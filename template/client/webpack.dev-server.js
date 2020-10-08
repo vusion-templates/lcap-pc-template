@@ -37,6 +37,15 @@ module.exports = function (port) {
         disableHostCheck: true,
         contentBase: path.join(__dirname),
         watchContentBase: false, // dev slow on Windows
+        /**
+         * 在一些网络硬盘中，必须要开启 poll 模式
+         * 同时要把 ignored 配置好，不然会卡死
+         */
+        watchOptions: {
+            aggregateTimeout: 200,
+            poll: 1000,
+            ignored: /node_modules/,
+        },
         clientLogLevel: 'info',
         headers: {
             'Access-Control-Allow-Origin': '*',

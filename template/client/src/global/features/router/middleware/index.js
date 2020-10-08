@@ -52,6 +52,9 @@ export const beforeMiddleware = function (router, appConfig) {
     // 中间件
     router.beforeEach((to, from, next) => {
         let middlewareList = [...(appConfig?.router?.middleware || [])];
+        if (!middlewareList.includes('first')) {
+            middlewareList.push('first');
+        }
         to.matched.forEach((routerItem) => {
             const componentOptions = getComponentOption(routerItem);
             if (componentOptions) {

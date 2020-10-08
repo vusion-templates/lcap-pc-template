@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const util = require('./util');
 module.exports = {
-    chain(config, isDevelopment, pages) {
+    chain(config, isDevelopment) {
         if (!isDevelopment) {
             config.plugin('namedchunk').use(webpack.NamedChunksPlugin, [
                 (chunk) => {

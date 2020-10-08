@@ -28,9 +28,12 @@ const isMicro = webpackMicro.isMicro(pages);
 
 const webpackDll = require('./webpack/dll');
 const webpackStyle = require('./webpack/style');
+const webpackDesigner = require('./webpack/designer');
 const webpackRoutes = require('./webpack/routes');
 const webpackHtml = require('./webpack/html');
+const webpackGQL = require('./webpack/gqloader');
 const webpackOptimization = require('./webpack/optimization');
+const isDesignner = process.env.BUILD_LIB_ENV === 'designer';
 
 if (isMicro) {
     webpackMicro.setup(pages);
@@ -51,19 +54,29 @@ let baseConfig = {
 if (isMicro) {
     baseConfig = webpackMicro.config(baseConfig, port, isDevelopment);
 }
+
+if (isDesignner) {
+    webpackDesigner.config(baseConfig, pages);
+}
 const vueConfig = {
     ...baseConfig,
     pages,
     chainWebpack(config) {
-        webpackHtml.chain(config, isDevelopment);
-        webpackOptimization.chain(config, isDevelopment, pages);
-        if (isMicro) {
-            webpackMicro.chain(config, isDevelopment);
+        if (isDesignner) {
+            webpackDesigner.chain(config, pages);
         } else {
-            webpackDll.chain(config, publicPathPrefix, isDevelopment);
+            webpackHtml.chain(config, isDevelopment);
+            if (isMicro) {
+                webpackMicro.chain(config, isDevelopment);
+            } else {
+                webpackDll.chain(config, publicPathPrefix, isDevelopment);
+            }
         }
+        webpackOptimization.chain(config, isDevelopment);
+
         webpackStyle.chain(config);
         webpackRoutes.chain(config);
+        webpackGQL.chain(config);
         config.output.jsonpFunction('webpackJsonp' + pkg.name + (isMicro ? Object.keys(pages)[0] : ''));
 
         config.module.rule('js').uses.delete('cache-loader');

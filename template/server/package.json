@@ -12,11 +12,10 @@
     "inited": true
   },
   "dependencies": {
+    "@eggjs/http-proxy": "^1.1.0",
     "egg": "^2.15.1",
     "egg-scripts": "^2.11.0",
     "egg-view-nunjucks": "^2.2.0",
-    "http-proxy-middleware": "^1.0.4",
-    "koa2-connect": "^1.0.2",
     "nuims-login": "^0.5.0"
   },
   "forceUpdate": {

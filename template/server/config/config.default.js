@@ -34,6 +34,26 @@ module.exports = appInfo => {
         // 还可以定义其他 LoaderOptions
       },
     },
+    httpProxy: {
+      timeout: 10 * 1000,
+      withCredentials: true,
+      ignoreHeaders: {
+        'strict-transport-security': true,
+        'x-powered-by': true,
+        'x-readtime': true,
+        connection: true,
+        date: true,
+        'keep-alive': true,
+        'proxy-authenticate': true,
+        'proxy-authorization': true,
+        'x-forwarded-port': true,
+        'x-forwarded-host': true,
+        te: true,
+        trailer: true,
+        'transfer-encoding': true,
+        upgrade: true,
+      },
+    },
   };
 
   // use for cookie sign key, should change to your own and keep security

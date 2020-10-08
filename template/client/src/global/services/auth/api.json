@@ -21,7 +21,7 @@
     },
     "GetUserResources": {
         "url": {
-            "method": "get",
+            "method": "post",
             "path": "/gateway/nuims/nuims",
             "query": {
                 "Action": "GetUserResources",

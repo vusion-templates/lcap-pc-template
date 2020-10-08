@@ -14,7 +14,7 @@ function httpCode(response, params, requestInfo) {
     });
 }
 function shortResponse(response, params, requestInfo) {
-    return response.data.Data;
+    return response.data;
 }
 const httpError = {
     reject(err, params, requestInfo) {

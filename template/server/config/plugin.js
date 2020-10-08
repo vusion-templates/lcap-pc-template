@@ -6,6 +6,10 @@ module.exports = {
   static: {
     enable: true,
   },
+  httpProxy: {
+    enable: true,
+    package: '@eggjs/http-proxy',
+  },
   nunjucks: {
     enable: true,
     package: 'egg-view-nunjucks',

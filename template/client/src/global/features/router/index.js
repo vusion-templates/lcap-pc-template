@@ -7,6 +7,22 @@ import { beforeMiddleware, afterMiddleware } from './middleware';
 
 Vue.use(VueRouter);
 
+Vue.prototype.$destination = function (url) {
+    if (url.startsWith('http'))
+        location.href = url;
+    else {
+        if (url[0] !== '/')
+            this.$router.push(url);
+        else {
+            const oldPath = location.pathname.split('/');
+            if (url.startsWith('/' + (oldPath[1] || '')))
+                this.$router.push(url.replace('/' + (oldPath[1] || ''), ''));
+            else
+                location.href = url;
+        }
+    }
+};
+
 export default function (routes, base, appConfig) {
     base = base || appConfig?.router.base;
     const router = new VueRouter({
