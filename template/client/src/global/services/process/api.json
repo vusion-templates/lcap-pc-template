@@ -1,0 +1,44 @@
+{
+    "start": {
+        "url": {
+            "path": "/gateway/bpms/bpms-rest/service/runtime/v2/process-instances",
+            "method": "POST"
+        }
+    },
+    "complete": {
+        "url": {
+            "path": "/gateway/bpms/bpms-rest/service/runtime/v2/tasks/{taskId}",
+            "method": "POST"
+        }
+    },
+    "getList": {
+        "url": {
+            "path": "/gateway/bpms/bpms-rest/service/query/v2/historic-task-instances",
+            "method": "POST"
+        }
+    },
+    "get": {
+        "url": {
+            "path": "/gateway/bpms/bpms-rest/service/query/v2/historic-task-instances/{processInstanceId}",
+            "method": "GET"
+        }
+    },
+    "getProcessInstanceList": {
+        "url": {
+            "path": "/gateway/bpms/bpms-rest/service/query/v2/historic-process-instances",
+            "method": "POST"
+        }
+    },
+    "getProcessInstance": {
+        "url": {
+            "path": "/gateway/bpms/bpms-rest/service/query/v2/historic-process-instances/{processInstanceId}",
+            "method": "GET"
+        }
+    },
+    "updateVariables": {
+        "url": {
+            "path": "/gateway/bpms/bpms-rest/service/query/v2/process-instances/{processInstanceId}/variables",
+            "method": "PUT"
+        }
+    }
+}
