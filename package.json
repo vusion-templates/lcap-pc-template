@@ -20,5 +20,8 @@
   "homepage": "https://github.com/vusion-templates/lcap-pc-template#readme",
   "dependencies": {
     "vusion": "^0.12.12"
+  },
+  "devDependencies": {
+    "husky": "^4.3.0"
   }
 }
