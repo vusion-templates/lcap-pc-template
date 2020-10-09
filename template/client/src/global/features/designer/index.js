@@ -15,27 +15,22 @@ import GueryStrCollect from '@/global/features/apollo/queryStrCollect';
 
 Vue.use(installServices);
 Vue.use(GueryStrCollect);
-export default function init(appConfig, platformConfig, rootRoute) {
-    window.appInfo = Object.assign(appConfig, platformConfig);
-    initMiddleware(appConfig);
-    const genRouter = initRouter(appConfig, rootRoute);
-    if (window.microApp && window.microApp.isMicro) {
-        micro.init(genRouter);
-    } else {
-        const app = new Vue({
-            name: 'app',
-            apolloProvider,
-            router: genRouter(),
-            ...App,
-            // i18n: initI18n(),
-        });
-        app.$mount('#app');
-    }
-}
-window.$$designer = init;
-window.addEventListener('message', (event) => {
-    const data = event.data;
-    if (data.type === 'pageInit') {
-        init(data.appConfig, data.platformConfig);
-    }
-});
+export default {
+    init(appConfig, platformConfig, rootRoute) {
+        window.appInfo = Object.assign(appConfig, platformConfig);
+        initMiddleware(appConfig);
+        const genRouter = initRouter(appConfig, rootRoute);
+        if (window.microApp && window.microApp.isMicro) {
+            micro.init(genRouter);
+        } else {
+            const app = new Vue({
+                name: 'app',
+                apolloProvider,
+                router: genRouter(),
+                ...App,
+                // i18n: initI18n(),
+            });
+            app.$mount('#app');
+        }
+    },
+};

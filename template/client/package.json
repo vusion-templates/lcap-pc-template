@@ -1,13 +1,13 @@
 {
   "name": "my-app-client",
   "description": "base on vue cloud-ui.vusion",
-  "version": "0.14.2",
+  "version": "0.14.4",
   "scripts": {
     "cache-install": "npx cache-install && node node_modules/vusion-install/index.js",
     "dev": "vue-cli-service serve",
     "serve": "npm run dev",
     "build": "vue-cli-service build --apply-theme",
-    "build:designer": "vue-cli-service build --target lib --mode designer --inline-vue --name cloudAdminDesigner src/global/features/designer/index.js",
+    "build:designer": "vue-cli-service build --target lib --mode designer --name cloudAdminDesigner src/global/features/designer/index.js",
     "build:stage": "vue-cli-service build --mode staging",
     "build:site": "vue-cli-service build  --apply-theme --mode site",
     "lint": "npx eslint --quiet",

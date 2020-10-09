@@ -7,6 +7,12 @@ module.exports = {
         Object.keys(pages).forEach((pageName) => {
             delete pages[pageName];
         });
+        baseConfig.configureWebpack = {
+            ...baseConfig.configureWebpack,
+            output: {
+                libraryExport: 'default',
+            },
+        };
     },
     chain(config) {
         config.externals({
