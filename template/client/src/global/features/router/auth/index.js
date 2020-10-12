@@ -8,7 +8,7 @@ const request = function (times) {
         config: {
             noErrorTip: true,
         },
-    }).catch((err) => {
+    }).then((result) => result.Data).catch((err) => {
         times--;
         if (times > 0) {
             return request(times);
@@ -35,7 +35,7 @@ const auth = {
                     DomainName,
                 },
             }).then((result) => {
-                const resources = result.items.filter((resource) => resource.ResourceType === 'ui');
+                const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
 
                 // 初始化权限项
                 this._map = new Map();
