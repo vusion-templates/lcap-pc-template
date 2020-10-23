@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "pc": "node ./scripts/pc",
-    "deploy:pc": "cp -Rf ./template/pc/client/pkg ./public && vusion deploy ./public && rm -Rf ./public",
+    "deploy:pc": "npm run pc && cp -Rf ./template/pc/client/pkg ./public && vusion deploy ./public && rm -Rf ./public",
     "deploy:vue": "cp -Rf ./node_modules/vue/dist ./public && vusion deploy ./public && rm -Rf ./public",
     "prepublishOnly": "npm run deploy:pc && npm run deploy:vue"
   },

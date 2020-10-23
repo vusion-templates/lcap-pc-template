@@ -16,10 +16,19 @@ childProcess.execSync(cmd, {
 });
 const client = path.join(root, 'client');
 const server = path.join(root, 'server');
+const serverPackagePath = path.join(server, 'package.json');
+const packagePath = path.join(root, 'package.json');
 assert(fs.existsSync(path.join(client, 'package.json')), 'client 初始化失败');
-assert(fs.existsSync(path.join(server, 'package.json')), 'server 初始化失败');
+assert(fs.existsSync(serverPackagePath), 'server 初始化失败');
 const clientPlatformConfig = require(path.join(client, 'platform.config.json'));
 const serverPlatformConfig = require(path.join(server, 'config/platform.config.json'));
 assert(Object.keys(clientPlatformConfig).length === Object.keys(serverPlatformConfig).length, 'platform.config 添加失败');
+
+const rootPackage = require(packagePath);
+const serverPackage = require(serverPackagePath);
+serverPackage.version = rootPackage.version;
+fs.writeFileSync(serverPackagePath, JSON.stringify(serverPackage, null, 2));
+rootPackage.version = require('../../package.json').version;
+fs.writeFileSync(packagePath, JSON.stringify(rootPackage, null, 2));
 
 console.log('success');
