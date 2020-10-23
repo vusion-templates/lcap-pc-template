@@ -50,6 +50,7 @@ export default function (service) {
             }
         });
     }
+
     service.postConfig.set('httpCode', httpCode);
     service.postConfig.set('httpError', httpError);
     service.postConfig.set('shortResponse', shortResponse);

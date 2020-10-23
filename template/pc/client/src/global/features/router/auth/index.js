@@ -1,4 +1,5 @@
 import authService from '@/global/services/auth';
+import Vue from 'vue';
 
 let userInfoPromise = null;
 let userResourcesPromise = null;
@@ -21,7 +22,11 @@ const auth = {
     _map: undefined,
     getUserInfo(times = 1) {
         if (!userInfoPromise) {
-            userInfoPromise = request(times).catch((e) => {
+            userInfoPromise = request(times).then((userInfo) => {
+                const $global = Vue.prototype.$global = Vue.prototype.$global || {};
+                $global.userInfo = userInfo;
+                return userInfo;
+            }).catch((e) => {
                 userInfoPromise = undefined;
                 throw e;
             });

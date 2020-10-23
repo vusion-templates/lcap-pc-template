@@ -7,6 +7,7 @@ import '@/global/features/page-init';
 import './library';
 import '@/global/styles/index.css';
 import installServices from '@/global/features/service/install';
+import installDataTypes from '@/global/features/dataTypes/install';
 import installUtils from '@/global/features/utils/install';
 import micro from './micro';
 
@@ -15,8 +16,10 @@ import { apolloProvider } from '@/global/features/apollo';
 import GueryStrCollect from '@/global/features/apollo/queryStrCollect';
 
 Vue.use(installServices);
+Vue.use(installDataTypes);
 Vue.use(installUtils);
 Vue.use(GueryStrCollect);
+
 export default {
     init(appConfig, platformConfig, rootRoute) {
         window.appInfo = Object.assign(appConfig, platformConfig);

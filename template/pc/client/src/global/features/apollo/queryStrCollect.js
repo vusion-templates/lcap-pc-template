@@ -1,4 +1,4 @@
-
+import { stringify } from 'qs';
 
 /**
  * 根据实体解析动态的 endpoint
@@ -20,7 +20,12 @@ export default {
                         arr.pop();
                         const newVariables = {};
                         Object.keys(variables || {}).forEach((key) => {
-                            newVariables[`Query__${operationName}__${key}`] = variables[key];
+                            // key 如果是保留的关键字， query，需要转化成 string 提供给后端
+                            let value = variables[key];
+                            if (key === 'query') {
+                                value = stringify(value);
+                            }
+                            newVariables[`Query__${operationName}__${key}`] = value;
                         });
 
                         return this.$apollo.query({
@@ -50,7 +55,7 @@ export default {
                                 uri: getUriValue(schemaRef),
                             },
                         }).then((res) => res.data[operationName]);
-                    },
+                    }
                 };
             },
         });

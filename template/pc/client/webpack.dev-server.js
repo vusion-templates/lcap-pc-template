@@ -29,7 +29,7 @@ const onProxyReq = function (proxyReq, req, res) {
     // console.log(proxyReq.path, proxyReq.getHeaders());
 };
 module.exports = function (port) {
-    return {
+    const devServer = {
         host,
         port,
         progress: !process.env.SERVER_DEVELOP,
@@ -44,7 +44,7 @@ module.exports = function (port) {
         watchOptions: {
             aggregateTimeout: 200,
             poll: 1000,
-            ignored: /node_modules/,
+            ignored: /node_modules\/(?!vue-cli-plugin-vusion\/|cloud-ui\.vusion\/).+/,
         },
         clientLogLevel: 'info',
         headers: {
@@ -67,4 +67,22 @@ module.exports = function (port) {
             },
         },
     };
+
+    // 目前 designer 和 dev 均要在初始时自动登录
+    if (process.env.DESIGNER_SERVER_BEFORE_PATH) {
+        try {
+            devServer.before = require(process.env.DESIGNER_SERVER_BEFORE_PATH);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    if (process.env.DESIGNER_SERVER_AFTER_PATH) {
+        try {
+            devServer.after = require(process.env.DESIGNER_SERVER_AFTER_PATH);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    return devServer;
 };
