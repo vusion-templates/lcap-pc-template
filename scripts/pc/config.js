@@ -5,6 +5,6 @@ module.exports = {
     },
     server: {
         name: 'cloud-admin-fullstack',
-        version: '0.3.11',
+        version: '0.3.12',
     },
 };

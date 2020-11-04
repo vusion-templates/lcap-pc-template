@@ -24,12 +24,13 @@ module.exports = function(options) {
           userName,
           authorization,
         },
-        beforeResponse() {
+        beforeResponse(proxyResult) {
           const urlObj = new URL(ctx.href);
           const isLogout = urlObj.pathname === '/gateway/nuims/nuims' && (urlObj.searchParams.get('Action') === 'Logout');
           if (isLogout) {
             ctx.cookies.set('authorization');
           }
+          return proxyResult;
         },
       });
     } else if (ctx.request.url.startsWith('/gw/')) {
