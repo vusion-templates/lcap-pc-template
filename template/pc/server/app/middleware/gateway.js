@@ -24,6 +24,13 @@ module.exports = function(options) {
           userName,
           authorization,
         },
+        beforeResponse() {
+          const urlObj = new URL(ctx.href);
+          const isLogout = urlObj.pathname === '/gateway/nuims/nuims' && (urlObj.searchParams.get('Action') === 'Logout');
+          if (isLogout) {
+            ctx.cookies.set('authorization');
+          }
+        },
       });
     } else if (ctx.request.url.startsWith('/gw/')) {
       const host = `${TENANT}.gateway.lowcode`;

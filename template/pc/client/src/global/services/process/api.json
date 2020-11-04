@@ -19,7 +19,7 @@
     },
     "get": {
         "url": {
-            "path": "/gateway/bpms/bpms-rest/service/query/v2/historic-task-instances/{processInstanceId}",
+            "path": "/gateway/bpms/bpms-rest/service/history/v2/historic-task-instances/{taskId}",
             "method": "GET"
         }
     },
@@ -31,13 +31,13 @@
     },
     "getProcessInstance": {
         "url": {
-            "path": "/gateway/bpms/bpms-rest/service/query/v2/historic-process-instances/{processInstanceId}",
+            "path": "/gateway/bpms/bpms-rest/service/history/v2/historic-process-instances/{processInstanceId}",
             "method": "GET"
         }
     },
     "updateVariables": {
         "url": {
-            "path": "/gateway/bpms/bpms-rest/service/query/v2/process-instances/{processInstanceId}/variables",
+            "path": "/gateway/bpms/bpms-rest/service/runtime/v2/process-instances/{processInstanceId}",
             "method": "PUT"
         }
     }

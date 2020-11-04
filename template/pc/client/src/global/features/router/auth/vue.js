@@ -17,6 +17,11 @@ export default {
                 subPath = '/' + subPath;
             return this.has(currentPath + subPath);
         };
+        $auth.hasFullPath = function (path) {
+            if (path[0] !== '/')
+                path = '/' + path;
+            return this.has(base + path);
+        };
         /**
          * 账号与权限中心
          */

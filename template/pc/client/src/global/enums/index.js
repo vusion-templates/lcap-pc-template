@@ -11,10 +11,10 @@ function createEnum(items) {
 }
 
 const map = {};
-Object.keys(enums).forEach((key) => {
-    Object.keys(enums[key]).forEach((enumKey) => {
+Object.keys(enums).forEach((serviceName) => {
+    Object.keys(enums[serviceName]).forEach((enumKey) => {
         map[enumKey] = map[enumKey] || {};
-        map[enumKey] = createEnum(enums[key][enumKey]);
+        map[enumKey] = createEnum(enums[serviceName][enumKey]);
     });
 });
 

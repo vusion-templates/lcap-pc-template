@@ -29,10 +29,15 @@ export default function (appConfig) {
                             return Promise.reject();
                         }
                         let out;
-                        if (metaAuth === 'loginAuth') {
-                            out = loginAuth(to, from, _next, appConfig);
+                        if (metaAuth === true) {
+                            const done = () => {
+                                _next();
+                            };
+                            return runAhead(appConfig.domainName).catch(done, done);
+                        } else if (metaAuth === 'loginAuth') {
+                            out = loginAuth(to, from, _next, appConfig, item);
                         } else {
-                            out = metaAuth(to, from, _next, appConfig);
+                            out = metaAuth(to, from, _next, appConfig, item);
                         }
                         if (out && out.then) {
                             return out;
