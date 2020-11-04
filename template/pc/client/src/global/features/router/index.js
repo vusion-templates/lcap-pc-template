@@ -25,6 +25,11 @@ Vue.prototype.$destination = function (url) {
 
 export default function (routes, base, appConfig) {
     base = base || appConfig?.router.base;
+
+    if (appConfig.auth) {
+        routes[0].meta = routes[0].meta || {};
+        routes[0].meta.auth = 'loginAuth';
+    }
     const router = new VueRouter({
         routes,
         base,
@@ -44,12 +49,6 @@ export default function (routes, base, appConfig) {
     });
     beforeMiddleware(router, appConfig);
     Vue.use(routerLock);
-
-    if (appConfig.auth) {
-        routes[0].meta = routes[0].meta || {};
-        routes[0].meta.auth = 'loginAuth';
-    }
-
     Vue.use(AuthPlugin, {
         base,
         router,

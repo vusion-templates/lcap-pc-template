@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import auth from '@/global/features/router/auth/index';
 export const loginAuth = function (to, from, next, appConfig, item) {
-    const currentPath = appConfig.router.base + (appConfig.router.rule === 'scope' ? item.path : to.path);
+    const currentPath = (appConfig.router.base + (appConfig.router.rule === 'scope' ? item.path : to.path)).replace(/\/$/, '');
     const authOptions = {
         tipMessage: appConfig.router.tipMessage,
         noLogin: appConfig.router.noLogin,

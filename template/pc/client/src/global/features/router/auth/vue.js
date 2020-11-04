@@ -28,8 +28,14 @@ export default {
         Vue.prototype.$auth = $auth;
 
         // designer 和 环境直接放行认证和鉴权
-        if (process.env.NODE_ENV === 'development' || process.env.VUE_APP_DESIGNER)
+        if (process.env.NODE_ENV === 'development' || process.env.VUE_APP_DESIGNER) {
+            Vue.directive('auth', {
+                bind() {
+                    // noop
+                },
+            });
             return;
+        }
 
         /**
          * - 组件权限项功能
@@ -86,9 +92,11 @@ export default {
 
                     let visible = true;
                     if (options.autoHide && this.to) {
-                        let toPath = this.to;
-                        if (typeof toPath === 'object')
-                            toPath = toPath.path;
+                        let toPath;
+                        if (typeof this.to === 'object')
+                            toPath = this.to.path;
+                        else if (typeof this.to === 'string')
+                            toPath = this.to.split('?')[0];
 
                         visible = visible && $auth.has(base + toPath);
                     }
