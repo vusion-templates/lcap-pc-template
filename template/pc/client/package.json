@@ -1,7 +1,7 @@
 {
   "name": "my-app-client",
   "description": "base on vue cloud-ui.vusion",
-  "version": "0.14.15",
+  "version": "0.14.17",
   "scripts": {
     "cache-install": "npx cache-install && node node_modules/vusion-install/index.js",
     "dev": "vue-cli-service serve",

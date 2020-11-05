@@ -58,7 +58,8 @@ export default {
                     actions: Object.keys(binding.modifiers),
                 };
 
-                const authPath = `${base + router.currentRoute.path}/${data.value ? data.value : vnode.data.ref}`;
+                // const authPath = `${base + router.currentRoute.path}/${data.value ? data.value : vnode.data.ref}`;
+                const authPath = data.value;
                 const visible = $auth.has(authPath);
 
                 el && (el.style.display = visible ? '' : 'none');
