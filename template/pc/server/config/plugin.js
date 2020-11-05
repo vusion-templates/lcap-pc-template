@@ -10,6 +10,10 @@ module.exports = {
     enable: true,
     package: '@eggjs/http-proxy',
   },
+  logger: {
+    enable: true,
+    package: 'egg-logger',
+  },
   nunjucks: {
     enable: true,
     package: 'egg-view-nunjucks',

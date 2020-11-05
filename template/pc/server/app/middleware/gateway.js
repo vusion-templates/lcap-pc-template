@@ -28,6 +28,7 @@ module.exports = function(options) {
           const urlObj = new URL(ctx.href);
           const isLogout = urlObj.pathname === '/gateway/nuims/nuims' && (urlObj.searchParams.get('Action') === 'Logout');
           if (isLogout) {
+            ctx.logger.info('logout', 'clear authorization');
             ctx.cookies.set('authorization');
           }
           return proxyResult;
