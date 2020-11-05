@@ -1,7 +1,7 @@
 module.exports = {
     client: {
         name: 'cloud-admin-template',
-        version: '0.14.14',
+        version: '0.14.15',
     },
     server: {
         name: 'cloud-admin-fullstack',

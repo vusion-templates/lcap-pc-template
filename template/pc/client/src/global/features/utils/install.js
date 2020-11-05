@@ -57,6 +57,15 @@ export const utils = {
     RemoveAt(arr, index) {
         return arr.splice(arr, index);
     },
+    CurrDate() {
+        return new Date().toJSON().replace(/T.+?Z/, 'T00:00:00.000Z');
+    },
+    CurrTime() {
+        return new Date().toTimeString().split(' ')[0];
+    },
+    CurrDateTime() {
+        return new Date().toJSON();
+    },
     Clone(obj) {
         return cloneDeep(obj);
     },
