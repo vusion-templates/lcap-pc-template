@@ -37,7 +37,7 @@
     },
     "updateVariables": {
         "url": {
-            "path": "/gateway/bpms/bpms-rest/service/runtime/v2/process-instances/{processInstanceId}",
+            "path": "/gateway/bpms/bpms-rest/service/runtime/v2/process-instances/{processInstanceId}/variables",
             "method": "PUT"
         }
     }

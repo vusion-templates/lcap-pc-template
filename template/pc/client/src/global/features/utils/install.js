@@ -69,6 +69,9 @@ export const utils = {
     Clone(obj) {
         return cloneDeep(obj);
     },
+    New(obj) {
+        return obj;
+    },
     /**
      * 这是个临时的方法。。。
      * @param {*} obj1
