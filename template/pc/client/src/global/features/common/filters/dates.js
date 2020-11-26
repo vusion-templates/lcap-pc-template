@@ -8,14 +8,14 @@ const formatDate = function (value) {
     }
     return new Date(timestamp);
 };
-const dateFormat = (value, formater = 'yyyy-MM-dd HH:mm:ss') => {
+const dateFormat = (value, formatter = 'yyyy-MM-dd HH:mm:ss') => {
     const timestamp = formatDate(value);
     if (timestamp === '-') {
         return timestamp;
     }
-    if (!formater)
+    if (!formatter)
         return value;
-    return format(timestamp, formater);
+    return format(timestamp, formatter);
 };
 
 const timeFormat = (value, type = 'day') => { // type 取值 day、minute, 默认day

@@ -27,6 +27,7 @@ const webpackMicro = require('./webpack/micro');
 const isMicro = webpackMicro.isMicro(pages);
 
 const webpackDll = require('./webpack/dll');
+const webpackCloudUI = require('./webpack/cloud-ui');
 const webpackStyle = require('./webpack/style');
 const webpackDesigner = require('./webpack/designer');
 const webpackRoutes = require('./webpack/routes');
@@ -74,6 +75,7 @@ const vueConfig = {
         }
         webpackOptimization.chain(config, isDevelopment);
 
+        webpackCloudUI.chain(config);
         webpackStyle.chain(config);
         webpackRoutes.chain(config);
         webpackGQL.chain(config);

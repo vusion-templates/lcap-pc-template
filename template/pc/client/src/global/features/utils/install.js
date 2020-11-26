@@ -1,6 +1,7 @@
 import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
 import enums from '../../enums';
+import { utils as cutils } from 'cloud-ui';
 
 export const utils = {
     gql,
@@ -71,6 +72,9 @@ export const utils = {
     },
     CurrDateTime() {
         return new Date().toJSON();
+    },
+    FormatDate(value, formatter) {
+        return cutils.dateFormatter.format(value, formatter);
     },
     Clone(obj) {
         return cloneDeep(obj);
