@@ -6,7 +6,14 @@ import { utils as cutils } from 'cloud-ui';
 export const utils = {
     gql,
     Enum(enumName, value) {
-        return this.EnumLabel(enumName, value);
+        if (arguments.length === 0)
+            return '';
+        else if (arguments.length === 1)
+            return enums[enumName];
+        else if (enums[enumName])
+            return enums[enumName](value);
+        else
+            return '';
     },
     EnumValue(enumName, value) {
         return value;
