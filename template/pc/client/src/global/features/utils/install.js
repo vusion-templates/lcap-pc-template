@@ -2,11 +2,19 @@ import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
 import enums from '../../enums';
 import { utils as cutils } from 'cloud-ui';
+import { addDays, subDays, format, parse } from 'date-fns';
 
 export const utils = {
     gql,
     Enum(enumName, value) {
-        return this.EnumLabel(enumName, value);
+        if (arguments.length === 0)
+            return '';
+        else if (arguments.length === 1)
+            return enums[enumName];
+        else if (enums[enumName])
+            return enums[enumName](value);
+        else
+            return '';
     },
     EnumValue(enumName, value) {
         return value;
@@ -72,6 +80,12 @@ export const utils = {
     },
     CurrDateTime() {
         return new Date().toJSON();
+    },
+    AddDays(date = new Date(), amount = 1, formatter = 'yyyy-MM-dd') {
+        return format(addDays(parse(date, 'yyyy-MM-dd', new Date()), amount), formatter);
+    },
+    SubDays(date = new Date(), amount = 1, formatter = 'yyyy-MM-dd') {
+        return format(subDays(parse(date, 'yyyy-MM-dd', new Date()), amount), formatter);
     },
     FormatDate(value, formatter) {
         return cutils.dateFormatter.format(value, formatter);

@@ -23,13 +23,13 @@ export default {
                             // key 如果是保留的关键字， query，需要转化成 string 提供给后端
                             let value = variables[key];
                             if (key === 'query') {
-                                value = stringify(value);
+                                value = stringify(value, { arrayFormat: 'repeat' });
                             }
                             newVariables[`Query__${operationName}__${key}`] = value;
                         });
 
                         return this.$apollo.query({
-                            query: this.$utils.gql`${graphqlClient}`,
+                            query: this.$utils.gql `${graphqlClient}`,
                             variables: newVariables,
                             context: {
                                 uri: getUriValue(schemaRef),
@@ -49,13 +49,13 @@ export default {
                         });
 
                         return this.$apollo.mutate({
-                            mutation: this.$utils.gql`${graphqlClient}`,
+                            mutation: this.$utils.gql `${graphqlClient}`,
                             variables: newVariables,
                             context: {
                                 uri: getUriValue(schemaRef),
                             },
                         }).then((res) => res.data[operationName]);
-                    }
+                    },
                 };
             },
         });

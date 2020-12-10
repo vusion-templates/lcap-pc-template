@@ -19,7 +19,7 @@ Vue.use(installServices);
 Vue.use(installDataTypes);
 Vue.use(installUtils);
 Vue.use(GueryStrCollect);
-
+window.appVue = Vue;
 export default {
     init(appConfig, platformConfig, rootRoute) {
         window.appInfo = Object.assign(appConfig, platformConfig);
