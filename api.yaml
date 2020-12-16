@@ -1,2 +1,3 @@
 features:
   genTableBlockUseScopeSlot: true
+  supportJSBlock: true
