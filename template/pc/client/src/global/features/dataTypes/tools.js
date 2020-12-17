@@ -58,11 +58,11 @@ export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSch
         if (ref === '#/basicTypes/Boolean')
             return { type: 'BooleanLiteral', value: false };
         else if (ref === '#/basicTypes/Integer')
-            return { type: 'NumericLiteral', name: 0 };
+            return { type: 'NumericLiteral', value: 0 };
         else if (ref === '#/basicTypes/Long')
             return { type: 'Identifier', name: 'undefined' };
         else if (ref === '#/basicTypes/Decimal')
-            return { type: 'NumericLiteral', name: 0.0 };
+            return { type: 'NumericLiteral', value: 0.0 };
         else
             return { type: 'Identifier', name: 'undefined' };
     } else if (next) {
