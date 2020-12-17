@@ -1,0 +1,5 @@
+features:
+  genTableBlockUseScopeSlot: true
+  useOptionalParamsInCallFlow: true
+  genInitFromSchema: true
+  supportJSBlock: true

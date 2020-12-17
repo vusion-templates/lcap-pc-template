@@ -9,8 +9,6 @@ const info = {
 const params = JSON.parse(info.params);
 const root = path.join(__dirname, '../../template/pc');
 
-childProcess.execSync('cp ../../api.yaml ./', { stdio: 'inherit', cwd: root });
-childProcess.execSync('cp ../../builtInFunctions.yaml ./', { stdio: 'inherit', cwd: root });
 const cmd = `npm init vusion app my-app -f -c ${config.client.name}#${config.client.version} -s ${config.server.name}#${config.server.version} --config ` + JSON.stringify(params.config) + ' --dir ' + root;
 console.log(cmd);
 childProcess.execSync(cmd, {
@@ -34,5 +32,8 @@ serverPackage.version = rootPackage.version;
 fs.writeFileSync(serverPackagePath, JSON.stringify(serverPackage, null, 2));
 rootPackage.version = require('../../package.json').version;
 fs.writeFileSync(packagePath, JSON.stringify(rootPackage, null, 2));
+
+childProcess.execSync('cp ../../api.yaml ./', { stdio: 'inherit', cwd: root });
+childProcess.execSync('cp ../../builtInFunctions.yaml ./', { stdio: 'inherit', cwd: root });
 
 console.log('success');
