@@ -44,7 +44,7 @@ module.exports = function (port) {
         watchOptions: {
             aggregateTimeout: 200,
             poll: 1000,
-            ignored: /node_modules\/(?!vue-cli-plugin-vusion\/|cloud-ui\.vusion\/).+/,
+            ignored: /node_modules\/(?!vue-cli-plugin-vusion\/|cloud-ui\.vusion\/|vusion_packages\/).+/,
         },
         clientLogLevel: 'info',
         headers: {

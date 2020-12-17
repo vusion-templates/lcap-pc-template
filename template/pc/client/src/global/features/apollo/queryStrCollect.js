@@ -23,7 +23,12 @@ export default {
                             // key 如果是保留的关键字， query，需要转化成 string 提供给后端
                             let value = variables[key];
                             if (key === 'query') {
-                                value = stringify(value, { arrayFormat: 'repeat' });
+                                value = stringify(value, { arrayFormat: 'repeat', encoder(str, defaultEncoder, charset, type) {
+                                    if (type === 'value' && str.includes && str.includes(','))
+                                        return encodeURI(str);
+                                    else
+                                        return defaultEncoder(...arguments);
+                                } });
                             }
                             newVariables[`Query__${operationName}__${key}`] = value;
                         });

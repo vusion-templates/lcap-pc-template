@@ -73,7 +73,7 @@ export const utils = {
         return arr.splice(arr, index);
     },
     CurrDate() {
-        return new Date().toJSON().replace(/T.+?Z/, 'T00:00:00.000Z');
+        return new Date().toJSON().replace(/T.+?Z/, '');
     },
     CurrTime() {
         return new Date().toTimeString().split(' ')[0];
