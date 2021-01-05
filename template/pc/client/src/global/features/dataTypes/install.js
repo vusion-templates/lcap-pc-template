@@ -26,6 +26,7 @@ export default {
             const expressDataTypeObject = genInitData(schema || {}, dataTypesMap);
             const expression = generate(expressDataTypeObject).code;
             console.info('expression', expression);
+            // eslint-disable-next-line no-new-func
             return Function('return ' + expression)();
         };
 
