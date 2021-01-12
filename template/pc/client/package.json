@@ -1,13 +1,13 @@
 {
   "name": "my-app-client",
   "description": "base on vue cloud-ui.vusion",
-  "version": "0.14.27",
+  "version": "0.14.28",
   "scripts": {
     "cache-install": "npx cache-install && node node_modules/vusion-install/index.js",
     "dev": "vue-cli-service serve",
     "serve": "npm run dev",
     "build": "vue-cli-service build --apply-theme",
-    "build:designer": "vue-cli-service build --target lib   --inline-vue --mode designer --name cloudAdminDesigner src/global/features/designer/index.js",
+    "build:designer": "vue-cli-service build --target lib --mode designer --name cloudAdminDesigner src/global/features/designer/index.js",
     "build:stage": "vue-cli-service build --mode staging",
     "build:site": "vue-cli-service build  --apply-theme --mode site",
     "lint": "npx eslint --quiet",
@@ -92,7 +92,7 @@
     "apollo-plugin-loader": "^1.0.8",
     "axios": "^0.19.0",
     "babel-polyfill": "^6.26.0",
-    "cloud-ui.vusion": "0.11.22",
+    "cloud-ui.vusion": "0.11.23",
     "date-fns": "^2.6.0",
     "event-hooks-webpack-plugin": "^2.1.6",
     "graphql-tools": "^6.2.1",
@@ -134,6 +134,6 @@
   },
   "ui": {
     "name": "cloud-ui.vusion",
-    "version": "0.11.22"
+    "version": "0.11.23"
   }
 }

@@ -6,6 +6,8 @@ import AuthPlugin from './auth/vue';
 import { beforeMiddleware, afterMiddleware } from './middleware';
 
 Vue.use(VueRouter);
+window.Vue = Vue;
+window.VueRouter = VueRouter;
 
 Vue.prototype.$destination = function (url) {
     if (url.startsWith('http'))
@@ -33,7 +35,7 @@ export default function (routes, base, appConfig) {
     const router = new VueRouter({
         routes,
         base,
-        mode: 'history',
+        mode: appConfig.router.mode || 'history',
         scrollBehavior(to, from, savedPosition) {
             if (to.hash) {
                 return {

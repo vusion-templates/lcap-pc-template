@@ -21,6 +21,7 @@ Vue.use(installUtils);
 Vue.use(GueryStrCollect);
 window.appVue = Vue;
 export default {
+    initRouter,
     init(appConfig, platformConfig, rootRoute) {
         window.appInfo = Object.assign(appConfig, platformConfig);
         initMiddleware(appConfig);
@@ -36,6 +37,7 @@ export default {
                 // i18n: initI18n(),
             });
             app.$mount('#app');
+            return app;
         }
     },
 };
