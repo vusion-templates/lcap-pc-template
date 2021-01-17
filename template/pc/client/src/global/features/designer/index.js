@@ -13,19 +13,22 @@ import micro from './micro';
 
 import { initMiddleware } from '@/global/middleware';
 import { apolloProvider } from '@/global/features/apollo';
-import GueryStrCollect from '@/global/features/apollo/queryStrCollect';
+import installApollo from '@/global/features/apollo/queryStrCollect';
+import originMetaData from '@/global/metaData';
 
-Vue.use(installServices);
-Vue.use(installDataTypes);
-Vue.use(installUtils);
-Vue.use(GueryStrCollect);
 window.appVue = Vue;
 export default {
     initRouter,
-    init(appConfig, platformConfig, rootRoute) {
+    init(appConfig, platformConfig, rootRoute, metaData = originMetaData) {
         window.appInfo = Object.assign(appConfig, platformConfig);
         initMiddleware(appConfig);
         const genRouter = initRouter(appConfig, rootRoute);
+
+        Vue.use(installServices, metaData);
+        Vue.use(installDataTypes, metaData);
+        Vue.use(installUtils, metaData);
+        Vue.use(installApollo, metaData);
+
         if (window.microApp && window.microApp.isMicro) {
             micro.init(genRouter);
         } else {

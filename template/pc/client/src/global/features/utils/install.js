@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
-import enums from '../../enums';
 import { utils as cutils } from 'cloud-ui';
 import { addDays, subDays, format, parse } from 'date-fns';
+let enumsMap = {};
 
 export const utils = {
     gql,
@@ -10,9 +10,9 @@ export const utils = {
         if (arguments.length === 0)
             return '';
         else if (arguments.length === 1)
-            return enums[enumName];
-        else if (enums[enumName])
-            return enums[enumName](value);
+            return enumsMap[enumName];
+        else if (enumsMap[enumName])
+            return enumsMap[enumName](value);
         else
             return '';
     },
@@ -23,9 +23,9 @@ export const utils = {
         if (arguments.length === 0)
             return '';
         else if (arguments.length === 1)
-            return enums[enumName];
-        else if (enums[enumName])
-            return enums[enumName](value);
+            return enumsMap[enumName];
+        else if (enumsMap[enumName])
+            return enumsMap[enumName](value);
         else
             return '';
     },
@@ -125,5 +125,6 @@ export const utils = {
 export default {
     install(Vue, options) {
         Vue.prototype.$utils = utils;
+        enumsMap = options.enumsMap;
     },
 };
