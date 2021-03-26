@@ -7,26 +7,24 @@ let dataTypesMap = {};
     function importAll(r) {
         r.keys().forEach((key) => dataTypesMap = r(key));
     }
-    importAll(require.context('../dataTypes/', true, /\/dataTypes.json$/));
+    importAll(require.context('./', true, /\/dataTypes.json$/));
 }
 
-const enums = {};
+let enums = {};
 const enumsMap = {};
 {
     function importAll(r) {
-        r.keys().forEach((key) => enums[key.split('/')[1]] = r(key));
+        r.keys().forEach((key) => enums = r(key));
     }
-    importAll(require.context('../enums/', true, /\/(.*?)\/enums\.json$/));
+    importAll(require.context('./', true, /\/enums.json$/));
     function createEnum(items) {
         const Enum = (key) => items[key];
         Object.assign(Enum, items);
         return Enum;
     }
-    Object.keys(enums).forEach((serviceName) => {
-        Object.keys(enums[serviceName]).forEach((enumKey) => {
-            enumsMap[enumKey] = enumsMap[enumKey] || {};
-            enumsMap[enumKey] = createEnum(enums[serviceName][enumKey]);
-        });
+    Object.keys(enums).forEach((enumKey) => {
+        enumsMap[enumKey] = enumsMap[enumKey] || {};
+        enumsMap[enumKey] = createEnum(enums[enumKey]);
     });
 }
 
@@ -53,6 +51,12 @@ const servicesMap = {};
     }
 
     importAll(require.context('../services/', true, /\/(.*?)\/api\.json$/));
+}
+{
+    function importAll(r) {
+        r.keys().forEach((key) => Object.assign(servicesMap, { _custom: r(key) }));
+    }
+    importAll(require.context('./', true, /\/apis.json$/));
 }
 
 export default { dataTypesMap, enumsMap, servicesMap };
