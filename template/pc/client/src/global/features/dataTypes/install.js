@@ -17,13 +17,17 @@ export default {
             },
         };
 
-        // read datatypes from template, then parse schema
-        Vue.prototype.$genInitFromSchema = (schema) => {
+        /**
+         * read datatypes from template, then parse schema
+         * @param {*} schema 是前端用的 refSchema
+         */
+        Vue.prototype.$genInitFromSchema = (schema = {}, defaultValue, isRouteParam) => {
+            schema.defaultValue = defaultValue;
+
             // read from file
             const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
-            const expressDataTypeObject = genInitData(schema || {}, dataTypesMap);
+            const expressDataTypeObject = genInitData(schema, dataTypesMap);
             const expression = generate(expressDataTypeObject).code;
-            console.info('expression', expression);
             // eslint-disable-next-line no-new-func
             return Function('return ' + expression)();
         };

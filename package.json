@@ -1,12 +1,12 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.2.22",
+  "version": "0.2.23",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "pc": "node ./scripts/pc && git add .",
-    "deploy:pc": "npm run pc && cp -Rf ./template/pc/client/pkg ./public && vusion deploy ./public && rm -Rf ./public",
+    "deploy:pc": "cp -Rf ./template/pc/client/pkg ./public && vusion deploy ./public && rm -Rf ./public",
     "prepublishOnly": "npm run deploy:pc"
   },
   "repository": {
