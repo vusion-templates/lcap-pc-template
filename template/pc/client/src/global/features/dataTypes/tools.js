@@ -67,7 +67,7 @@ export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSch
         else if (ref === '#/basicTypes/Integer')
             return { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0 };
         else if (ref === '#/basicTypes/Long')
-            return { type: 'Identifier', name: 'undefined' };
+            return schema.defaultValue === undefined || schema.defaultValue === null ? { type: 'Identifier', name: 'undefined' } : { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0 };
         else if (ref === '#/basicTypes/Decimal')
             return { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0.0 };
         else if (ref === '#/basicTypes/String')
