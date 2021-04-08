@@ -68,9 +68,6 @@ module.exports = appInfo => {
     const htmlPath = [];
     const files = fs.readdirSync(path.join(__dirname, '../app/view'));
     hasLogin = !!files.find(i => i === 'login.html');
-    if (authHtmlNames.includes('index')) {
-      htmlPath.push('/');
-    }
     authHtmlNames.filter(authHtmlName => !protectedHtmlNames.includes(authHtmlName)).forEach(authHtmlName => {
       htmlPath.push('/' + authHtmlName);
       htmlPath.push('/' + authHtmlName + '/(.*)');
