@@ -52,6 +52,9 @@ const auth = {
         }
         return userResourcesPromise;
     },
+    logout() {
+        return authService.Logout();
+    },
     /**
      * 权限服务是否初始化
      */

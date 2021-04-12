@@ -119,6 +119,15 @@ CurrTime:
   params:
 CurrDateTime:
   params:
+FormatDate:
+  params:
+    - name: date
+      schema:
+        type: Date
+    - name: formatter
+      schema:
+        type: string
+        format: ''
 AddDays:
   params:
     - name: date
@@ -161,12 +170,3 @@ ClearObject:
     - name: obj
       schema:
         type: object
-FormatDate:
-  params:
-    - name: date
-      schema:
-        type: Date
-    - name: formatter
-      schema:
-        type: string
-        format: ''

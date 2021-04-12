@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
-import { utils as cutils } from 'cloud-ui';
+import { utils as cutils } from 'cloud-ui.vusion';
 import { addDays, subDays, format, parse } from 'date-fns';
 let enumsMap = {};
 
