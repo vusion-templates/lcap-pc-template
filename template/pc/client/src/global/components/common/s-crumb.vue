@@ -9,6 +9,7 @@
 import isFunction from 'lodash/isFunction';
 import isObject from 'lodash/isObject';
 import { MSubscriber, MPublisher } from 'cloud-ui.vusion';
+import { getComponentOption } from '@/global/middleware/util';
 export default {
     mixins: [MSubscriber, MPublisher],
     data() {
@@ -23,7 +24,10 @@ export default {
                     const matched = to.matched || [];
                     const crumbs = [];
                     matched.forEach((route) => {
-                        let crumb = route.components.default.meta?.crumb || route.meta?.crumb;
+                        const mata = route.components.default.meta || route.meta || {};
+                        const componentOptions = getComponentOption(route);
+                        Object.assign(meta, getComponentOption && componentOptions.meta);
+                        let crumb = meta.crumb;
                         if (crumb) {
                             if (isFunction(crumb))
                                 crumb = crumb(route, to, from);
