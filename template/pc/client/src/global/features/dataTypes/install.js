@@ -33,6 +33,15 @@ export default {
         };
 
         const enumsMap = options.enumsMap;
+        function createEnum(items) {
+            const Enum = (key) => items[key];
+            Object.assign(Enum, items);
+            return Enum;
+        }
+        Object.keys(enumsMap).forEach((enumKey) => {
+            enumsMap[enumKey] = createEnum(enumsMap[enumKey] || {});
+        });
+
         Vue.prototype.$enums = (key, value) => {
             if (!key || !value)
                 return '';
