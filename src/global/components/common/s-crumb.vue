@@ -24,7 +24,7 @@ export default {
                     const matched = to.matched || [];
                     const crumbs = [];
                     matched.forEach((route) => {
-                        const mata = route.components.default.meta || route.meta || {};
+                        const meta = route.components.default.meta || route.meta || {};
                         const componentOptions = getComponentOption(route);
                         Object.assign(meta, getComponentOption && componentOptions.meta);
                         let crumb = meta.crumb;

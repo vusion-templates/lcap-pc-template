@@ -58,7 +58,7 @@ export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSch
         });
         return result;
     } else if (schema.type === 'enum') {
-        return { type: 'Identifier', name: 'undefined' }; // schema.enumItemList[0].value
+        return { type: 'StringLiteral', value: schema.defaultValue || '' };
     } else if (schema.isArray) {
         return { type: 'ArrayExpression', elements: [] };
     } else if (ref && ref.startsWith('#/basicTypes/')) {
