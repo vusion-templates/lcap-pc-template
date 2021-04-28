@@ -90,6 +90,9 @@ export const utils = {
     FormatDate(value, formatter) {
         return cutils.dateFormatter.format(value, formatter);
     },
+    FormatDateTime(value) {
+        return cutils.dateFormatter.format(value);
+    },
     Clone(obj) {
         return cloneDeep(obj);
     },
