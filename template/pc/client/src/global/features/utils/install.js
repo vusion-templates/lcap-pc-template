@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
 import { utils as cutils } from 'cloud-ui.vusion';
-import { addDays, subDays, format, parse } from 'date-fns';
+import { addDays, subDays, format, parse, formatRFC3339 } from 'date-fns';
 let enumsMap = {};
 
 export const utils = {
@@ -119,6 +119,31 @@ export const utils = {
         } catch (e) {}
 
         return result;
+    },
+    Convert(value, schema) {
+        const { type, format } = schema;
+
+        if(type === 'string') {
+            switch(format) {
+                case 'date-time':
+                    return formatRFC3339(new Date(value));
+                case 'date':
+                    return format(new Date(value), 'yyyy-MM-dd');
+                case 'time':
+                    return format(new Date(value), 'HH:mm:ss');
+                case '':  // 字符串
+                    return String(value);
+            }
+        }
+
+        if(type === 'number' && format === 'double')  // 小数
+            return parseFloat(+value);
+
+        if(type === 'integer')  // 整数： format 'int' ; 长整数: format: 'long'
+            return parseInt(+value);
+
+        if(type === 'boolean')  // 布尔值
+            return !!value;
     },
 };
 
