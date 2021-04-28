@@ -32,7 +32,7 @@ export default {
             return Function('return ' + expression)();
         };
 
-        const enumsMap = options.enumsMap;
+        const enumsMap = options.enumsMap || {};
         function createEnum(items) {
             const Enum = (key) => items[key];
             Object.assign(Enum, items);
