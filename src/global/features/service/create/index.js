@@ -3,6 +3,7 @@ import axios from 'axios';
 import { stringify } from 'qs';
 import addConfigs from './add.configs';
 import { getFilenameFromContentDispositionHeader } from './tools';
+import paramsSerializer from './paramsSerializer';
 
 const formatContentType = function (contentType, data) {
     const map = {
@@ -71,6 +72,7 @@ const requester = function (requestInfo) {
     }
     const req = axios({
         params: query,
+        paramsSerializer,
         baseURL,
         method: method2,
         url: path,
