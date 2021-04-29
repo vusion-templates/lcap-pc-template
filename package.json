@@ -1,13 +1,12 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.2.26",
+  "version": "0.3.0",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "cache-install": "npx cache-install && node node_modules/vusion-install/index.js",
     "dev": "vue-cli-service serve",
     "serve": "npm run dev",
     "build": "vue-cli-service build --apply-theme",
-    "build:designer": "vue-cli-service build --target lib --mode designer --name cloudAdminDesigner src/global/features/designer/index.js",
     "build:stage": "vue-cli-service build --mode staging",
     "build:site": "vue-cli-service build  --apply-theme --mode site",
     "lint": "npx eslint --quiet",
@@ -19,7 +18,8 @@
     "manage": "plop",
     "postpublish": "rm _.gitignore",
     "screenshot": "vusion screenshot --server public/index.html -o screenshots/0.png -w 1440 -h 900 && vusion screenshot --server public/index.html#/demo/list/basic -o screenshots/1.png -w 1440 -h 900 -d 200",
-    "deploy": "cp -Rf ./template/pc/client/pkg ./public && vusion deploy ./public && rm -Rf ./public",
+    "build:designer": "vue-cli-service build --target lib --mode designer --name cloudAdminDesigner src/global/features/designer/index.js",
+    "deploy": "vusion deploy ./public",
     "prepublishOnly": "npm run deploy"
   },
   "keywords": [
