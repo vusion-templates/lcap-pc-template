@@ -34,7 +34,7 @@ const webpackRoutes = require('./webpack/routes');
 const webpackHtml = require('./webpack/html');
 const webpackGQL = require('./webpack/gqloader');
 const webpackOptimization = require('./webpack/optimization');
-const isDesignner = process.env.BUILD_LIB_ENV === 'designer';
+const isDesigner = true; // process.env.BUILD_LIB_ENV === 'designer';
 
 if (isMicro) {
     webpackMicro.setup(pages);
@@ -56,14 +56,14 @@ if (isMicro) {
     baseConfig = webpackMicro.config(baseConfig, port, isDevelopment);
 }
 
-if (isDesignner) {
+if (isDesigner) {
     webpackDesigner.config(baseConfig, pages);
 }
 const vueConfig = {
     ...baseConfig,
     pages,
     chainWebpack(config) {
-        if (isDesignner) {
+        if (isDesigner) {
             webpackDesigner.chain(config, pages);
         } else {
             webpackHtml.chain(config, isDevelopment);
