@@ -10,6 +10,10 @@ function tryJSONParse(str) {
 
 // schema 和 dataTypes 解析出最终结构是在 template 内部， 所以从 low-code-fe 迁移过来的转化方法
 export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSchemaRefs = {}) => {
+    const isEnum = (property) => {
+        return property.$ref && dataTypesMap[property.$ref] && dataTypesMap[property.$ref].level === 'enum';
+    };
+
     if (relationship && relationship !== 'None' && Object.keys(usedSchemaRefs).every((ref) => {
         const refData = dataTypesMap[ref] || {};
         return refData.level === 'entity';
@@ -57,7 +61,7 @@ export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSch
             });
         });
         return result;
-    } else if (schema.type === 'enum') {
+    } else if (isEnum(schema)) {
         if (schema.defaultValue === null || schema.defaultValue === undefined)
             return { type: 'Identifier', name: 'undefined' };
         else
