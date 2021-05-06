@@ -26,7 +26,7 @@ const httpError = {
         }
         let handle;
         if (!err.code) {
-            handle = errHandles.localError;
+            handle = errHandles.remoteError;
         } else {
             handle = errHandles[err.code];
             if (!handle)
