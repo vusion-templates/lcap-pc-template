@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "cache-install": "npx cache-install && node node_modules/vusion-install/index.js",

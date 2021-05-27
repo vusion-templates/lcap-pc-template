@@ -4,6 +4,7 @@ import { stringify } from 'qs';
 import addConfigs from './add.configs';
 import { getFilenameFromContentDispositionHeader } from './tools';
 import paramsSerializer from './paramsSerializer';
+import cookie from '@/global/features/utils/cookie';
 
 const formatContentType = function (contentType, data) {
     const map = {
@@ -62,6 +63,8 @@ const requester = function (requestInfo) {
     const { path, method, body = {}, headers = {}, query = {} } = url;
     const baseURL = config.baseURL ? config.baseURL : '';
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+    headers['authorization'] = cookie.get('authorization');
+
     if (config.download) {
         return download(url);
     }
