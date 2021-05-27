@@ -34,7 +34,7 @@ export default {
     },
     async getDestinationUrl(param = {}) {
         const { path: { id } } = param;
-        const res = await processService.claimTask({
+        const res = await processService.getDestinationUrl({
             path: {
                 id,
                 domainName: window.appInfo && window.appInfo.domainName,
