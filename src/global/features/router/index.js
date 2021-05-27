@@ -2,12 +2,18 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 import routerLock from '@/global/features/router/lock';
+import processService from '@/global/services/process';
 import AuthPlugin from './auth/vue';
 import { beforeMiddleware, afterMiddleware } from './middleware';
 
 Vue.use(VueRouter);
 window.Vue = Vue;
 window.VueRouter = VueRouter;
+
+/**
+ * 流程接口注册
+ */
+Vue.prototype.$process = processService;
 
 Vue.prototype.$destination = function (url) {
     if (url.startsWith('http'))

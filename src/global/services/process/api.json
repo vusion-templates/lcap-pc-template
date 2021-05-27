@@ -1,44 +1,20 @@
 {
-    "start": {
+    "getTasks": {
         "url": {
-            "path": "/gateway/bpms/bpms-rest/service/runtime/v2/process-instances",
-            "method": "POST"
+            "path": "/api/system/process/task/myList",
+            "method": "get"
         }
     },
-    "complete": {
+    "claimTask": {
         "url": {
-            "path": "/gateway/bpms/bpms-rest/service/runtime/v2/tasks/{taskId}",
-            "method": "POST"
+            "path": "/api/system/process/task/{id}/claim",
+            "method": "put"
         }
     },
-    "getList": {
+    "getDestinationUrl": {
         "url": {
-            "path": "/gateway/bpms/bpms-rest/service/query/v2/historic-task-instances",
-            "method": "POST"
-        }
-    },
-    "get": {
-        "url": {
-            "path": "/gateway/bpms/bpms-rest/service/history/v2/historic-task-instances/{taskId}",
-            "method": "GET"
-        }
-    },
-    "getProcessInstanceList": {
-        "url": {
-            "path": "/gateway/bpms/bpms-rest/service/query/v2/historic-process-instances",
-            "method": "POST"
-        }
-    },
-    "getProcessInstance": {
-        "url": {
-            "path": "/gateway/bpms/bpms-rest/service/history/v2/historic-process-instances/{processInstanceId}",
-            "method": "GET"
-        }
-    },
-    "updateVariables": {
-        "url": {
-            "path": "/gateway/bpms/bpms-rest/service/runtime/v2/process-instances/{processInstanceId}/variables",
-            "method": "PUT"
+            "path": "/api/system/process/task/{id}/destinationUrl",
+            "method": "get"
         }
     }
 }
