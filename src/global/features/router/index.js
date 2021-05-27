@@ -2,8 +2,8 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 import routerLock from '@/global/features/router/lock';
-import processService from '@/global/services/process';
 import AuthPlugin from './auth/vue';
+import processService from './processService';
 import { beforeMiddleware, afterMiddleware } from './middleware';
 
 Vue.use(VueRouter);
