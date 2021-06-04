@@ -43,7 +43,7 @@ const cookie = {
         return true;
     },
     remove(key, sPath, sDomain) {
-        if (!key || !this.hasItem(key)) { return false; }
+        if (!key || !this.has(key)) { return false; }
         document.cookie = encodeURIComponent(key) + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT' + (sDomain ? '; domain=' + sDomain : '') + (sPath ? '; path=' + sPath : '');
         return true;
     },

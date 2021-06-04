@@ -1,5 +1,6 @@
-import authService from '@/global/services/auth';
 import Vue from 'vue';
+import authService from '@/global/services/auth';
+import cookie from '@/global/features/utils/cookie';
 
 let userInfoPromise = null;
 let userResourcesPromise = null;
@@ -53,7 +54,10 @@ const auth = {
         return userResourcesPromise;
     },
     logout() {
-        return authService.Logout();
+        return authService.Logout().then(() => {
+            cookie.remove('authorization');
+            cookie.remove('username');
+        });
     },
     /**
      * 权限服务是否初始化
