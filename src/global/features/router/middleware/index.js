@@ -28,7 +28,14 @@ const runMiddleWare = function (middlewareList, context) {
                 }
             } else {
                 console.error(`${middleware} not exist`);
+                return Promise.resolve();
             }
+        }, (e) => {
+            console.error(`${middleware} run error`, e);
+            if (!called) {
+                called = true;
+            }
+            return Promise.reject();
         });
     }
     p.then(() => {

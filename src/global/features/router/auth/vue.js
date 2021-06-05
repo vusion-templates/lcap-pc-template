@@ -98,8 +98,9 @@ export default {
                             toPath = this.to.path;
                         else if (typeof this.to === 'string')
                             toPath = this.to.split('?')[0];
-
-                        visible = visible && $auth.has(base + toPath);
+                        // 去掉末尾的 / 导致的权限不匹配
+                        const fullPath = (base + toPath).replace(/\/+$/, '');
+                        visible = visible && $auth.has(fullPath);
                     }
 
                     this.$el && (this.$el.style.display = visible ? '' : 'none');

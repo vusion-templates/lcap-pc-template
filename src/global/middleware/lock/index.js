@@ -39,7 +39,7 @@ export default function (appConfig) {
                 return;
 
             lock.params.forEach((param) => {
-                if (!(param in toQuery)) {
+                if (!(param in toQuery) && fromQuery[param]) {
                     isChanged = true;
                     toQuery[param] = fromQuery[param];
                 }
