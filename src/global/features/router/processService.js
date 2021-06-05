@@ -5,7 +5,6 @@ let assignee;
 export default {
     async getTasks(param = {}) {
         const userInfo = await $auth.getUserInfo() || {};
-        console.log('userInfo', userInfo);
         assignee = userInfo.UserId;
         const { query } = param;
         const res = await processService.getTasks({
