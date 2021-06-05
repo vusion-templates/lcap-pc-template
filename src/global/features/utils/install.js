@@ -88,9 +88,11 @@ export const utils = {
         return format(subDays(parse(date, 'yyyy-MM-dd', new Date()), amount), formatter);
     },
     FormatDate(value, formatter) {
+        if(!value) return '-';
         return cutils.dateFormatter.format(value, formatter);
     },
     FormatDateTime(value) {
+        if(!value) return '-';
         return cutils.dateFormatter.format(value);
     },
     Clone(obj) {
