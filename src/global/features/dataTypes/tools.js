@@ -35,20 +35,50 @@ export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSch
         }
     }
 
-    const ref = schema.$ref;
-    if (ref && usedSchemaRefs[ref])
+    if (schema.$ref && !schema.typeKey) { // 兼容有些已经生成缓存的页面
+        schema.typeKey = schema.$ref;
+    }
+    const typeKey = schema.typeKey;
+    if (typeKey && usedSchemaRefs[typeKey])
         return { type: 'Identifier', name: 'undefined' };
     // 理论上可以继续往下选，但这里先断掉！
 
-    const next = dataTypesMap[ref];
+    const next = dataTypesMap[typeKey];
     usedSchemaRefs = Object.assign({}, usedSchemaRefs);
-    if (ref && !ref.startsWith('#/basicTypes/'))
-        usedSchemaRefs[ref] = true;
+    if (typeKey && !(typeKey.startsWith('#/basicTypes/') || typeKey.startsWith('#/genericTypes/')))
+        usedSchemaRefs[typeKey] = true;
 
     // if (schema.defaultValue)
     //     return schema.defaultValue;
 
-    if (schema.type === 'object') {
+    if (schema.type === 'genericType') {
+        if (schema.typeKey === '#/genericTypes/List') {
+            return { type: 'ArrayExpression', elements: [] };
+        }
+        const result = { type: 'ObjectExpression', properties: [] };
+        const genericClass = dataTypesMap[schema.typeKey];
+        if (genericClass) {
+            const propertyList = genericClass.propertyList;
+            propertyList.forEach((property) => {
+                let propertySchema = property;
+                if (property.type === 'genericParam' && schema.typeInstantiation) {
+                    const param = schema.typeInstantiation.typeParams.find((typeParam) => typeParam.typeParamName === property.typeParamName);
+                    if (param) {
+                        propertySchema = Object.assign({ name: property.name }, param.typeParamValue);
+                    }
+                }
+                result.properties.push({
+                    type: 'ObjectProperty',
+                    key: {
+                        type: 'Identifier',
+                        name: property.name,
+                    },
+                    value: genInitData(propertySchema, property.relationship, usedSchemaRefs),
+                });
+            });
+        }
+        return result;
+    } else if (schema.type === 'object') { // Entity、structure的type是object
         const result = { type: 'ObjectExpression', properties: [] };
         schema.propertyList.forEach((property) => {
             result.properties.push({
@@ -68,19 +98,19 @@ export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSch
             return { type: 'StringLiteral', value: schema.defaultValue };
     } else if (schema.isArray) {
         return { type: 'ArrayExpression', elements: [] };
-    } else if (ref && ref.startsWith('#/basicTypes/')) {
+    } else if (typeKey && typeKey.startsWith('#/basicTypes/')) {
         // if (schema.defaultValue)
         //     return schema.defaultValue;
 
-        if (ref === '#/basicTypes/Boolean')
+        if (typeKey === '#/basicTypes/Boolean')
             return { type: 'BooleanLiteral', value: tryJSONParse(schema.defaultValue) || false };
-        else if (ref === '#/basicTypes/Integer')
+        else if (typeKey === '#/basicTypes/Integer')
             return { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0 };
-        else if (ref === '#/basicTypes/Long')
+        else if (typeKey === '#/basicTypes/Long')
             return schema.defaultValue === undefined || schema.defaultValue === null ? { type: 'Identifier', name: 'undefined' } : { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0 };
-        else if (ref === '#/basicTypes/Decimal')
+        else if (typeKey === '#/basicTypes/Decimal')
             return { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0.0 };
-        else if (ref === '#/basicTypes/String')
+        else if (typeKey === '#/basicTypes/String')
             return { type: 'StringLiteral', value: schema.defaultValue || '' };
         else
             return { type: 'Identifier', name: 'undefined' };
