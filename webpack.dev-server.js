@@ -2,8 +2,9 @@ const host = 'localhost';
 const path = require('path');
 const pkg = require('./package.json');
 const platformConfig = require('./platform.config.json');
-if (!platformConfig.tenantId || !platformConfig.projectId) {
-    console.error('parse platform.config error');
+
+if (!platformConfig.tenant) {
+    console.error('platform.config error');
     process.exit(1);
 }
 const onProxyReq = function (proxyReq, req, res) {
@@ -67,22 +68,6 @@ module.exports = function (port) {
             },
         },
     };
-
-    // 目前 designer 和 dev 均要在初始时自动登录
-    if (process.env.DESIGNER_SERVER_BEFORE_PATH) {
-        try {
-            devServer.before = require(process.env.DESIGNER_SERVER_BEFORE_PATH);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-    if (process.env.DESIGNER_SERVER_AFTER_PATH) {
-        try {
-            devServer.after = require(process.env.DESIGNER_SERVER_AFTER_PATH);
-        } catch (e) {
-            console.error(e);
-        }
-    }
 
     return devServer;
 };
