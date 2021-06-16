@@ -35,7 +35,6 @@ const webpackHtml = require('./webpack/html');
 const webpackGQL = require('./webpack/gqloader');
 const webpackOptimization = require('./webpack/optimization');
 const isDesigner = process.env.BUILD_LIB_ENV === 'designer';
-console.log(isDesigner)
 
 if (isMicro) {
     webpackMicro.setup(pages);
