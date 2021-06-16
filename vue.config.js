@@ -29,12 +29,10 @@ const isMicro = webpackMicro.isMicro(pages);
 const webpackDll = require('./webpack/dll');
 const webpackCloudUI = require('./webpack/cloud-ui');
 const webpackStyle = require('./webpack/style');
-const webpackDesigner = require('./webpack/designer');
 const webpackRoutes = require('./webpack/routes');
 const webpackHtml = require('./webpack/html');
 const webpackGQL = require('./webpack/gqloader');
 const webpackOptimization = require('./webpack/optimization');
-const isDesigner = true; // process.env.BUILD_LIB_ENV === 'designer';
 
 if (isMicro) {
     webpackMicro.setup(pages);
@@ -56,22 +54,15 @@ if (isMicro) {
     baseConfig = webpackMicro.config(baseConfig, port, isDevelopment);
 }
 
-if (isDesigner) {
-    webpackDesigner.config(baseConfig, pages);
-}
 const vueConfig = {
     ...baseConfig,
     pages,
     chainWebpack(config) {
-        if (isDesigner) {
-            webpackDesigner.chain(config, pages);
+        webpackHtml.chain(config, isDevelopment);
+        if (isMicro) {
+            webpackMicro.chain(config, isDevelopment);
         } else {
-            webpackHtml.chain(config, isDevelopment);
-            if (isMicro) {
-                webpackMicro.chain(config, isDevelopment);
-            } else {
-                webpackDll.chain(config, publicPathPrefix, isDevelopment);
-            }
+            webpackDll.chain(config, publicPathPrefix, isDevelopment);
         }
         webpackOptimization.chain(config, isDevelopment);
 
