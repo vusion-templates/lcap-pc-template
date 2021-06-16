@@ -15,6 +15,12 @@ const dateFormat = (value, formatter = 'yyyy-MM-dd HH:mm:ss') => {
     }
     if (!formatter)
         return value;
+
+    if (formatter = 'YYYY-QQ') {
+        /** 季度格式显示 */
+        return `${timestamp.getFullYear()}-Q${Math.ceil((timestamp.getMonth() + 1)/3)}`;
+    }
+
     return format(timestamp, formatter);
 };
 
