@@ -1,8 +1,21 @@
 import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
 import { utils as cutils } from 'cloud-ui.vusion';
-import { addDays, subDays, format, parse, formatRFC3339 } from 'date-fns';
+import { addDays, subDays, addMonths, format, parse, formatRFC3339 } from 'date-fns';
 let enumsMap = {};
+
+function toValue(date, converter) {
+    if (!date)
+        return date;
+    if (converter === 'format')
+        return this.format(date, 'YYYY-MM-DD'); // value 的真实格式
+    else if (converter === 'json')
+        return date.toJSON();
+    else if (converter === 'timestamp')
+        return date.getTime();
+    else
+        return date;
+}
 
 export const utils = {
     gql,
@@ -81,18 +94,24 @@ export const utils = {
     CurrDateTime() {
         return new Date().toJSON();
     },
-    AddDays(date = new Date(), amount = 1, formatter = 'yyyy-MM-dd') {
-        return format(addDays(parse(date, 'yyyy-MM-dd', new Date()), amount), formatter);
+    AddDays(date = new Date(), amount = 1, converter = 'json') {
+        return toValue(addDays(new Date(date), amount), converter);
     },
-    SubDays(date = new Date(), amount = 1, formatter = 'yyyy-MM-dd') {
-        return format(subDays(parse(date, 'yyyy-MM-dd', new Date()), amount), formatter);
+    AddMonths(date = new Date(), amount = 1, converter = 'json') {
+        /** 传入的值为标准的时间格式 */
+        return toValue(addMonths(new Date(date), amount), converter);
+    },
+    SubDays(date = new Date(), amount = 1, converter = 'json') {
+        return toValue(subDays(new Date(date), amount), converter);
     },
     FormatDate(value, formatter) {
-        if(!value) return '-';
+        if (!value)
+            return '-';
         return cutils.dateFormatter.format(value, formatter);
     },
     FormatDateTime(value) {
-        if(!value) return '-';
+        if (!value)
+            return '-';
         return cutils.dateFormatter.format(value);
     },
     Clone(obj) {
@@ -128,26 +147,26 @@ export const utils = {
     Convert(value, schema) {
         const { type, format } = schema;
 
-        if(type === 'string') {
-            switch(format) {
+        if (type === 'string') {
+            switch (format) {
                 case 'date-time':
                     return formatRFC3339(new Date(value));
                 case 'date':
                     return format(new Date(value), 'yyyy-MM-dd');
                 case 'time':
                     return format(new Date(value), 'HH:mm:ss');
-                case '':  // 字符串
+                case '': // 字符串
                     return String(value);
             }
         }
 
-        if(type === 'number' && format === 'double')  // 小数
+        if (type === 'number' && format === 'double') // 小数
             return parseFloat(+value);
 
-        if(type === 'integer')  // 整数： format 'int' ; 长整数: format: 'long'
+        if (type === 'integer') // 整数： format 'int' ; 长整数: format: 'long'
             return parseInt(+value);
 
-        if(type === 'boolean')  // 布尔值
+        if (type === 'boolean') // 布尔值
             return !!value;
     },
 };
