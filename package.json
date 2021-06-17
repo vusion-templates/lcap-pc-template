@@ -18,6 +18,7 @@
     "screenshot": "vusion screenshot --server public/index.html -o screenshots/0.png -w 1440 -h 900 && vusion screenshot --server public/index.html#/demo/list/basic -o screenshots/1.png -w 1440 -h 900 -d 200",
     "build:designer": "cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/global/features/designer/index.js",
     "deploy": "vusion deploy ./public",
+    "deploy:inlcap": "lcap deploy ./public",
     "postinstall": "node node_modules/vusion-install/index.js",
     "prepublishOnly": "cp .gitignore _.gitignore && npm run build:designer && npm run deploy",
     "postpublish": "rm _.gitignore"
