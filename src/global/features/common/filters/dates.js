@@ -15,6 +15,7 @@ const dateFormat = (value, formatter = 'yyyy-MM-dd HH:mm:ss') => {
     }
     if (!formatter)
         return value;
+
     return format(timestamp, formatter);
 };
 

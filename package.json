@@ -1,9 +1,8 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.3.2",
+  "version": "0.3.7",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
-    "cache-install": "npx cache-install && node node_modules/vusion-install/index.js",
     "dev": "vue-cli-service serve",
     "serve": "npm run dev",
     "build": "vue-cli-service build --apply-theme",
@@ -16,11 +15,14 @@
     "test:unit:watch": "npm run test:unit -- --watch",
     "ui": "npx vue ui",
     "manage": "plop",
-    "postpublish": "rm _.gitignore",
     "screenshot": "vusion screenshot --server public/index.html -o screenshots/0.png -w 1440 -h 900 && vusion screenshot --server public/index.html#/demo/list/basic -o screenshots/1.png -w 1440 -h 900 -d 200",
-    "build:designer": "vue-cli-service build --target lib --name cloudAdminDesigner src/global/features/designer/index.js",
-    "deploy": "vusion deploy ./public",
-    "prepublishOnly": "npm run deploy"
+    "build:designer": "cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/global/features/designer/index.js",
+    "deploy:dev": "lcap deploy ./public --platform http://lcp.vusion.top",
+    "deploy:test": "lcap deploy ./public --platform http://defaulttenant.low-code-fe.qa-ci-lowcode.service.163.org",
+    "deploy:online": "vusion deploy ./public",
+    "postinstall": "node node_modules/vusion-install/index.js",
+    "prepublishOnly": "cp .gitignore _.gitignore && npm run build:designer && npm run deploy",
+    "postpublish": "rm _.gitignore"
   },
   "keywords": [
     "vue",
@@ -94,7 +96,7 @@
     "apollo-plugin-loader": "^1.0.8",
     "axios": "^0.19.0",
     "babel-polyfill": "^6.26.0",
-    "cloud-ui.vusion": "0.11.24",
+    "cloud-ui.vusion": "^0.11.42",
     "date-fns": "^2.6.0",
     "event-hooks-webpack-plugin": "^2.1.6",
     "graphql-tools": "^6.2.1",
