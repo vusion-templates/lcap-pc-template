@@ -9,3 +9,11 @@
 [demo](https://vusion-templates.github.io/cloud-admin/)
 
 [模板 demo](https://vusion-templates.github.io/cloud-admin-lite/)
+
+## 更新线上环境 NOS
+
+npm run deploy:online
+
+## 更新测试环境/联调环境 NOS
+
+npm run deploy
