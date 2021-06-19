@@ -73,7 +73,7 @@ export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSch
                         type: 'Identifier',
                         name: property.name,
                     },
-                    value: genInitData(propertySchema, property.relationship, usedSchemaRefs),
+                    value: genInitData(propertySchema, dataTypesMap, 'None', usedSchemaRefs),
                 });
             });
         }
