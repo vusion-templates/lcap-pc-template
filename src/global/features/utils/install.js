@@ -83,7 +83,7 @@ export const utils = {
         return ~index && arr.splice(index, 1);
     },
     RemoveAt(arr, index) {
-        return arr.splice(arr, index);
+        return arr.splice(index, 1);
     },
     CurrDate() {
         return new Date().toJSON().replace(/T.+?Z/, '');
