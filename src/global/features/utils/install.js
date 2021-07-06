@@ -83,7 +83,7 @@ export const utils = {
         return ~index && arr.splice(index, 1);
     },
     RemoveAt(arr, index) {
-        return arr.splice(arr, index);
+        return arr.splice(index, 1);
     },
     CurrDate() {
         return new Date().toJSON().replace(/T.+?Z/, '');
@@ -109,10 +109,10 @@ export const utils = {
             return '-';
         return cutils.dateFormatter.format(value, formatter);
     },
-    FormatDateTime(value) {
+    FormatDateTime(value, formatter) {
         if (!value)
             return '-';
-        return cutils.dateFormatter.format(value);
+        return cutils.dateFormatter.format(value, formatter);
     },
     Clone(obj) {
         return cloneDeep(obj);
@@ -145,10 +145,10 @@ export const utils = {
         return result;
     },
     Convert(value, schema) {
-        const { type, format } = schema;
+        const { type, format: formatVar } = schema;
 
         if (type === 'string') {
-            switch (format) {
+            switch (formatVar) {
                 case 'date-time':
                     return formatRFC3339(new Date(value));
                 case 'date':
@@ -160,11 +160,11 @@ export const utils = {
             }
         }
 
-        if (type === 'number' && format === 'double') // 小数
+        if (type === 'number' && formatVar === 'double') // 小数
             return parseFloat(+value);
 
         if (type === 'integer') // 整数： format 'int' ; 长整数: format: 'long'
-            return parseInt(+value);
+            return Math.round(+value);
 
         if (type === 'boolean') // 布尔值
             return !!value;
