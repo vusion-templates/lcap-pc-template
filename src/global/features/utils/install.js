@@ -109,10 +109,10 @@ export const utils = {
             return '-';
         return cutils.dateFormatter.format(value, formatter);
     },
-    FormatDateTime(value) {
+    FormatDateTime(value, formatter) {
         if (!value)
             return '-';
-        return cutils.dateFormatter.format(value);
+        return cutils.dateFormatter.format(value, formatter);
     },
     Clone(obj) {
         return cloneDeep(obj);
