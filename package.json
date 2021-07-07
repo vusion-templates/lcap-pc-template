@@ -21,7 +21,7 @@
     "deploy:test": "lcap deploy ./public --platform http://defaulttenant.low-code-fe.qa-ci-lowcode.service.163.org",
     "deploy:online": "vusion deploy ./public",
     "postinstall": "node node_modules/vusion-install/index.js",
-    "prepublishOnly": "cp .gitignore _.gitignore && npm run build:designer && npm run deploy",
+    "prepublishOnly": "cp .gitignore _.gitignore && npm run build:designer && npm run deploy:online",
     "postpublish": "rm _.gitignore"
   },
   "keywords": [
