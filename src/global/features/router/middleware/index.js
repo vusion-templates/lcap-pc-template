@@ -32,6 +32,7 @@ const runMiddleWare = function (middlewareList, context) {
             }
         }, (e) => {
             console.error(`${middleware} run error`, e);
+            middlewareList = [];
             if (!called) {
                 called = true;
             }
