@@ -135,6 +135,18 @@ export const utils = {
     Merge(obj1, obj2) {
         return Object.assign(obj1, obj2);
     },
+    RandomInt(min, max) {
+        if (max === undefined) {
+            max = min;
+            min = 0;
+        }
+
+        if (typeof min !== 'number' || typeof max !== 'number') {
+            throw new TypeError('Expected all arguments to be numbers');
+        }
+
+        return Math.floor((Math.random() * (max - min + 1)) + min);
+    },
     tryJSONParse(str) {
         let result;
 
