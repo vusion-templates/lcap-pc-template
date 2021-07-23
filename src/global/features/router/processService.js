@@ -5,7 +5,7 @@ let assignee;
 export default {
     async getTasks(param = {}) {
         const userInfo = await $auth.getUserInfo() || {};
-        assignee = userInfo.UserId;
+        assignee = userInfo.UserName;
         const { query } = param;
         const res = await processService.getTasks({
             path: {
@@ -43,5 +43,5 @@ export default {
             },
         });
         return res;
-    }
+    },
 };
