@@ -9,6 +9,7 @@ const service = createService(merge(api, apiConfig), {
         domainName: window.appInfo && window.appInfo.domainName,
         authorization: cookie.get('authorization'),
         username: cookie.get('username'),
+        env: window.appInfo && window.appInfo.env,
     },
 });
 
