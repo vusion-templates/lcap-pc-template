@@ -5,7 +5,7 @@ import paramsSerializer from '../../features/service/create/paramsSerializer';
  */
 function getUriValue(schemaRef = '') {
     const arr = schemaRef.split('/');
-    return `/gw/${arr[1]}/graphql`;
+    return `/graphql`;
 }
 
 /* eslint-disable no-underscore-dangle */
