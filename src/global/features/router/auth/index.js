@@ -5,8 +5,16 @@ import cookie from '@/global/features/utils/cookie';
 let userInfoPromise = null;
 let userResourcesPromise = null;
 const maxTimes = 3;
+const getBaseHeaders = () => ({
+    domainName: window.appInfo && window.appInfo.domainName,
+    authorization: cookie.get('authorization'),
+    username: cookie.get('userName'),
+    Env: window.appInfo && window.appInfo.env,
+});
+
 const request = function (times) {
     return authService.GetUser({
+        headers: getBaseHeaders(),
         config: {
             noErrorTip: true,
         },
@@ -37,6 +45,7 @@ const auth = {
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
             userResourcesPromise = authService.GetUserResources({
+                headers: getBaseHeaders(),
                 query: {
                     DomainName,
                 },
@@ -54,7 +63,9 @@ const auth = {
         return userResourcesPromise;
     },
     logout() {
-        return authService.Logout().then(() => {
+        return authService.Logout({
+            headers: getBaseHeaders(),
+        }).then(() => {
             cookie.remove('authorization');
             cookie.remove('username');
         });
