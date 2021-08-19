@@ -76,7 +76,7 @@ const auth = {
      * @param {*} authPath 权限路径，如 /dashboard/entity/list
      */
     has(authPath) {
-        return this._map.has(authPath);
+        return this._map ? this._map.has(authPath) : true;
     },
 };
 export default auth;
