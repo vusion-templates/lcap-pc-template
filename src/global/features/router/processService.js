@@ -8,9 +8,6 @@ export default {
         assignee = userInfo.UserName;
         const { query } = param;
         const res = await processService.getTasks({
-            path: {
-                domainName: window.appInfo && window.appInfo.domainName,
-            },
             query: {
                 ...query,
                 assignee,
@@ -21,10 +18,7 @@ export default {
     async claimTask(param = {}) {
         const { path = {} } = param;
         const res = await processService.claimTask({
-            path: {
-                ...path,
-                domainName: window.appInfo && window.appInfo.domainName,
-            },
+            path: { ...path },
             body: {
                 assignee,
             },
@@ -34,10 +28,7 @@ export default {
     async getDestinationUrl(param = {}) {
         const { path: { id } } = param;
         const res = await processService.getDestinationUrl({
-            path: {
-                id,
-                domainName: window.appInfo && window.appInfo.domainName,
-            },
+            path: { id },
             query: {
                 assignee,
             },

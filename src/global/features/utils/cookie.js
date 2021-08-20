@@ -1,60 +1,51 @@
-/*\
-|*|
-|*|  :: cookies.js ::
-|*|
-|*|  A complete cookies reader/writer framework with full unicode support.
-|*|
-|*|  https://developer.mozilla.org/en-US/docs/DOM/document.cookie
-|*|
-|*|  This framework is released under the GNU Public License, version 3 or later.
-|*|  http://www.gnu.org/licenses/gpl-3.0-standalone.html
-|*|
-|*|  Syntaxes:
-|*|
-|*|  * cookie.setItem(name, value[, end[, path[, domain[, secure]]]])
-|*|  * cookie.getItem(name)
-|*|  * cookie.removeItem(name[, path], domain)
-|*|  * cookie.hasItem(name)
-|*|  * cookie.keys()
-|*|
-\*/
+function getDomain() {
+    const { hostname } = location;
+    const hostArr = hostname.split('.');
+    if (hostArr.length < 3)
+        return hostname;
+    const len = hostArr.length;
+    return `${hostArr[len - 3]}.${hostArr[len - 2]}.${hostArr[len - 1]}`;
+}
 
-const cookie = {
-    get(key) {
-        return decodeURIComponent(document.cookie.replace(new RegExp('(?:(?:^|.*;)\\s*' + encodeURIComponent(key).replace(/[-.+*]/g, '\\$&') + '\\s*=\\s*([^;]*).*$)|^.*$'), '$1')) || null;
-    },
-    set(key, sValue, vEnd, sPath, sDomain, bSecure) {
-        if (!key || /^(?:expires|max-age|path|domain|secure)$/i.test(key)) { return false; }
-        let sExpires = '';
-        if (vEnd) {
-            switch (vEnd.constructor) {
-                case Number:
-                    sExpires = vEnd === Infinity ? '; expires=Fri, 31 Dec 9999 23:59:59 GMT' : '; max-age=' + vEnd;
-                    break;
-                case String:
-                    sExpires = '; expires=' + vEnd;
-                    break;
-                case Date:
-                    sExpires = '; expires=' + vEnd.toUTCString();
-                    break;
+export default {
+    set(data = {}, exdays = 1) {
+        const d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        const expires = d.toGMTString();
+        Object.keys(data).forEach((key) => {
+            const value = data[key];
+            if (key && value) {
+                document.cookie = `${key}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
             }
+        });
+    },
+    get(name) {
+        const nameEQ = name + '=';
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ')
+                c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0)
+                return decodeURIComponent(c.substring(nameEQ.length, c.length));
         }
-        document.cookie = encodeURIComponent(key) + '=' + encodeURIComponent(sValue) + sExpires + (sDomain ? '; domain=' + sDomain : '') + (sPath ? '; path=' + sPath : '') + (bSecure ? '; secure' : '');
-        return true;
+        return null;
     },
-    remove(key, sPath, sDomain) {
-        if (!key || !this.has(key)) { return false; }
-        document.cookie = encodeURIComponent(key) + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT' + (sDomain ? '; domain=' + sDomain : '') + (sPath ? '; path=' + sPath : '');
-        return true;
+    erase(name) {
+        const d = new Date();
+        d.setTime(d.getTime() - (1 * 24 * 60 * 60 * 1000));
+        const expires = d.toGMTString();
+        document.cookie = `${name}=; expires=${expires}; path=/`;
+        const domain = getDomain();
+        document.cookie = `${name}=; expires=${expires}; path=/; domain=${domain}`;
     },
-    has(key) {
-        return (new RegExp('(?:^|;\\s*)' + encodeURIComponent(key).replace(/[-.+*]/g, '\\$&') + '\\s*=')).test(document.cookie);
-    },
-    keys() {
-        const aKeys = document.cookie.replace(/((?:^|\s*;)[^=]+)(?=;|$)|^\s*|\s*(?:=[^;]*)?(?:\1|$)/g, '').split(/\s*(?:=[^;]*)?;\s*/);
-        for (let nIdx = 0; nIdx < aKeys.length; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
-        return aKeys;
+    eraseAll() {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i];
+            const eqPos = cookie.indexOf('=');
+            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            this.erase(name);
+        }
     },
 };
-
-export default cookie;

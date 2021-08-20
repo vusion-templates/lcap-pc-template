@@ -6,9 +6,7 @@ let userInfoPromise = null;
 let userResourcesPromise = null;
 const maxTimes = 3;
 const getBaseHeaders = () => ({
-    domainName: window.appInfo && window.appInfo.domainName,
-    authorization: cookie.get('authorization'),
-    username: cookie.get('userName'),
+    Authorization: cookie.get('authorization'),
     Env: window.appInfo && window.appInfo.env,
 });
 
@@ -66,8 +64,8 @@ const auth = {
         return authService.Logout({
             headers: getBaseHeaders(),
         }).then(() => {
-            cookie.remove('authorization');
-            cookie.remove('username');
+            cookie.erase('authorization');
+            cookie.erase('username');
         });
     },
     /**

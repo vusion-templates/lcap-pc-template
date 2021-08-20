@@ -63,7 +63,7 @@ const requester = function (requestInfo) {
     const { path, method, body = {}, headers = {}, query = {} } = url;
     const baseURL = config.baseURL ? config.baseURL : '';
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
-    headers['authorization'] = cookie.get('authorization');
+    headers.Authorization = cookie.get('authorization');
 
     if (config.download) {
         return download(url);
