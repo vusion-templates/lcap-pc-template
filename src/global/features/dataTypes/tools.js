@@ -9,7 +9,7 @@ function tryJSONParse(str) {
 }
 
 // schema 和 dataTypes 解析出最终结构是在 template 内部， 所以从 low-code-fe 迁移过来的转化方法
-export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSchemaRefs = {}) => {
+export const genInitData = (schema, dataTypesMap, useDefaultValue = false, usedSchemaRefs = {}) => {
     const isEnum = (property) => {
         return property.$ref && dataTypesMap[property.$ref] && dataTypesMap[property.$ref].level === 'enum';
     };
@@ -70,40 +70,44 @@ export const genInitData = (schema, dataTypesMap, relationship = 'None', usedSch
             });
         });
         return result;
-    } else if (next) {
-        // 现在比较多的 string 也是有内部的显示结构的，所以主要是是根据 schema 的 ref 去判断  schema.type === 'string'
-        return genInitData(next, dataTypesMap, relationship, usedSchemaRefs);
     } else {
-        return { type: 'Identifier', name: 'undefined' };
+        if (useDefaultValue) {
+            // 需要和产品讨论一下 New 的问题
+            if (isEnum(schema)) {
+                if (schema.defaultValue === null || schema.defaultValue === undefined)
+                    return { type: 'Identifier', name: 'undefined' };
+                else
+                    return { type: 'StringLiteral', value: schema.defaultValue };
+            } else if (schema.isArray) {
+                return { type: 'ArrayExpression', elements: [] };
+            } else if (typeKey && typeKey.startsWith('#/basicTypes/')) {
+                // if (schema.defaultValue)
+                //     return schema.defaultValue;
+
+                if (typeKey === '#/basicTypes/Boolean')
+                    return { type: 'BooleanLiteral', value: tryJSONParse(schema.defaultValue) || false };
+                else if (typeKey === '#/basicTypes/Integer')
+                    return { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0 };
+                else if (typeKey === '#/basicTypes/Long')
+                    return schema.defaultValue === undefined || schema.defaultValue === null ? { type: 'Identifier', name: 'undefined' } : { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0 };
+                else if (typeKey === '#/basicTypes/Decimal')
+                    return { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0.0 };
+                else if (typeKey === '#/basicTypes/String')
+                    return { type: 'StringLiteral', value: schema.defaultValue || '' };
+                else
+                    return { type: 'Identifier', name: 'undefined' };
+            } else if (next) {
+                // 现在比较多的 string 也是有内部的显示结构的，所以主要是是根据 schema 的 ref 去判断  schema.type === 'string'
+                return genInitData(next, dataTypesMap, useDefaultValue, usedSchemaRefs);
+            } else
+                return { type: 'Identifier', name: 'undefined' };
+        } else {
+            if (next) {
+                // 现在比较多的 string 也是有内部的显示结构的，所以主要是是根据 schema 的 ref 去判断  schema.type === 'string'
+                return genInitData(next, dataTypesMap, useDefaultValue, usedSchemaRefs);
+            } else {
+                return { type: 'Identifier', name: 'undefined' };
+            }
+        }
     }
-
-    // 需要和产品讨论一下 New 的问题
-    // else if (isEnum(schema)) {
-    //     if (schema.defaultValue === null || schema.defaultValue === undefined)
-    //         return { type: 'Identifier', name: 'undefined' };
-    //     else
-    //         return { type: 'StringLiteral', value: schema.defaultValue };
-    // } else if (schema.isArray) {
-    //     return { type: 'ArrayExpression', elements: [] };
-    // } else if (typeKey && typeKey.startsWith('#/basicTypes/')) {
-    //     // if (schema.defaultValue)
-    //     //     return schema.defaultValue;
-
-    //     if (typeKey === '#/basicTypes/Boolean')
-    //         return { type: 'BooleanLiteral', value: tryJSONParse(schema.defaultValue) || false };
-    //     else if (typeKey === '#/basicTypes/Integer')
-    //         return { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0 };
-    //     else if (typeKey === '#/basicTypes/Long')
-    //         return schema.defaultValue === undefined || schema.defaultValue === null ? { type: 'Identifier', name: 'undefined' } : { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0 };
-    //     else if (typeKey === '#/basicTypes/Decimal')
-    //         return { type: 'NumericLiteral', value: tryJSONParse(schema.defaultValue) || 0.0 };
-    //     else if (typeKey === '#/basicTypes/String')
-    //         return { type: 'StringLiteral', value: schema.defaultValue || '' };
-    //     else
-    //         return { type: 'Identifier', name: 'undefined' };
-    // } else if (next) {
-    //     // 现在比较多的 string 也是有内部的显示结构的，所以主要是是根据 schema 的 ref 去判断  schema.type === 'string'
-    //     return genInitData(next, dataTypesMap, relationship, usedSchemaRefs);
-    // } else
-    //     return { type: 'Identifier', name: 'undefined' };
 };

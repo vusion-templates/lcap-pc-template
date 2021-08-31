@@ -26,7 +26,7 @@ export default {
 
             // read from file
             const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
-            const expressDataTypeObject = genInitData(schema, dataTypesMap);
+            const expressDataTypeObject = genInitData(schema, dataTypesMap, isRouteParam);
             const expression = generate(expressDataTypeObject).code;
             // eslint-disable-next-line no-new-func
             return Function('return ' + expression)();
