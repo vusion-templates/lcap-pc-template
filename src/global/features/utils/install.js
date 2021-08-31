@@ -18,6 +18,7 @@ function toValue(date, converter) {
 }
 
 export const utils = {
+    Vue: undefined,
     gql,
     Enum(enumName, value) {
         if (arguments.length === 0)
@@ -70,7 +71,7 @@ export const utils = {
         return arr[index];
     },
     Set(arr, index, item) {
-        return arr[index] = item;
+        return this.Vue.set(arr, index, item);
     },
     Add(arr, item) {
         return arr.push(item);
@@ -185,6 +186,7 @@ export const utils = {
 
 export default {
     install(Vue, options) {
+        this.Vue = Vue;
         Vue.prototype.$utils = utils;
         enumsMap = options.enumsMap;
     },
