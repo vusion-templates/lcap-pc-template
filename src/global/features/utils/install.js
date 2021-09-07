@@ -182,6 +182,31 @@ export const utils = {
         if (type === 'boolean') // 布尔值
             return !!value;
     },
+    /**
+     * 数字格式化
+     * @param {digits} 小数点保留个数
+     * @param {showGroup} 是否显示千位分割（默认逗号分隔）
+    */
+    FormatNumber(value, digits, showGroup) {
+        if (!value)
+            return value;
+        if (parseFloat(value) === 0)
+            return '0';
+        if (digits !== undefined) {
+            value = Number(value).toFixed(digits);
+        }
+        if (showGroup) {
+            const temp = value.split('.');
+            const right = temp[1];
+            let left = temp[0].split('').reverse().join('').match(/(\d{1,3})/g).join(',').split('').reverse().join('');
+            if (temp[0][0] === '-')
+                left = '-' + left;
+            if (right)
+                left = left + '.' + right;
+            value = left;
+        }
+        return '' + value;
+    },
 };
 
 export default {
