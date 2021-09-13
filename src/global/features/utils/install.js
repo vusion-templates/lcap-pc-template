@@ -207,6 +207,24 @@ export const utils = {
         }
         return '' + value;
     },
+    /**
+     * 时间差
+     * @param {dateTime1} 时间
+     * @param {dateTime2} 时间
+     * @param {calcType} 计算类型：天数(day)、小时数(hour)、分钟数(minute)、秒数(second)
+    */
+    DateDiff(dateTime1, dateTime2, calcType) {
+        const dateTime1Temp = new Date(dateTime1).getTime();
+        const dateTime2Temp = new Date(dateTime2).getTime();
+        const dateDiff = dateTime2Temp - dateTime1Temp;
+        const map = {
+            d: 24 * 60 * 60 * 1000,
+            h: 60 * 60 * 1000,
+            m: 60 * 1000,
+            s: 1000,
+        };
+        return Math.floor(dateDiff / (map[calcType]));
+    },
 };
 
 export default {
