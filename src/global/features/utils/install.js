@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
 import { utils as cutils } from 'cloud-ui.vusion';
-import { addDays, subDays, addMonths, format, parse, formatRFC3339 } from 'date-fns';
+import { addDays, subDays, addMonths, format, parse, formatRFC3339, isValid } from 'date-fns';
 let enumsMap = {};
 
 function toValue(date, converter) {
@@ -192,11 +192,13 @@ export const utils = {
             return value;
         if (parseFloat(value) === 0)
             return '0';
+        if (isNaN(parseFloat(value)) || isNaN(parseInt(digits)))
+            return;
         if (digits !== undefined) {
-            value = Number(value).toFixed(digits);
+            value = Number(value).toFixed(parseInt(digits));
         }
         if (showGroup) {
-            const temp = value.split('.');
+            const temp = ('' + value).split('.');
             const right = temp[1];
             let left = temp[0].split('').reverse().join('').match(/(\d{1,3})/g).join(',').split('').reverse().join('');
             if (temp[0][0] === '-')
@@ -216,6 +218,8 @@ export const utils = {
     DateDiff(dateTime1, dateTime2, calcType) {
         if (!dateTime1 || !dateTime2)
             return;
+        if (!isValid(new Date(dateTime1)) || !isValid(new Date(dateTime2)))
+            return;
         const map = {
             d: {
                 diff: 24 * 60 * 60 * 1000,
@@ -223,7 +227,7 @@ export const utils = {
             },
             h: {
                 diff: 60 * 60 * 1000,
-                formatter: 'yyyy-MM-dd HH',
+                formatter: 'yyyy-MM-dd HH:mm',
             },
             m: {
                 diff: 60 * 1000,
@@ -237,8 +241,8 @@ export const utils = {
         if (!map[calcType])
             return;
         const config = map[calcType];
-        const dateTime1Temp = new Date(cutils.dateFormatter.format(dateTime1, config.formatter)).getTime();
-        const dateTime2Temp = new Date(cutils.dateFormatter.format(dateTime2, config.formatter)).getTime();
+        const dateTime1Temp = new Date(format(new Date(dateTime1), config.formatter)).getTime();
+        const dateTime2Temp = new Date(format(new Date(dateTime2), config.formatter)).getTime();
         const dateDiff = dateTime2Temp - dateTime1Temp;
         return Math.floor(dateDiff / (config.diff));
     },
