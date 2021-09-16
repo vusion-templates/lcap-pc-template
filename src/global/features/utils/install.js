@@ -216,16 +216,31 @@ export const utils = {
     DateDiff(dateTime1, dateTime2, calcType) {
         if (!dateTime1 || !dateTime2)
             return;
-        const dateTime1Temp = new Date(dateTime1).getTime();
-        const dateTime2Temp = new Date(dateTime2).getTime();
-        const dateDiff = dateTime2Temp - dateTime1Temp;
         const map = {
-            d: 24 * 60 * 60 * 1000,
-            h: 60 * 60 * 1000,
-            m: 60 * 1000,
-            s: 1000,
+            d: {
+                diff: 24 * 60 * 60 * 1000,
+                formatter: 'yyyy-MM-dd',
+            },
+            h: {
+                diff: 60 * 60 * 1000,
+                formatter: 'yyyy-MM-dd HH',
+            },
+            m: {
+                diff: 60 * 1000,
+                formatter: 'yyyy-MM-dd HH:mm',
+            },
+            s: {
+                diff: 1000,
+                formatter: 'yyyy-MM-dd HH:mm:ss',
+            },
         };
-        return Math.floor(dateDiff / (map[calcType]));
+        if (!map[calcType])
+            return;
+        const config = map[calcType];
+        const dateTime1Temp = new Date(cutils.dateFormatter.format(dateTime1, config.formatter)).getTime();
+        const dateTime2Temp = new Date(cutils.dateFormatter.format(dateTime2, config.formatter)).getTime();
+        const dateDiff = dateTime2Temp - dateTime1Temp;
+        return Math.floor(dateDiff / (config.diff));
     },
 };
 
