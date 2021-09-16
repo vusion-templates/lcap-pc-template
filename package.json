@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -134,7 +134,7 @@
     ]
   },
   "vusionDependencies": {
-    "lcap-login": "^0.3.5"
+    "lcap-login": "^0.3.6"
   },
   "ui": {
     "name": "cloud-ui.vusion",
