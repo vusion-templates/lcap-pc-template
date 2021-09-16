@@ -214,6 +214,8 @@ export const utils = {
      * @param {calcType} 计算类型：天数(day)、小时数(hour)、分钟数(minute)、秒数(second)
     */
     DateDiff(dateTime1, dateTime2, calcType) {
+        if (!dateTime1 || !dateTime2)
+            return;
         const dateTime1Temp = new Date(dateTime1).getTime();
         const dateTime2Temp = new Date(dateTime2).getTime();
         const dateDiff = dateTime2Temp - dateTime1Temp;
