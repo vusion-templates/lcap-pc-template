@@ -16,6 +16,8 @@ import { apolloProvider } from '@/global/features/apollo';
 import installApollo from '@/global/features/apollo/queryStrCollect';
 import originMetaData from '@/global/metaData';
 
+import '@/global/features/common/utils';
+
 window.appVue = Vue;
 export default {
     initRouter,
