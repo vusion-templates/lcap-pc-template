@@ -48,7 +48,6 @@ let baseConfig = {
         /lodash/,
         'resize-detector',
         /cloud-ui\.vusion/,
-        /vusion-micro-app/,
         /@cloud-ui/,
     ],
 };

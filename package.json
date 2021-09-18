@@ -110,17 +110,13 @@
     "vue-apollo": "^3.0.4",
     "vue-i18n": "^8.14.0",
     "vue-router": "^3.1.2",
-    "vue-template-compiler": "^2.6.12",
-    "vusion-micro": "^0.2.4",
-    "vusion-micro-app": "^0.4.2"
+    "vue-template-compiler": "^2.6.12"
   },
   "forceUpdate": {
     "@vusion/utils": true,
     "request-pre": true,
     "cloud-admin-template-sdk": true,
-    "vusion-micro-app": true,
-    "vue-cli-plugin-vusion": true,
-    "vusion-micro": true
+    "vue-cli-plugin-vusion": true
   },
   "husky": {
     "hooks": {
