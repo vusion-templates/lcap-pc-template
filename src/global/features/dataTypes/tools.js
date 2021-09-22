@@ -11,23 +11,20 @@ function tryJSONParse(str) {
 const isNil = (value) => value === undefined || value === null || value === '';
 
 // schema 和 dataTypes 解析出最终结构是在 template 内部， 所以从 low-code-fe 迁移过来的转化方法
-export const genInitData = (schema, dataTypesMap, useDefaultValue = false, usedSchemaRefs = {}) => {
+export const genInitData = (schema, dataTypesMap, useDefaultValue = false, usedSchemaRefs = {}, level = 0) => {
     const isEnum = (property) => property.$ref && dataTypesMap[property.$ref] && dataTypesMap[property.$ref].level === 'enum';
 
     if (schema.$ref && !schema.typeKey) { // 兼容有些已经生成缓存的页面
         schema.typeKey = schema.$ref;
     }
     const typeKey = schema.typeKey;
-    // if (typeKey && usedSchemaRefs[typeKey])
-    //     return { type: 'Identifier', name: 'undefined' };
-    // 理论上可以继续往下选，但这里先断掉！
+    if (typeKey && usedSchemaRefs[typeKey])
+        return { type: 'Identifier', name: 'undefined' };
 
     const next = dataTypesMap[typeKey];
     usedSchemaRefs = Object.assign({}, usedSchemaRefs);
     if (typeKey && !(typeKey.startsWith('#/basicTypes/') || typeKey.startsWith('#/genericTypes/'))) {
-        // usedSchemaRefs[typeKey] = true;
-        // 0930：复合类型不钻生成字段
-        return { type: 'Identifier', name: 'undefined' };
+        usedSchemaRefs[typeKey] = true;
     }
 
     // 泛型优先
@@ -53,12 +50,15 @@ export const genInitData = (schema, dataTypesMap, useDefaultValue = false, usedS
                         type: 'Identifier',
                         name: property.name,
                     },
-                    value: genInitData(propertySchema, dataTypesMap, true, usedSchemaRefs),
+                    value: genInitData(propertySchema, dataTypesMap, true, usedSchemaRefs, level + 1),
                 });
             });
         }
         return result;
     } else if (schema.type === 'object') { // Entity、structure的type是object
+        if (level >= 1)
+            return { type: 'Identifier', name: 'undefined' };
+
         const result = { type: 'ObjectExpression', properties: [] };
         schema.propertyList.forEach((property) => {
             result.properties.push({
@@ -67,7 +67,7 @@ export const genInitData = (schema, dataTypesMap, useDefaultValue = false, usedS
                     type: 'Identifier',
                     name: property.name,
                 },
-                value: genInitData(property, dataTypesMap, true, usedSchemaRefs),
+                value: genInitData(property, dataTypesMap, true, usedSchemaRefs, level + 1),
             });
         });
         return result;
@@ -84,8 +84,7 @@ export const genInitData = (schema, dataTypesMap, useDefaultValue = false, usedS
             const parsedValue = tryJSONParse(schema.defaultValue);
             // 输入框为空，或解析的情况
             if (isNil(schema.defaultValue) || parsedValue === undefined) {
-                if (typeKey === '#/basicTypes/String')
-                    return { type: 'Identifier', name: 'undefined' };
+                return { type: 'Identifier', name: 'undefined' };
             } else {
                 if (typeKey === '#/basicTypes/Boolean')
                     return { type: 'BooleanLiteral', value: parsedValue };
