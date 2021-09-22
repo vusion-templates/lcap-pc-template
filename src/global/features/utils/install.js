@@ -122,14 +122,12 @@ export const utils = {
         return obj;
     },
     /**
-     * 这是个临时的方法。。。
-     * @param {*} obj1
-     * @param {*} obj2
+     * 将某个对象所有字段置为空，一般用于 filter
      */
     ClearObject(obj) {
         for (const key in obj) {
-            if (obj.hasOwnProperty(key) && obj[key] === undefined || obj[key] === null)
-                delete obj[key];
+            if (obj.hasOwnProperty(key))
+                obj[key] = undefined;
         }
         return obj;
     },
