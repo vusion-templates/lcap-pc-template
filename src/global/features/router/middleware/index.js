@@ -25,7 +25,7 @@ const runMiddleWare = async function (middlewareList, context) {
                 } else if (called) {
                     throw new Error(`${middleware} finished without return, next is called`);
                 } else {
-                    console.warn(`${middleware} finished without return, next is not called`);
+                    // console.warn(`${middleware} finished without return, next is not called`);
                 }
             } else {
                 console.error(`${middleware} not exist`);
@@ -37,6 +37,7 @@ const runMiddleWare = async function (middlewareList, context) {
             next();
         }
     } catch (error) {
+        console.error(error?.message);
         if (!called) {
             // eslint-disable-next-line require-atomic-updates
             called = true;
