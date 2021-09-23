@@ -84,8 +84,7 @@
     "vue-cli-plugin-vusion": "0.13.2",
     "vusion-install": "^0.12.8",
     "webpack": "^4.40.2",
-    "webpack-cli": "^3.3.9",
-    "webpack-micro": "^0.6.0"
+    "webpack-cli": "^3.3.9"
   },
   "dependencies": {
     "@vusion/utils": "^0.4.9",
