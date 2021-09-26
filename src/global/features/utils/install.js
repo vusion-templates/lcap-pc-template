@@ -78,7 +78,7 @@ export const utils = {
         return arr[index];
     },
     Set(arr, index, item) {
-        return this.Vue.set(arr, index, item);
+        return utils.Vue.set(arr, index, item);
     },
     Add(arr, item) {
         return arr.push(item);
@@ -255,7 +255,7 @@ export const utils = {
 
 export default {
     install(Vue, options) {
-        this.Vue = Vue;
+        utils.Vue = Vue;
         Vue.prototype.$utils = utils;
         enumsMap = options.enumsMap;
     },
