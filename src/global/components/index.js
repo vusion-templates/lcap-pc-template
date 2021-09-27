@@ -1,4 +1,3 @@
-export { default as IIcon } from './cloud-ui/i-icon.vue';
 export { default as USearch } from './common/u-search.vue';
 export { default as UHeadCard } from './common/u-head-card.vue';
 export { default as SCrumb } from './common/s-crumb.vue';
