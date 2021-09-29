@@ -48,7 +48,7 @@ export const utils = {
         if (!enumeration)
             return [];
         else
-            return [{ text: '全部', value: undefined }].concat(Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key })));
+            return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
     },
     Split(str, seperator) {
         return str.split(seperator);
