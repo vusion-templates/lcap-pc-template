@@ -83,7 +83,7 @@ export const genInitData = (schema, dataTypesMap, useDefaultValue = false, usedS
         } else if (typeKey && typeKey.startsWith('#/basicTypes/')) {
             const parsedValue = tryJSONParse(schema.defaultValue);
             // 输入框为空，或解析的情况
-            if (isNil(schema.defaultValue) || parsedValue === undefined) {
+            if (isNil(schema.defaultValue)) {
                 return { type: 'Identifier', name: 'undefined' };
             } else {
                 if (typeKey === '#/basicTypes/Boolean')
