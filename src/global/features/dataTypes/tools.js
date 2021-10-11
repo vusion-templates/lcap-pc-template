@@ -95,7 +95,7 @@ export const genInitData = (schema, dataTypesMap, useDefaultValue = false, usedS
                 else if (typeKey === '#/basicTypes/Decimal')
                     return { type: 'NumericLiteral', value: parsedValue };
                 else if (typeKey === '#/basicTypes/String')
-                    return { type: 'StringLiteral', value: parsedValue };
+                    return { type: 'StringLiteral', value: schema.defaultValue };
                 else
                     return { type: 'Identifier', name: 'undefined' };
             }
