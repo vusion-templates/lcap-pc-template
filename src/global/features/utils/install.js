@@ -181,8 +181,9 @@ export const utils = {
         if (type === 'number' && formatVar === 'double') // 小数
             return parseFloat(+value);
 
-        if (type === 'integer') // 整数： format 'int' ; 长整数: format: 'long'
-            return Math.round(+value);
+        if (type === 'integer')
+            // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
+            return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
 
         if (type === 'boolean') // 布尔值
             return !!value;
