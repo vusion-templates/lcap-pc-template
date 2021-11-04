@@ -1,4 +1,3 @@
-import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
 import { utils as cutils } from 'cloud-ui.vusion';
 import { addDays, subDays, addMonths, format, parse, formatRFC3339, isValid } from 'date-fns';
@@ -19,7 +18,6 @@ function toValue(date, converter) {
 
 export const utils = {
     Vue: undefined,
-    gql,
     Enum(enumName, value) {
         if (arguments.length === 0)
             return '';
