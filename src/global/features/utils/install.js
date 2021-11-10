@@ -1,4 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
+import isObject from 'lodash/isObject';
 import { utils as cutils } from 'cloud-ui.vusion';
 import { addDays, subDays, addMonths, format, parse, formatRFC3339, isValid } from 'date-fns';
 let enumsMap = {};
@@ -78,6 +79,9 @@ export const utils = {
     Set(arr, index, item) {
         return utils.Vue.set(arr, index, item);
     },
+    Contains(arr, item) {
+        return arr.includes(item);
+    },
     Add(arr, item) {
         return arr.push(item);
     },
@@ -127,7 +131,23 @@ export const utils = {
         return obj;
     },
     /**
-     * 将某个对象所有字段置为空，一般用于 filter
+     * 将内容置空，array 置为 []; object 沿用 ClearObject 逻辑; 其他置为 undefined
+     */
+    Clear(obj) {
+        if (Array.isArray(obj)) {
+            return [];
+        }
+        if (isObject(obj)) {
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key))
+                    obj[key] = undefined;
+            }
+            return obj;
+        }
+        return undefined;
+    },
+    /**
+     * 保留 ClearObject，兼容老版本，将某个对象所有字段置为空，一般用于 filter
      */
     ClearObject(obj) {
         for (const key in obj) {
