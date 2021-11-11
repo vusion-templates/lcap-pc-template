@@ -135,16 +135,16 @@ export const utils = {
      */
     Clear(obj) {
         if (Array.isArray(obj)) {
-            return [];
-        }
-        if (isObject(obj)) {
+            obj.length = 0;
+        } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
                     obj[key] = undefined;
             }
-            return obj;
+        } else {
+            obj = undefined;
         }
-        return undefined;
+        return obj;
     },
     /**
      * 保留 ClearObject，兼容老版本，将某个对象所有字段置为空，一般用于 filter
