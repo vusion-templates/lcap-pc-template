@@ -21,7 +21,6 @@ const webpackStyle = require('./webpack/style');
 const webpackDesigner = require('./webpack/designer');
 const webpackRoutes = require('./webpack/routes');
 const webpackHtml = require('./webpack/html');
-const webpackGQL = require('./webpack/gqloader');
 const webpackOptimization = require('./webpack/optimization');
 const isDesigner = process.env.BUILD_LIB_ENV === 'designer';
 
@@ -56,7 +55,6 @@ const vueConfig = {
         webpackCloudUI.chain(config);
         webpackStyle.chain(config);
         webpackRoutes.chain(config);
-        webpackGQL.chain(config);
         config.output.jsonpFunction('webpackJsonp' + pkg.name);
 
         config.module.rule('js').uses.delete('cache-loader');

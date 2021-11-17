@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -87,7 +87,7 @@
     "webpack-cli": "^3.3.9"
   },
   "dependencies": {
-    "@vusion/utils": "^0.4.9",
+    "@vusion/utils": "^0.4.10",
     "apollo-cache-inmemory": "^1.6.6",
     "apollo-client": "^2.6.10",
     "apollo-link-http": "^1.5.17",
@@ -98,8 +98,6 @@
     "cloud-ui.vusion": "^0.12.1",
     "date-fns": "^2.6.0",
     "event-hooks-webpack-plugin": "^2.1.6",
-    "graphql-tools": "^6.2.1",
-    "graphql.js": "^0.6.6",
     "i-material-design.vue": "^5.1.0",
     "lodash": "^4.17.15",
     "qs": "^6.8.0",
