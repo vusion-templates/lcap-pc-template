@@ -1,5 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isObject from 'lodash/isObject';
+import findIndex from 'lodash/findIndex';
 import { utils as cutils } from 'cloud-ui.vusion';
 import { addDays, subDays, addMonths, format, parse, formatRFC3339, isValid } from 'date-fns';
 let enumsMap = {};
@@ -80,7 +81,7 @@ export const utils = {
         return utils.Vue.set(arr, index, item);
     },
     Contains(arr, item) {
-        return arr.includes(item);
+        return findIndex(arr, item) !== -1;
     },
     Add(arr, item) {
         return arr.push(item);
