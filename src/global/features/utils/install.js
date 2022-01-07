@@ -1,6 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isObject from 'lodash/isObject';
-import findIndex from 'lodash/findIndex';
 import { utils as cutils } from 'cloud-ui.vusion';
 import { addDays, subDays, addMonths, format, parse, formatRFC3339, isValid } from 'date-fns';
 let enumsMap = {};
@@ -16,6 +15,24 @@ function toValue(date, converter) {
         return date.getTime();
     else
         return date;
+}
+
+function deepEqual(obj1, obj2) {
+    if (!isObject(obj1) || !isObject(obj2))
+        return obj1 === obj2;
+    if (Object.keys(obj1).length !== Object.keys(obj2).length)
+        return false;
+    for (const key in obj1) {
+        if (obj1.hasOwnProperty(key)) {
+            const val1 = obj1[key];
+            const val2 = obj2[key];
+            const areObjects = isObject(val1) && isObject(val2);
+            if (areObjects && !deepEqual(val1, val2)
+                || !areObjects && val1 !== val2)
+                return false;
+        }
+    }
+    return true;
 }
 
 export const utils = {
@@ -81,7 +98,15 @@ export const utils = {
         return utils.Vue.set(arr, index, item);
     },
     Contains(arr, item) {
-        return findIndex(arr, item) !== -1;
+        if (isObject(item)) {
+            const sameItem = arr.find((ele) => {
+                if (!isObject(ele))
+                    return false;
+                return deepEqual(ele, item);
+            });
+            return typeof sameItem !== 'undefined';
+        }
+        return arr.includes(item);
     },
     Add(arr, item) {
         return arr.push(item);
