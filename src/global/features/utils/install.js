@@ -1,7 +1,8 @@
-import gql from 'graphql-tag';
 import cloneDeep from 'lodash/cloneDeep';
+import isObject from 'lodash/isObject';
+import isEqual from 'lodash/isEqual';
 import { utils as cutils } from 'cloud-ui.vusion';
-import { addDays, subDays, addMonths, format, parse, formatRFC3339, isValid } from 'date-fns';
+import { addDays, subDays, addMonths, format, formatRFC3339, isValid } from 'date-fns';
 let enumsMap = {};
 
 function toValue(date, converter) {
@@ -19,7 +20,6 @@ function toValue(date, converter) {
 
 export const utils = {
     Vue: undefined,
-    gql,
     Enum(enumName, value) {
         if (arguments.length === 0)
             return '';
@@ -42,6 +42,13 @@ export const utils = {
             return enumsMap[enumName](value);
         else
             return '';
+    },
+    EnumList(enumName, value) {
+        const enumeration = enumsMap[enumName];
+        if (!enumeration)
+            return [];
+        else
+            return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
     },
     Split(str, seperator) {
         return str.split(seperator);
@@ -71,7 +78,10 @@ export const utils = {
         return arr[index];
     },
     Set(arr, index, item) {
-        return this.Vue.set(arr, index, item);
+        return utils.Vue.set(arr, index, item);
+    },
+    Contains(arr, item) {
+        return typeof arr.find((ele) => isEqual(ele, item)) !== 'undefined';
     },
     Add(arr, item) {
         return arr.push(item);
@@ -122,14 +132,28 @@ export const utils = {
         return obj;
     },
     /**
-     * 这是个临时的方法。。。
-     * @param {*} obj1
-     * @param {*} obj2
+     * 将内容置空，array 置为 []; object 沿用 ClearObject 逻辑; 其他置为 undefined
+     */
+    Clear(obj) {
+        if (Array.isArray(obj)) {
+            obj.length = 0;
+        } else if (isObject(obj)) {
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key))
+                    obj[key] = undefined;
+            }
+        } else {
+            obj = undefined;
+        }
+        return obj;
+    },
+    /**
+     * 保留 ClearObject，兼容老版本，将某个对象所有字段置为空，一般用于 filter
      */
     ClearObject(obj) {
         for (const key in obj) {
-            if (obj.hasOwnProperty(key) && obj[key] === undefined || obj[key] === null)
-                delete obj[key];
+            if (obj.hasOwnProperty(key))
+                obj[key] = undefined;
         }
         return obj;
     },
@@ -176,8 +200,9 @@ export const utils = {
         if (type === 'number' && formatVar === 'double') // 小数
             return parseFloat(+value);
 
-        if (type === 'integer') // 整数： format 'int' ; 长整数: format: 'long'
-            return Math.round(+value);
+        if (type === 'integer')
+            // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
+            return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
 
         if (type === 'boolean') // 布尔值
             return !!value;
@@ -250,7 +275,7 @@ export const utils = {
 
 export default {
     install(Vue, options) {
-        this.Vue = Vue;
+        utils.Vue = Vue;
         Vue.prototype.$utils = utils;
         enumsMap = options.enumsMap;
     },

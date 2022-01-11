@@ -2,6 +2,12 @@
 
 import Vue from 'vue';
 export default function resolveAsyncComponents(matched) {
+    if (matched && matched[0] && matched[0].path === '*') {
+        return (to, from, next) => {
+            document.body.innerHTML = `请确认默认跳转页面设置: ${to?.path}`;
+            next(false);
+        };
+    }
     return (to, from, next) => {
         let hasAsync = false;
         let pending = 0;
