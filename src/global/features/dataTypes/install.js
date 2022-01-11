@@ -1,5 +1,5 @@
 import generate from '@babel/generator';
-import { genInitData } from './tools';
+import { genInitData, wgs84togcj02, gcj02towgs84 } from './tools';
 import auth from '../router/auth';
 
 export default {
@@ -21,26 +21,27 @@ export default {
                         const { latitude, longitude } = position.coords;
                         // eslint-disable-next-line no-console
                         console.log(latitude, longitude);
-                        res(`${latitude},${longitude}`);
+                        const [mglng, mglat] = wgs84togcj02(longitude, latitude);
+                        res(`${mglng},${mglat}`);
                     }
                     function showError(error) {
                         // eslint-disable-next-line no-console
                         console.log(error, error.code);
                         switch (error.code) {
                             case error.PERMISSION_DENIED:
-                                this.$toast('用户禁止获取地理定位');
+                                this.$toast.show('用户禁止获取地理定位');
                                 rej({ code: error.code, msg: '用户禁止获取地理定位' });
                                 break;
                             case error.POSITION_UNAVAILABLE:
-                                this.$toast('地理定位信息无法获取');
+                                this.$toast.show('地理定位信息无法获取');
                                 rej({ code: error.code, msg: '地理定位信息无法获取' });
                                 break;
                             case error.TIMEOUT:
-                                this.$toast('地理定位信息获取超时');
+                                this.$toast.show('地理定位信息获取超时');
                                 rej({ code: error.code, msg: '地理定位信息获取超时' });
                                 break;
                             case error.UNKNOWN_ERROR:
-                                this.$toast('未知错误');
+                                this.$toast.show('未知错误');
                                 rej({ code: error.code, msg: '未知错误' });
                                 break;
                         }
@@ -50,7 +51,7 @@ export default {
                     } else {
                         // eslint-disable-next-line no-console
                         console.log('Geolocation is not supported by this browser.');
-                        this.$toast('当前系统不支持地理定位');
+                        this.$toast.show('当前系统不支持地理定位');
                         rej({ code: 666, msg: '当前系统不支持地理定位' });
                     }
                 });
@@ -61,10 +62,13 @@ export default {
                 function getRad(d) {
                     return d * PI / 180.0;
                 }
-                const lat1 = s1.split(',')[0];
-                const lng1 = s1.split(',')[1];
-                const lat2 = s2.split(',')[0];
-                const lng2 = s2.split(',')[1];
+                const lat1t = s1.split(',')[1];
+                const lng1t = s1.split(',')[0];
+                const lat2t = s2.split(',')[1];
+                const lng2t = s2.split(',')[0];
+
+                const [lng1, lat1] = gcj02towgs84(lng1t, lat1t);
+                const [lng2, lat2] = gcj02towgs84(lng2t, lat2t);
 
                 const f = getRad((lat1 + lat2) / 2);
                 const g = getRad((lat1 - lat2) / 2);
