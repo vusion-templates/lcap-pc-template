@@ -56,7 +56,7 @@ export default {
                     }
                 });
             },
-            getFlatternDistance(s1, s2) {
+            getDistance(s1, s2) {
                 const EARTH_RADIUS = 6378137.0;
                 const PI = Math.PI;
                 function getRad(d) {
