@@ -66,7 +66,7 @@ const auth = {
     },
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
-            if (window.appInfo.hasUserCenter) {
+            if (window.appInfo.hasAuth) {
                 userResourcesPromise = lowauthService.GetUserResources({
                     headers: getBaseHeaders(),
                     query: {
