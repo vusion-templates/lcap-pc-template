@@ -9,7 +9,7 @@
 	"GetUserResources": {
 			"url": {
 					"method": "get",
-					"path": "/system/resource/list",
+					"path": "/rest/getUserResources",
 					"query": {}
 			}
 	}

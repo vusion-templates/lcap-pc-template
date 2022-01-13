@@ -70,7 +70,7 @@ const auth = {
                 userResourcesPromise = lowauthService.GetUserResources({
                     headers: getBaseHeaders(),
                     query: {
-                        DomainName,
+                        userId: Vue.prototype.$global.userInfo.UserId,
                     },
                 }).then((result) => {
                     const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
