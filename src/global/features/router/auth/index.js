@@ -73,11 +73,11 @@ const auth = {
                         userId: Vue.prototype.$global.userInfo.UserId,
                     },
                 }).then((result) => {
-                    const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
+                    const resources = result.filter((resource) => resource.resourceType === 'ui');
 
                     // 初始化权限项
                     this._map = new Map();
-                    resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
+                    resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
                 }).catch((e) => {
                     // 获取权限异常
                     userResourcesPromise = undefined;
