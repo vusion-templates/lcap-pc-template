@@ -57,52 +57,22 @@ export default {
                 });
             },
             getDistance(s1, s2) {
-                const EARTH_RADIUS = 6378137.0;
-                const PI = Math.PI;
-                function getRad(d) {
-                    return d * PI / 180.0;
+                function deg2rad(deg) {
+                    return deg * (Math.PI / 180);
                 }
                 const lat1t = s1.split(',')[1];
                 const lng1t = s1.split(',')[0];
                 const lat2t = s2.split(',')[1];
                 const lng2t = s2.split(',')[0];
 
-                const [lng1, lat1] = gcj02towgs84(lng1t, lat1t);
-                const [lng2, lat2] = gcj02towgs84(lng2t, lat2t);
-
-                const f = getRad((lat1 + lat2) / 2);
-                const g = getRad((lat1 - lat2) / 2);
-                const l = getRad((lng1 - lng2) / 2);
-
-                let sg = Math.sin(g);
-                let sl = Math.sin(l);
-                let sf = Math.sin(f);
-
-                let s; let c; let w; let r; let d; let h1; let h2;
-                const a = EARTH_RADIUS;
-                const fl = 1 / 298.257;
-
-                sg = sg * sg;
-                sl = sl * sl;
-                sf = sf * sf;
-
-                // eslint-disable-next-line prefer-const
-                s = sg * (1 - sl) + (1 - sf) * sl;
-                // eslint-disable-next-line prefer-const
-                c = (1 - sg) * (1 - sl) + sf * sl;
-
-                // eslint-disable-next-line prefer-const
-                w = Math.atan(Math.sqrt(s / c));
-                // eslint-disable-next-line prefer-const
-                r = Math.sqrt(s * c) / w;
-                // eslint-disable-next-line prefer-const
-                d = 2 * w * a;
-                // eslint-disable-next-line prefer-const
-                h1 = (3 * r - 1) / 2 / c;
-                // eslint-disable-next-line prefer-const
-                h2 = (3 * r + 1) / 2 / s;
-
-                return d * (1 + fl * (h1 * sf * (1 - sg) - h2 * (1 - sf) * sg));
+                const R = 6371; // Radius of the earth in km
+                const dLat = deg2rad(lat2t - lat1t); // deg2rad below
+                const dLon = deg2rad(lng2t - lng1t);
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                    + Math.cos(deg2rad(lat1t)) * Math.cos(deg2rad(lat2t)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const d = R * c; // Distance in km
+                return d * 1000;
             },
         };
 
