@@ -8,40 +8,46 @@ const getBaseHeaders = () => ({
     Env: window.appInfo && window.appInfo.env,
 });
 
+let userInfoPromise = null;
 let userResourcesPromise = null;
 
 export default {
     _map: undefined,
     getUserInfo() {
-        if (window.appInfo.hasUserCenter) {
-            return lowauthService.GetUser({
-                headers: getBaseHeaders(),
-                config: {
-                    noErrorTip: true,
-                },
-            }).then((result) => {
-                const userInfo = result.Data;
+        if (!userInfoPromise) {
+            if (window.appInfo.hasUserCenter) {
+                userInfoPromise = lowauthService.GetUser({
+                    headers: getBaseHeaders(),
+                    config: {
+                        noErrorTip: true,
+                    },
+                });
+            } else {
+                userInfoPromise = authService.GetUser({
+                    headers: getBaseHeaders(),
+                    config: {
+                        noErrorTip: true,
+                    },
+                });
+            }
+            userInfoPromise = userInfoPromise.then((result) => {
+                let userInfo = result.Data;
                 const $global = Vue.prototype.$global = Vue.prototype.$global || {};
-                // 格式转化
-                $global.userInfo = {
-                    UserName: userInfo?.userName,
-                    UserId: userInfo?.userId,
-                };
-                return userInfo;
-            });
-        } else {
-            return authService.GetUser({
-                headers: getBaseHeaders(),
-                config: {
-                    noErrorTip: true,
-                },
-            }).then((result) => {
-                const userInfo = result.Data;
-                const $global = Vue.prototype.$global = Vue.prototype.$global || {};
+                if (window.appInfo.hasUserCenter) {
+                    // 格式转化
+                    userInfo = {
+                        UserName: userInfo?.userName,
+                        UserId: userInfo?.userId,
+                    };
+                }
                 $global.userInfo = userInfo;
                 return userInfo;
+            }).catch((e) => {
+                userInfoPromise = null;
+                throw e;
             });
         }
+        return userInfoPromise;
     },
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
@@ -51,15 +57,6 @@ export default {
                     query: {
                         userId: Vue.prototype.$global.userInfo.UserId,
                     },
-                }).then((result) => {
-                    const resources = result.filter((resource) => resource.resourceType === 'ui');
-                    // 初始化权限项
-                    this._map = new Map();
-                    resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
-                    return resources;
-                }).catch((e) => {
-                    console.error('获取权限异常', e);
-                    userResourcesPromise = null;
                 });
             } else {
                 userResourcesPromise = authService.GetUserResources({
@@ -67,17 +64,18 @@ export default {
                     query: {
                         DomainName,
                     },
-                }).then((result) => {
-                    const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
-                    // 初始化权限项
-                    this._map = new Map();
-                    resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
-                    return resources;
-                }).catch((e) => {
-                    console.error('获取权限异常', e);
-                    userResourcesPromise = null;
                 });
             }
+            userResourcesPromise = userResourcesPromise.then((result) => {
+                const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
+                // 初始化权限项
+                this._map = new Map();
+                resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
+                return resources;
+            }).catch((e) => {
+                console.error('获取权限异常', e);
+                userResourcesPromise = null;
+            });
         }
         return userResourcesPromise;
     },
