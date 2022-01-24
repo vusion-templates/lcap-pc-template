@@ -1,9 +1,9 @@
 import { loginAuth } from './auth';
-import { runAhead } from '@/global/features/router/auth';
+import auth from '@/global/features/router/auth';
 import { getComponentOption } from '../util';
 export default function (appConfig) {
     if (appConfig.auth) {
-        runAhead(appConfig.domainName);
+        auth.init(appConfig.domainName);
     }
     return function ({ to, from, next, appConfig }) {
         // designer 和 环境直接放行认证和鉴权
@@ -33,7 +33,7 @@ export default function (appConfig) {
                             const done = () => {
                                 _next();
                             };
-                            return runAhead(appConfig.domainName).catch(done, done);
+                            return auth.init(appConfig.domainName).catch(done, done);
                         } else if (metaAuth === 'loginAuth') {
                             out = loginAuth(to, from, _next, appConfig, item);
                         } else {

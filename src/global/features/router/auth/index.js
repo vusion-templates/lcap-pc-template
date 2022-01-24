@@ -3,104 +3,76 @@ import authService from '@/global/services/auth';
 import lowauthService from '@/global/services/lowauth';
 import cookie from '@/global/features/utils/cookie';
 
-let userInfoPromise = null;
-let userResourcesPromise = null;
-const maxTimes = 3;
 const getBaseHeaders = () => ({
     Authorization: cookie.get('authorization'),
     Env: window.appInfo && window.appInfo.env,
 });
 
-const request = function (times) {
-    if (window.appInfo.hasUserCenter) {
-        return lowauthService.GetUser({
-            headers: getBaseHeaders(),
-            config: {
-                noErrorTip: true,
-            },
-        }).then((result) => result).catch((err) => {
-            times--;
-            if (times > 0) {
-                return request(times);
-            } else {
-                throw err;
-            }
-        });
-    } else {
-        return authService.GetUser({
-            headers: getBaseHeaders(),
-            config: {
-                noErrorTip: true,
-            },
-        }).then((result) => result.Data).catch((err) => {
-            times--;
-            if (times > 0) {
-                return request(times);
-            } else {
-                throw err;
-            }
-        });
-    }
-};
-const auth = {
+export default {
     _map: undefined,
-    getUserInfo(times = 1) {
-        if (!userInfoPromise) {
-            userInfoPromise = request(times).then((userInfo) => {
+    getUserInfo() {
+        if (window.appInfo.hasUserCenter) {
+            return lowauthService.GetUser({
+                headers: getBaseHeaders(),
+                config: {
+                    noErrorTip: true,
+                },
+            }).then((result) => {
+                const userInfo = result.Data;
                 const $global = Vue.prototype.$global = Vue.prototype.$global || {};
-                if (window.appInfo.hasUserCenter) {
-                    // 格式转化
-                    userInfo = {
-                        UserName: userInfo?.userName,
-                        UserId: userInfo?.userId,
-                    };
-                }
+                // 格式转化
+                $global.userInfo = {
+                    UserName: userInfo?.userName,
+                    UserId: userInfo?.userId,
+                };
+                return userInfo;
+            });
+        } else {
+            return authService.GetUser({
+                headers: getBaseHeaders(),
+                config: {
+                    noErrorTip: true,
+                },
+            }).then((result) => {
+                const userInfo = result.Data;
+                const $global = Vue.prototype.$global = Vue.prototype.$global || {};
                 $global.userInfo = userInfo;
                 return userInfo;
-            }).catch((e) => {
-                userInfoPromise = undefined;
-                throw e;
             });
         }
-        return userInfoPromise;
     },
     getUserResources(DomainName) {
-        if (!userResourcesPromise) {
-            if (window.appInfo.hasAuth) {
-                userResourcesPromise = lowauthService.GetUserResources({
-                    headers: getBaseHeaders(),
-                    query: {
-                        userId: Vue.prototype.$global.userInfo.UserId,
-                    },
-                }).then((result) => {
-                    const resources = result.filter((resource) => resource.resourceType === 'ui');
-
-                    // 初始化权限项
-                    this._map = new Map();
-                    resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
-                }).catch((e) => {
-                    // 获取权限异常
-                    userResourcesPromise = undefined;
-                });
-            } else {
-                userResourcesPromise = authService.GetUserResources({
-                    headers: getBaseHeaders(),
-                    query: {
-                        DomainName,
-                    },
-                }).then((result) => {
-                    const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
-
-                    // 初始化权限项
-                    this._map = new Map();
-                    resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
-                }).catch((e) => {
-                    // 获取权限异常
-                    userResourcesPromise = undefined;
-                });
-            }
+        if (window.appInfo.hasAuth) {
+            return lowauthService.GetUserResources({
+                headers: getBaseHeaders(),
+                query: {
+                    userId: Vue.prototype.$global.userInfo.UserId,
+                },
+            }).then((result) => {
+                const resources = result.filter((resource) => resource.resourceType === 'ui');
+                // 初始化权限项
+                this._map = new Map();
+                resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
+                return resources;
+            }).catch((e) => {
+                console.error('获取权限异常', e);
+            });
+        } else {
+            return authService.GetUserResources({
+                headers: getBaseHeaders(),
+                query: {
+                    DomainName,
+                },
+            }).then((result) => {
+                const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
+                // 初始化权限项
+                this._map = new Map();
+                resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
+                return resources;
+            }).catch((e) => {
+                console.error('获取权限异常', e);
+            });
         }
-        return userResourcesPromise;
     },
     logout() {
         if (window.appInfo.hasUserCenter) {
@@ -125,8 +97,8 @@ const auth = {
     /**
      * 初始化权限服务
      */
-    init(domainName, times) {
-        return this.getUserInfo(times || maxTimes).then(() => this.getUserResources(domainName));
+    init(domainName) {
+        return this.getUserInfo().then(() => this.getUserResources(domainName));
     },
     /**
      * 是否有权限
@@ -135,9 +107,4 @@ const auth = {
     has(authPath) {
         return this._map ? this._map.has(authPath) : true;
     },
-};
-export default auth;
-
-export const runAhead = function (domainName, times) {
-    auth.init(domainName, times);
 };
