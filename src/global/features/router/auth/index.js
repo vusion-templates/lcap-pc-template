@@ -57,6 +57,15 @@ export default {
                     query: {
                         userId: Vue.prototype.$global.userInfo.UserId,
                     },
+                }).then((result) => {
+                    const resources = result.filter((resource) => resource.resourceType === 'ui');
+                    // 初始化权限项
+                    this._map = new Map();
+                    resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
+                    return resources;
+                }).catch((e) => {
+                    console.error('获取权限异常', e);
+                    userResourcesPromise = null;
                 });
             } else {
                 userResourcesPromise = authService.GetUserResources({
@@ -64,18 +73,17 @@ export default {
                     query: {
                         DomainName,
                     },
+                }).then((result) => {
+                    const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
+                    // 初始化权限项
+                    this._map = new Map();
+                    resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
+                    return resources;
+                }).catch((e) => {
+                    console.error('获取权限异常', e);
+                    userResourcesPromise = null;
                 });
             }
-            userResourcesPromise = userResourcesPromise.then((result) => {
-                const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
-                // 初始化权限项
-                this._map = new Map();
-                resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
-                return resources;
-            }).catch((e) => {
-                console.error('获取权限异常', e);
-                userResourcesPromise = null;
-            });
         }
         return userResourcesPromise;
     },
