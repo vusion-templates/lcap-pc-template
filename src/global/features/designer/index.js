@@ -11,8 +11,6 @@ import installDataTypes from '@/global/features/dataTypes/install';
 import installUtils from '@/global/features/utils/install';
 
 import { initMiddleware } from '@/global/middleware';
-import { apolloProvider } from '@/global/features/apollo';
-import installApollo from '@/global/features/apollo/queryStrCollect';
 import originMetaData from '@/global/metaData';
 
 import '@/global/features/common/utils';
@@ -28,11 +26,9 @@ export default {
         Vue.use(installServices, metaData);
         Vue.use(installDataTypes, metaData);
         Vue.use(installUtils, metaData);
-        Vue.use(installApollo, metaData);
 
         const app = new Vue({
             name: 'app',
-            apolloProvider,
             router: genRouter(),
             ...App,
             // i18n: initI18n(),

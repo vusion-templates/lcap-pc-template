@@ -1,5 +1,5 @@
 import generate from '@babel/generator';
-import { genInitData, wgs84togcj02, gcj02towgs84 } from './tools';
+import { genInitData, wgs84togcj02 } from './tools';
 import auth from '../router/auth';
 
 export default {
