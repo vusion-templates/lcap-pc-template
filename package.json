@@ -89,6 +89,7 @@
   "dependencies": {
     "@vusion/utils": "^0.4.10",
     "axios": "^0.19.0",
+    "babel-generator": "^6.26.1",
     "babel-polyfill": "^6.26.0",
     "cloud-ui.vusion": "^0.12.1",
     "date-fns": "^2.6.0",
@@ -119,9 +120,6 @@
       "npm run lint -- --fix",
       "git add"
     ]
-  },
-  "vusionDependencies": {
-    "lcap-login": "^0.3.6"
   },
   "ui": {
     "name": "cloud-ui.vusion",
