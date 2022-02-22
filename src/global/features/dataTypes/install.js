@@ -1,5 +1,5 @@
 import generate from '@babel/generator';
-import { genInitData, wgs84togcj02, gcj02towgs84 } from './tools';
+import { genInitData } from './tools';
 import auth from '../router/auth';
 
 export default {
@@ -21,7 +21,7 @@ export default {
                         const { latitude, longitude } = position.coords;
                         // eslint-disable-next-line no-console
                         console.log(latitude, longitude);
-                        const [mglng, mglat] = wgs84togcj02(longitude, latitude);
+                        const [mglng, mglat] = [longitude, latitude];
                         res(`${mglng},${mglat}`);
                     }
                     function showError(error) {
