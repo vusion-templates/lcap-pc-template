@@ -36,8 +36,8 @@ export default {
                 if (window.appInfo.hasUserCenter) {
                     // 格式转化
                     userInfo = {
-                        UserName: userInfo?.userName,
-                        UserId: userInfo?.userId,
+                        UserName: userInfo.userName,
+                        UserId: userInfo.userId,
                     };
                 }
                 $global.userInfo = userInfo;
