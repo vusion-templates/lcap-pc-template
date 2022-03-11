@@ -51,10 +51,12 @@ export const utils = {
             return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
     },
     Split(str, seperator) {
-        return str.split(seperator);
+        return str && str.split(seperator);
     },
     Join(arr, seperator) {
-        return arr.join(seperator);
+        if (Array.isArray(arr)) {
+            return arr.join(seperator);
+        }
     },
     Concat(str1, str2) {
         if (Array.isArray(str1) && Array.isArray(str2))
@@ -63,19 +65,21 @@ export const utils = {
             return str1 + str2;
     },
     Length(str1) {
-        return str1.length;
+        return str1 && str1.length;
     },
     ToLower(str) {
-        return str.toLowerCase();
+        return str && str.toLowerCase();
     },
     ToUpper(str) {
-        return str.toUpperCase();
+        return str && str.toUpperCase();
     },
     Trim(str) {
-        return str.trim();
+        return str && str.trim();
     },
     Get(arr, index) {
-        return arr[index];
+        if (Array.isArray(arr)) {
+            return arr[index];
+        }
     },
     Set(arr, index, item) {
         return utils.Vue.set(arr, index, item);
@@ -84,17 +88,25 @@ export const utils = {
         return typeof arr.find((ele) => isEqual(ele, item)) !== 'undefined';
     },
     Add(arr, item) {
-        return arr.push(item);
+        if (Array.isArray(arr)) {
+            return arr.push(item);
+        }
     },
     Insert(arr, index, item) {
-        return arr.splice(index, 0, item);
+        if (Array.isArray(arr)) {
+            return arr.splice(index, 0, item);
+        }
     },
     Remove(arr, item) {
-        const index = arr.indexOf(item);
-        return ~index && arr.splice(index, 1);
+        if (Array.isArray(arr)) {
+            const index = arr.indexOf(item);
+            return ~index && arr.splice(index, 1);
+        }
     },
     RemoveAt(arr, index) {
-        return arr.splice(index, 1);
+        if (Array.isArray(arr)) {
+            return arr.splice(index, 1);
+        }
     },
     CurrDate() {
         return new Date().toJSON().replace(/T.+?Z/, '');
