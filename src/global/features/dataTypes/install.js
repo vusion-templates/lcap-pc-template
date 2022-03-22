@@ -74,6 +74,21 @@ export default {
                 const d = R * c; // Distance in km
                 return d * 1000;
             },
+            logOut() {
+                this.$confirm('确定退出登录吗？', '提示')
+                    .then(() => this.$auth.logout())
+                    .then(() => {
+                        const cookies = document.cookie.split(';');
+                        cookies.forEach((cookie) => {
+                            const eqPos = cookie.indexOf('=');
+                            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                            const d = new Date();
+                            d.setTime(d.getTime() - (1 * 24 * 60 * 60 * 1000));
+                            document.cookie = `${name}=; expires=${d.toGMTString()}; path=/`;
+                        });
+                        location.reload();
+                    });
+            },
         };
 
         /**
