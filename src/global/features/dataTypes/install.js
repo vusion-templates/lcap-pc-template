@@ -75,8 +75,8 @@ export default {
                 return d * 1000;
             },
             logOut() {
-                this.$confirm('确定退出登录吗？', '提示')
-                    .then(() => this.$auth.logout())
+                Vue.prototype.$confirm('确定退出登录吗？', '提示')
+                    .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
                         const cookies = document.cookie.split(';');
                         cookies.forEach((cookie) => {
