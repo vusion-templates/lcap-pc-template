@@ -8,6 +8,13 @@ const getBaseHeaders = () => ({
     Env: window.appInfo && window.appInfo.env,
 });
 
+const getTenant = () => {
+    const hostArr = location.host.split('.');
+    const length = hostArr.length;
+    // 制品的租户标记
+    return hostArr[length - 3];
+};
+
 let userInfoPromise = null;
 let userResourcesPromise = null;
 
@@ -87,19 +94,47 @@ export default {
         }
         return userResourcesPromise;
     },
-    logout() {
+
+    async getKeycloakLogoutUrl() {
+        let logoutUrl = '';
+        const res = await authService.GetNuimsConfig({
+            query: {
+                Action: 'GetTenantLoginTypes',
+                Version: '2020-06-01',
+                TenantName: getTenant(),
+            },
+        });
+
+        const KeycloakConfig = res?.Data.find((item) => (item.LoginType === 'Keycloak'));
+        if (KeycloakConfig) {
+            logoutUrl = `${KeycloakConfig?.extendProperties?.logout_url}?redirect_uri=${window.location.protocol}//${window.location.host}/login`;
+        }
+        return logoutUrl;
+    },
+    async logout() {
         if (window.appInfo.hasUserCenter) {
             // 用户中心，去除认证和用户名信息
             cookie.erase('authorization');
             cookie.erase('username');
         } else {
-            return authService.Logout({
-                headers: getBaseHeaders(),
-            }).then(() => {
-                cookie.erase('authorization');
-                cookie.erase('username');
-            });
+            const sleep = (t) => new Promise((r) => setTimeout(r, t));
+            const logoutUrl = await this.getKeycloakLogoutUrl();
+            localStorage.setItem('logoutUrl', logoutUrl);
+            if (logoutUrl) {
+                this.jumpTo(logoutUrl);
+                sleep(100);
+            } else {
+                return authService.Logout({
+                    headers: getBaseHeaders(),
+                }).then(() => {
+                    cookie.erase('authorization');
+                    cookie.erase('username');
+                });
+            }
         }
+    },
+    jumpTo(url) {
+        window.location.href = url;
     },
     /**
      * 权限服务是否初始化
