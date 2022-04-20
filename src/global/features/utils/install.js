@@ -283,6 +283,13 @@ export const utils = {
         const dateDiff = dateTime2Temp - dateTime1Temp;
         return Math.floor(dateDiff / (config.diff));
     },
+    GetProperties(name) {
+        let customerProperties = window.customerProperties;
+        if (typeof customerProperties === 'string') {
+            customerProperties = JSON.parse(customerProperties);
+        }
+        return customerProperties[name];
+    },
 };
 
 export default {
