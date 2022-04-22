@@ -284,7 +284,7 @@ export const utils = {
         return Math.floor(dateDiff / (config.diff));
     },
     GetProperties(name) {
-        let customerProperties = window.customerProperties;
+        let customerProperties = window.__LCAP_CONFIG__;
         if (typeof customerProperties === 'string') {
             customerProperties = JSON.parse(customerProperties);
         }
