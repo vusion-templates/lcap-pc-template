@@ -16,7 +16,8 @@ window.VueRouter = VueRouter;
 Vue.prototype.$process = processService;
 
 Vue.prototype.$destination = function (url) {
-    if (url.startsWith('http'))
+    // 修复访问路径为默认首页 / 时跳转可能失效的问题
+    if (url.startsWith('http') || location.pathname === '/')
         location.href = url;
     else {
         if (url[0] !== '/')
