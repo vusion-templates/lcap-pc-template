@@ -32,6 +32,7 @@ export default {
             this.$toast.success('复制成功，可粘贴查看错误信息');
         },
         show(text, message, duration = 3000) {
+            this.copySuccess = false;
             if (!this.$el) {
                 this.$mount(document.createElement('div'));
             }
