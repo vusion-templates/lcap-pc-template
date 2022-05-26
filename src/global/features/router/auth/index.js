@@ -15,7 +15,7 @@ export default {
     _map: undefined,
     getUserInfo() {
         if (!userInfoPromise) {
-            if (window.appInfo.hasUserCenter) {
+            if (window.appInfo.hasUserCenter || window.appInfo.envConfig.name === 'zhezhengding') {
                 userInfoPromise = Promise.resolve({});
             } else {
                 userInfoPromise = authService.GetUser({
