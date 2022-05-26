@@ -16,12 +16,7 @@ export default {
     getUserInfo() {
         if (!userInfoPromise) {
             if (window.appInfo.hasUserCenter) {
-                userInfoPromise = lowauthService.GetUser({
-                    headers: getBaseHeaders(),
-                    config: {
-                        noErrorTip: true,
-                    },
-                });
+                userInfoPromise = Promise.resolve({});
             } else {
                 userInfoPromise = authService.GetUser({
                     headers: getBaseHeaders(),
@@ -31,15 +26,9 @@ export default {
                 });
             }
             userInfoPromise = userInfoPromise.then((result) => {
-                let userInfo = result.Data;
+                const userInfo = result.Data;
                 const $global = Vue.prototype.$global = Vue.prototype.$global || {};
-                if (window.appInfo.hasUserCenter) {
-                    // 格式转化
-                    userInfo = {
-                        UserName: userInfo.userName,
-                        UserId: userInfo.userId,
-                    };
-                }
+
                 $global.userInfo = userInfo;
                 return userInfo;
             }).catch((e) => {
