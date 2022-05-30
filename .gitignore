@@ -6,8 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Locks
-package-lock.json
-yarn.lock
+# package-lock.json
+# yarn.lock
 
 # Cache
 .DS_Store
