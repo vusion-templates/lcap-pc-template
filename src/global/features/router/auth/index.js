@@ -41,10 +41,16 @@ export default {
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
             if (window.appInfo.hasAuth) {
+                let userId;
+                if (Vue.prototype.$global.userInfo) {
+                    userId = Vue.prototype.$global.userInfo.UserId;
+                } else {
+                    userId = cookie.get('zzdUserId');
+                }
                 userResourcesPromise = lowauthService.GetUserResources({
                     headers: getBaseHeaders(),
                     query: {
-                        userId: Vue.prototype.$global.userInfo.UserId,
+                        userId,
                     },
                 }).then((result) => {
                     const resources = result.filter((resource) => resource.resourceType === 'ui');

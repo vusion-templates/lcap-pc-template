@@ -2,14 +2,12 @@ import { loginAuth } from './auth';
 import auth from '@/global/features/router/auth';
 import { getComponentOption } from '../util';
 export default function (appConfig) {
-    const iszzd = window.appInfo.hasUserCenter || window.appInfo.envConfig.name === 'zhezhengding';
-
-    if (appConfig.auth && !iszzd) {
+    if (appConfig.auth) {
         auth.init(appConfig.domainName);
     }
     return function ({ to, from, next, appConfig }) {
         // designer 和 环境直接放行认证和鉴权
-        if (!(iszzd || process.env.NODE_ENV === 'development' || process.env.VUE_APP_DESIGNER)) {
+        if (!(process.env.NODE_ENV === 'development' || process.env.VUE_APP_DESIGNER)) {
             // 权限验证
             let called = false;
             const _next = function (...args) {
