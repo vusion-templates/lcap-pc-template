@@ -16,7 +16,11 @@ export default {
     getUserInfo() {
         if (!userInfoPromise) {
             if (window.appInfo.hasUserCenter || window.appInfo.envConfig.name === 'zhezhengding') {
-                userInfoPromise = Promise.resolve({});
+                const userInfo = {
+                    userName: cookie.get('zzdUserName') || '',
+                    userId: cookie.get('zzdUserId') || '',
+                };
+                userInfoPromise = Promise.resolve({ Data: userInfo });
             } else {
                 userInfoPromise = authService.GetUser({
                     headers: getBaseHeaders(),
