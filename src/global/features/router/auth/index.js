@@ -17,8 +17,8 @@ export default {
         if (!userInfoPromise) {
             if (window.appInfo.hasUserCenter || window.appInfo.envConfig.name === 'zhezhengding') {
                 const userInfo = {
-                    userName: cookie.get('zzdUserName') || '',
-                    userId: cookie.get('zzdUserId') || '',
+                    UserName: cookie.get('zzdUserName') || '',
+                    UserId: cookie.get('zzdUserId') || '',
                 };
                 userInfoPromise = Promise.resolve({ Data: userInfo });
             } else {
@@ -46,7 +46,7 @@ export default {
         if (!userResourcesPromise) {
             if (window.appInfo.hasAuth) {
                 let userId;
-                if (Vue.prototype.$global.userInfo) {
+                if (Vue.prototype.$global?.userInfo?.UserId) {
                     userId = Vue.prototype.$global.userInfo.UserId;
                 } else {
                     userId = cookie.get('zzdUserId');
