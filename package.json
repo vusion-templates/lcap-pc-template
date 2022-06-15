@@ -19,6 +19,7 @@
     "build:designer": "cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/global/features/designer/index.js",
     "deploy:dev": "lcap deploy ./public --platform http://lcp.vusion.top",
     "deploy:test": "lcap deploy ./public --platform http://defaulttenant.qa-ci.lcap.group",
+    "deploy:pre": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.dri.com",
     "deploy:online": "vusion deploy ./public",
     "postinstall": "node node_modules/vusion-install/index.js",
     "prepublishOnly": "cp .gitignore _.gitignore && npm run build:designer && npm run deploy:online",
