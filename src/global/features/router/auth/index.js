@@ -27,7 +27,7 @@ export default {
             }
             userInfoPromise = userInfoPromise.then((result) => {
                 const userInfo = result.Data;
-                const $global = Vue.prototype.$global = Vue.prototype.$global || {};
+                const $global = Vue.prototype.$global || {};
                 $global.userInfo = userInfo;
                 return userInfo;
             }).catch((e) => {
