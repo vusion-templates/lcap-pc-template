@@ -290,6 +290,70 @@ export const utils = {
         }
         return customerProperties[name];
     },
+    /**
+     * 字符串查找
+     * @param {string} str 字符串
+     * @param {string} search 查找字符串
+     * @param {number} fromIndex 开始位置
+     * @param {boolean} ignoreCase 是否忽略大小写
+     * @returns {number} 查找到的位置，没找到返回-1
+     */
+    IndexOf(str, search, fromIndex, ignoreCase) {
+        if (typeof str !== 'string' || typeof search !== 'string') {
+            return -1;
+        }
+        if (fromIndex === undefined) {
+            fromIndex = 0;
+        }
+        if (ignoreCase) {
+            str = str.toLowerCase();
+            search = search.toLowerCase();
+        }
+        return str.indexOf(search, fromIndex);
+    },
+    /**
+     * 倒序字符串查找
+     * @param {string} str 字符串
+     * @param {string} search 查找字符串
+     * @param {boolean} ignoreCase 是否忽略大小写
+     * @returns {number} 查找到的位置，没找到返回-1
+     */
+    LastIndexOf(str, search, ignoreCase) {
+        if (typeof str !== 'string' || typeof search !== 'string') {
+            return -1;
+        }
+        if (ignoreCase) {
+            str = str.toLowerCase();
+            search = search.toLowerCase();
+        }
+        return str.lastIndexOf(search);
+    },
+    /**
+     *
+     * @param {string} str 字符串
+     * @param {string} search 查找字符串
+     * @param {string} replace 替换字符串
+     * @returns {string} 替换后的字符串
+     */
+    Replace(str, search, replace) {
+        if (typeof str !== 'string' || typeof search !== 'string') {
+            return str;
+        }
+        return str.replace(search, replace);
+    },
+    /**
+     *
+     * @param {string} str 字符串
+     * @param {number} start 开始位置
+     * @param {number} length 长度
+     * @returns {string} 截取后的字符串
+     */
+    SubString(str, start, length) {
+        if (typeof str !== 'string') {
+            return str;
+        }
+        return str.substr(start, length);
+    },
 };
 
 export default {
