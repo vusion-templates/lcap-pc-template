@@ -329,7 +329,7 @@ export const utils = {
         return str.lastIndexOf(search);
     },
     /**
-     *
+     * 注意是 ReplaceAll
      * @param {string} str 字符串
      * @param {string} search 查找字符串
      * @param {string} replace 替换字符串
@@ -339,7 +339,8 @@ export const utils = {
         if (typeof str !== 'string' || typeof search !== 'string') {
             return str;
         }
-        return str.replace(search, replace);
+        replace = replace.replace(/\$/g, '$$$$');
+        return str.replace(new RegExp(search.replace(/([/,!\\^${}[\]().*+?|<>\-&])/g, '\\$&'), 'g'), replace);
     },
     /**
      *
