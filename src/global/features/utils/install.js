@@ -302,7 +302,7 @@ export const utils = {
         if (typeof str !== 'string' || typeof search !== 'string') {
             return -1;
         }
-        if (fromIndex === undefined) {
+        if (fromIndex === undefined || fromIndex < 0 || fromIndex % 1 !== 0) {
             fromIndex = 0;
         }
         if (ignoreCase) {
@@ -352,6 +352,12 @@ export const utils = {
     SubString(str, start, length) {
         if (typeof str !== 'string') {
             return str;
+        }
+        if (start !== undefined && (start < 0 || start % 1 !== 0)) {
+            start = 0;
+        }
+        if (length !== undefined && (length < 0 || length % 1 !== 0)) {
+            length = 0;
         }
         return str.substr(start, length);
     },
