@@ -2,6 +2,8 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 import routerLock from '@/global/features/router/lock';
+import encodeUrl from '@/global/features/utils/encodeUrl';
+
 import AuthPlugin from './auth/vue';
 import processService from './processService';
 import { beforeMiddleware, afterMiddleware } from './middleware';
@@ -18,7 +20,7 @@ Vue.prototype.$process = processService;
 Vue.prototype.$destination = function (url) {
     // 修复访问路径为默认首页 / 时跳转可能失效的问题
     if (url.startsWith('http') || location.pathname === '/')
-        location.href = url;
+        location.href = encodeUrl(url);
     else {
         if (url[0] !== '/')
             this.$router.push(url);
@@ -27,7 +29,7 @@ Vue.prototype.$destination = function (url) {
             if (url.startsWith('/' + (oldPath[1] || '')))
                 this.$router.push(url.replace('/' + (oldPath[1] || ''), ''));
             else
-                location.href = url;
+                location.href = encodeUrl(url);
         }
     }
 };
