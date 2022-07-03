@@ -4,7 +4,7 @@ import auth from '../router/auth';
 
 export default {
     install(Vue, options = {}) {
-        Vue.prototype.$global = {
+        const $global = {
             userInfo: {},
             requestFullscreen() {
                 return document.body.requestFullscreen();
@@ -90,6 +90,13 @@ export default {
                     });
             },
         };
+        new Vue({
+            data: {
+                $global,
+            },
+        });
+
+        Vue.prototype.$global = $global;
 
         /**
          * read datatypes from template, then parse schema

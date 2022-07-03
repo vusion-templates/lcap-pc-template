@@ -6,7 +6,7 @@
     "node": true
   },
   "globals": {
-    
+
   },
   "rules": {
     "no-debugger": ["error"],
@@ -15,7 +15,8 @@
     "new-cap": [ "error", { "newIsCap": true, "properties": false }],
     "vue/no-unused-components": [2],
     "vue/html-indent": ["error", 4, { "alignAttributesVertically": false }],
-    "vue/no-use-v-if-with-v-for": [0]
+    "vue/no-use-v-if-with-v-for": [0],
+    "linebreak-style": "off"
   },
   "overrides": [
     {
