@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.4.13",
+  "version": "0.4.13-beta",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -17,7 +17,7 @@
     "manage": "plop",
     "screenshot": "vusion screenshot --server public/index.html -o screenshots/0.png -w 1440 -h 900 && vusion screenshot --server public/index.html#/demo/list/basic -o screenshots/1.png -w 1440 -h 900 -d 200",
     "build:designer": "cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/global/features/designer/index.js",
-    "deploy:dev": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.dt.com",
+    "deploy:dev": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.dev.com",
     "deploy:test": "lcap deploy ./public --platform http://defaulttenant.lcap.qa-ci.lcap.group",
     "deploy:pre": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.dri.com",
     "deploy:online": "vusion deploy ./public",

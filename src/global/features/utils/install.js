@@ -47,8 +47,13 @@ export const utils = {
         const enumeration = enumsMap[enumName];
         if (!enumeration)
             return [];
-        else
-            return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
+        else {
+            const list = Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
+            list.forEach((item) => {
+                list[item.value] = item.value;
+            });
+            return list;
+        }
     },
     Split(str, seperator) {
         return str && str.split(seperator);
@@ -189,7 +194,7 @@ export const utils = {
 
         try {
             result = JSON.parse(str);
-        } catch (e) {}
+        } catch (e) { }
 
         return result;
     },
