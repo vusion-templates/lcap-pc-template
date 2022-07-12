@@ -60,7 +60,10 @@ export const genInitData = (
                         type: 'Identifier',
                         name: property.name,
                     },
-                    value: genInitData(property.typeAnnotation, dataTypesMap, true, usedSchemaRefs, level + 1),
+                    value: genInitData({
+                        ...property.typeAnnotation,
+                        defaultValue: property.defaultValue,
+                    }, dataTypesMap, true, usedSchemaRefs, level + 1),
                 });
             });
             return result;
