@@ -43,7 +43,7 @@ export const genInitData = (
                 };
             }
 
-            if (level >= 1) {
+            if (level >= 2) {
                 return {
                     type: 'Identifier',
                     name: 'undefined',
