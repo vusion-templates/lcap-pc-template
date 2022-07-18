@@ -1,0 +1,9 @@
+{
+	"getConfiguration": {
+		"url": {
+			"method": "get",
+			"path": "/getConfiguration/{configKey}",
+			"query": {}
+		}
+	}
+}
