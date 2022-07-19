@@ -74,7 +74,7 @@ export default {
                 const d = R * c; // Distance in km
                 return d * 1000;
             },
-            logOut() {
+            logout() {
                 Vue.prototype.$confirm('确定退出登录吗？', '提示')
                     .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
