@@ -8,7 +8,7 @@ export default {
                 return componentOptions?.meta?.title || item.meta?.title;
             }).filter((i) => i)[0];
             if (metaTitle) {
-                document.title = isFunction(metaTitle) ? metaTitle(to, from) : metaTitle;
+                document.title = isFunction(metaTitle) ? metaTitle(to, from) : appConfig.documentTitle.replace('$页面名称', metaTitle).replace('$应用名称', appConfig.project);
             }
         };
     },
