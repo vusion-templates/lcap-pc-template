@@ -1,6 +1,7 @@
 import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
 import { genInitData } from './tools';
 import auth from '../router/auth';
+import configService from '@/global/services/config';
 
 export default {
     install(Vue, options = {}) {
@@ -89,6 +90,14 @@ export default {
                         location.reload();
                     });
             },
+            getConfig(name) {
+                const res = configService.getConfig({
+                    path: {
+                        configKey: name,
+                    }
+                });
+                return res;
+            }
         };
         new Vue({
             data: {
