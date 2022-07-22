@@ -213,7 +213,7 @@ export const utils = {
             else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
                 // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
                 return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
-            else if (typeAnnotation.typeName === 'boolean') // 布尔值
+            else if (typeAnnotation.typeName === 'Boolean') // 布尔值
                 return !!value;
         }
 
