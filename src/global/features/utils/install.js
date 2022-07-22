@@ -198,31 +198,26 @@ export const utils = {
 
         return result;
     },
-    Convert(value, schema) {
-        const { type, format: formatVar } = schema;
-
-        if (type === 'string') {
-            switch (formatVar) {
-                case 'date-time':
-                    return formatRFC3339(new Date(value));
-                case 'date':
-                    return format(new Date(value), 'yyyy-MM-dd');
-                case 'time':
-                    return format(new Date(value), 'HH:mm:ss');
-                case '': // 字符串
-                    return String(value);
-            }
+    Convert(value, typeAnnotation) {
+        if (typeAnnotation && typeAnnotation.typeKind === 'primitive') {
+            if (typeAnnotation.typeName === 'DateTime')
+                return formatRFC3339(new Date(value));
+            else if (typeAnnotation.typeName === 'Date')
+                return format(new Date(value), 'yyyy-MM-dd');
+            else if (typeAnnotation.typeName === 'Time')
+                return format(new Date(value), 'HH:mm:ss');
+            else if (typeAnnotation.typeName === 'String')
+                return String(value);
+            else if (typeAnnotation.typeName === 'Double') // 小数
+                return parseFloat(+value);
+            else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
+                // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
+                return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
+            else if (typeAnnotation.typeName === 'boolean') // 布尔值
+                return !!value;
         }
 
-        if (type === 'number' && formatVar === 'double') // 小数
-            return parseFloat(+value);
-
-        if (type === 'integer')
-            // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
-            return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
-
-        if (type === 'boolean') // 布尔值
-            return !!value;
+        return value;
     },
     /**
      * 数字格式化
