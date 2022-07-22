@@ -153,7 +153,7 @@ export const utils = {
      */
     Clear(obj) {
         if (Array.isArray(obj)) {
-            obj.length = 0;
+            obj = [];
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
@@ -287,13 +287,6 @@ export const utils = {
         const dateTime2Temp = new Date(format(new Date(dateTime2), config.formatter)).getTime();
         const dateDiff = dateTime2Temp - dateTime1Temp;
         return Math.floor(dateDiff / (config.diff));
-    },
-    GetProperties(name) {
-        let customerProperties = window.__LCAP_CONFIG__;
-        if (typeof customerProperties === 'string') {
-            customerProperties = JSON.parse(customerProperties);
-        }
-        return customerProperties[name];
     },
     /**
      * 字符串查找
