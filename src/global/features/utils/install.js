@@ -47,8 +47,13 @@ export const utils = {
         const enumeration = enumsMap[enumName];
         if (!enumeration)
             return [];
-        else
-            return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
+        else {
+            const list = Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
+            list.forEach((item) => {
+                list[item.value] = item.value;
+            });
+            return list;
+        }
     },
     Split(str, seperator) {
         return str && str.split(seperator);
@@ -148,7 +153,7 @@ export const utils = {
      */
     Clear(obj) {
         if (Array.isArray(obj)) {
-            obj.length = 0;
+            obj = [];
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
@@ -189,35 +194,30 @@ export const utils = {
 
         try {
             result = JSON.parse(str);
-        } catch (e) {}
+        } catch (e) { }
 
         return result;
     },
-    Convert(value, schema) {
-        const { type, format: formatVar } = schema;
-
-        if (type === 'string') {
-            switch (formatVar) {
-                case 'date-time':
-                    return formatRFC3339(new Date(value));
-                case 'date':
-                    return format(new Date(value), 'yyyy-MM-dd');
-                case 'time':
-                    return format(new Date(value), 'HH:mm:ss');
-                case '': // 字符串
-                    return String(value);
-            }
+    Convert(value, typeAnnotation) {
+        if (typeAnnotation && typeAnnotation.typeKind === 'primitive') {
+            if (typeAnnotation.typeName === 'DateTime')
+                return formatRFC3339(new Date(value));
+            else if (typeAnnotation.typeName === 'Date')
+                return format(new Date(value), 'yyyy-MM-dd');
+            else if (typeAnnotation.typeName === 'Time')
+                return format(new Date(value), 'HH:mm:ss');
+            else if (typeAnnotation.typeName === 'String')
+                return String(value);
+            else if (typeAnnotation.typeName === 'Double') // 小数
+                return parseFloat(+value);
+            else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
+                // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
+                return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
+            else if (typeAnnotation.typeName === 'boolean') // 布尔值
+                return !!value;
         }
 
-        if (type === 'number' && formatVar === 'double') // 小数
-            return parseFloat(+value);
-
-        if (type === 'integer')
-            // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
-            return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
-
-        if (type === 'boolean') // 布尔值
-            return !!value;
+        return value;
     },
     /**
      * 数字格式化
@@ -282,13 +282,6 @@ export const utils = {
         const dateTime2Temp = new Date(format(new Date(dateTime2), config.formatter)).getTime();
         const dateDiff = dateTime2Temp - dateTime1Temp;
         return Math.floor(dateDiff / (config.diff));
-    },
-    GetProperties(name) {
-        let customerProperties = window.__LCAP_CONFIG__;
-        if (typeof customerProperties === 'string') {
-            customerProperties = JSON.parse(customerProperties);
-        }
-        return customerProperties[name];
     },
     /**
      * 字符串查找

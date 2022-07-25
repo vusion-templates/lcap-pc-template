@@ -1,6 +1,7 @@
 import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
 import { genInitData } from './tools';
 import auth from '../router/auth';
+import configService from '@/global/services/config';
 
 export default {
     install(Vue, options = {}) {
@@ -74,7 +75,7 @@ export default {
                 const d = R * c; // Distance in km
                 return d * 1000;
             },
-            logOut() {
+            logout() {
                 Vue.prototype.$confirm('确定退出登录吗？', '提示')
                     .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
@@ -89,6 +90,14 @@ export default {
                         location.reload();
                     });
             },
+            getConfig(name) {
+                const res = configService.getConfig({
+                    path: {
+                        configKey: name,
+                    }
+                });
+                return res;
+            }
         };
         new Vue({
             data: {

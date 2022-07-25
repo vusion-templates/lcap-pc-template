@@ -29,6 +29,14 @@ export default {
             location.href = '/login';
         }
     },
+    403({ config }, err = {}) {
+        if (err.Code === 'InvalidToken' && err.Message === 'Token is invalid') {
+            if (!config.noErrorTip) {
+                instance.show('登录失效', '请重新登录');
+            }
+            location.href = '/login';
+        }
+    },
     remoteError({ config }, err) {
         if (!config.noErrorTip) {
             UToast.show('系统错误，请联系管理员！');
