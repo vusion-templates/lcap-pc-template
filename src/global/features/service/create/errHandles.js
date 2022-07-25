@@ -13,12 +13,12 @@ export default {
     },
     500({ config }, err = {}) {
         if (!config.noErrorTip) {
-            instance.show(getErrMessage(), getErrStrack());
+            instance.show(getErrMessage(err), getErrStrack(err));
         }
     },
     400({ config }, err = {}) {
         if (!config.noErrorTip) {
-            instance.show(getErrMessage(), getErrStrack());
+            instance.show(getErrMessage(err), getErrStrack(err));
         }
     },
     403({ config }, err = {}) {
