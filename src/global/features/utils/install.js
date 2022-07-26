@@ -204,9 +204,12 @@ export const utils = {
                 return formatRFC3339(new Date(value));
             else if (typeAnnotation.typeName === 'Date')
                 return format(new Date(value), 'yyyy-MM-dd');
-            else if (typeAnnotation.typeName === 'Time')
-                return format(new Date(value), 'HH:mm:ss');
-            else if (typeAnnotation.typeName === 'String')
+            else if (typeAnnotation.typeName === 'Time') {
+                if (/^\d{2}:\d{2}:\d{2}$/.test(value)) // 纯时间 12:30:00
+                    return format(new Date('2022-01-01 ' + value), 'HH:mm:ss');
+                else
+                    return format(new Date(value), 'HH:mm:ss');
+            } else if (typeAnnotation.typeName === 'String')
                 return String(value);
             else if (typeAnnotation.typeName === 'Double') // 小数
                 return parseFloat(+value);
