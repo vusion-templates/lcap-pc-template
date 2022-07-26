@@ -189,13 +189,6 @@ export const utils = {
 
         return Math.floor((Math.random() * (max - min + 1)) + min);
     },
-    GetProperties(name) {
-        let customerProperties = window.__LCAP_CONFIG__;
-        if (typeof customerProperties === 'string') {
-            customerProperties = JSON.parse(customerProperties);
-        }
-        return customerProperties[name];
-    },
     tryJSONParse(str) {
         let result;
 
@@ -292,6 +285,13 @@ export const utils = {
         const dateTime2Temp = new Date(format(new Date(dateTime2), config.formatter)).getTime();
         const dateDiff = dateTime2Temp - dateTime1Temp;
         return Math.floor(dateDiff / (config.diff));
+    },
+    GetProperties(name) {
+        let customerProperties = window.__LCAP_CONFIG__;
+        if (typeof customerProperties === 'string') {
+            customerProperties = JSON.parse(customerProperties);
+        }
+        return customerProperties[name];
     },
     /**
      * 字符串查找
