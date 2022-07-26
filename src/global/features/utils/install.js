@@ -189,6 +189,13 @@ export const utils = {
 
         return Math.floor((Math.random() * (max - min + 1)) + min);
     },
+    GetProperties(name) {
+        let customerProperties = window.__LCAP_CONFIG__;
+        if (typeof customerProperties === 'string') {
+            customerProperties = JSON.parse(customerProperties);
+        }
+        return customerProperties[name];
+    },
     tryJSONParse(str) {
         let result;
 
