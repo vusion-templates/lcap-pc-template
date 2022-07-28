@@ -94,23 +94,23 @@ export const utils = {
     },
     Add(arr, item) {
         if (Array.isArray(arr)) {
-            return arr.push(item);
+            arr.push(item);
         }
     },
     Insert(arr, index, item) {
         if (Array.isArray(arr)) {
-            return arr.splice(index, 0, item);
+            arr.splice(index, 0, item);
         }
     },
     Remove(arr, item) {
         if (Array.isArray(arr)) {
             const index = arr.indexOf(item);
-            return ~index && arr.splice(index, 1);
+            ~index && arr.splice(index, 1);
         }
     },
     RemoveAt(arr, index) {
         if (Array.isArray(arr)) {
-            return arr.splice(index, 1);
+            return arr.splice(index, 1)[0];
         }
     },
     CurrDate() {
