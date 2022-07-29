@@ -48,11 +48,7 @@ export const utils = {
         if (!enumeration)
             return [];
         else {
-            const list = Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
-            list.forEach((item) => {
-                list[item.value] = item.value;
-            });
-            return list;
+            return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
         }
     },
     Split(str, seperator) {
