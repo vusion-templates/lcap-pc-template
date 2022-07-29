@@ -7,4 +7,3 @@ const cloneDeep = (obj, func) => Object.entries(obj)
     }, {});
 
 export default cloneDeep;
-
