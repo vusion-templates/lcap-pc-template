@@ -96,20 +96,15 @@ export const genInitData = (
                 type: 'NumericLiteral',
                 value: parsedValue,
             };
-        } else if (typeName === 'Decimal') {
+        } else if (typeName === 'Double') {
             return {
                 type: 'NumericLiteral',
                 value: parsedValue,
             };
-        } else if (typeName === 'String') {
+        } else { // String, Date, Time, DateTime, Email
             return {
                 type: 'StringLiteral',
                 value: typeAnnotation.defaultValue,
-            };
-        } else {
-            return {
-                type: 'Identifier',
-                name: 'undefined',
             };
         }
     } else {

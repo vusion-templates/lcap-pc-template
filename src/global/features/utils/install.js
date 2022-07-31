@@ -90,23 +90,23 @@ export const utils = {
     },
     Add(arr, item) {
         if (Array.isArray(arr)) {
-            return arr.push(item);
+            arr.push(item);
         }
     },
     Insert(arr, index, item) {
         if (Array.isArray(arr)) {
-            return arr.splice(index, 0, item);
+            arr.splice(index, 0, item);
         }
     },
     Remove(arr, item) {
         if (Array.isArray(arr)) {
             const index = arr.indexOf(item);
-            return ~index && arr.splice(index, 1);
+            ~index && arr.splice(index, 1);
         }
     },
     RemoveAt(arr, index) {
         if (Array.isArray(arr)) {
-            return arr.splice(index, 1);
+            return arr.splice(index, 1)[0];
         }
     },
     CurrDate() {
@@ -194,31 +194,29 @@ export const utils = {
 
         return result;
     },
-    Convert(value, schema) {
-        const { type, format: formatVar } = schema;
-
-        if (type === 'string') {
-            switch (formatVar) {
-                case 'date-time':
-                    return formatRFC3339(new Date(value));
-                case 'date':
-                    return format(new Date(value), 'yyyy-MM-dd');
-                case 'time':
+    Convert(value, typeAnnotation) {
+        if (typeAnnotation && typeAnnotation.typeKind === 'primitive') {
+            if (typeAnnotation.typeName === 'DateTime')
+                return formatRFC3339(new Date(value));
+            else if (typeAnnotation.typeName === 'Date')
+                return format(new Date(value), 'yyyy-MM-dd');
+            else if (typeAnnotation.typeName === 'Time') {
+                if (/^\d{2}:\d{2}:\d{2}$/.test(value)) // 纯时间 12:30:00
+                    return format(new Date('2022-01-01 ' + value), 'HH:mm:ss');
+                else
                     return format(new Date(value), 'HH:mm:ss');
-                case '': // 字符串
-                    return String(value);
-            }
+            } else if (typeAnnotation.typeName === 'String')
+                return String(value);
+            else if (typeAnnotation.typeName === 'Double') // 小数
+                return parseFloat(+value);
+            else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
+                // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
+                return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
+            else if (typeAnnotation.typeName === 'Boolean') // 布尔值
+                return !!value;
         }
 
-        if (type === 'number' && formatVar === 'double') // 小数
-            return parseFloat(+value);
-
-        if (type === 'integer')
-            // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
-            return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
-
-        if (type === 'boolean') // 布尔值
-            return !!value;
+        return value;
     },
     /**
      * 数字格式化
@@ -283,6 +281,13 @@ export const utils = {
         const dateTime2Temp = new Date(format(new Date(dateTime2), config.formatter)).getTime();
         const dateDiff = dateTime2Temp - dateTime1Temp;
         return Math.floor(dateDiff / (config.diff));
+    },
+    GetProperties(name) {
+        let customerProperties = window.__LCAP_CONFIG__;
+        if (typeof customerProperties === 'string') {
+            customerProperties = JSON.parse(customerProperties);
+        }
+        return customerProperties[name];
     },
     /**
      * 字符串查找
