@@ -149,7 +149,7 @@ export const utils = {
      */
     Clear(obj) {
         if (Array.isArray(obj)) {
-            obj = [];
+            obj.splice(0, obj.length);
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
