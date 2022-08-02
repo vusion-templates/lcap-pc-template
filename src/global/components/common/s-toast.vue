@@ -86,6 +86,6 @@ export default {
 
     .stoast [class^="u-toast_item__"] {
         padding: 0px 0px 0px 40px !important;
+        max-width:999px!important
     }
-
 </style>
