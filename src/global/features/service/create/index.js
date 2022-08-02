@@ -72,7 +72,7 @@ const requester = function (requestInfo) {
     }
     let data;
     const method2 = method.toUpperCase();
-    if (Object.keys(body).length || ['PUT', 'POST', 'PATCH'].includes(method2)) {
+    if (Array.isArray(body) || Object.keys(body).length || ['PUT', 'POST', 'PATCH', 'DELETE'].includes(method2)) {
         data = formatContentType(headers['Content-Type'], body);
     }
     const req = axios({
