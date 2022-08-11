@@ -1,0 +1,8 @@
+{
+	"getCustomConfig": {
+		"url": {
+			"method": "get",
+			"path": "/getCustomConfig/{configKey}"
+		}
+	}
+}
