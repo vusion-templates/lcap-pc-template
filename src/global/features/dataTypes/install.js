@@ -1,7 +1,6 @@
 import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
 import { genInitData } from './tools';
 import auth from '../router/auth';
-import configService from '@/global/services/config';
 import configurationService from '@/global/services/configuration';
 
 export default {
