@@ -60,10 +60,7 @@ export const utils = {
         }
     },
     Concat(str1, str2) {
-        if (Array.isArray(str1) && Array.isArray(str2))
-            return [].concat(str1, str2);
-        else
-            return str1 + str2;
+        return String(str1) + String(str2);
     },
     Length(str1) {
         return str1 && str1.length;
