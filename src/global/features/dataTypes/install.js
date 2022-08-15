@@ -92,7 +92,7 @@ export default {
             },
             async getCustomConfig(configKey = '') {
                 const res = await configurationService.getCustomConfig({
-                    path: { configKey: configKey }
+                    path: { configKey },
                 });
                 return res;
             },
