@@ -350,6 +350,28 @@ export const utils = {
         }
         return str.substr(start, length);
     },
+    /**
+     * List<T> 转换为 PageOf<T>
+     * @param {List<T>} list 集合
+     * @param {number} page 页数
+     * @param {number} size 每页条数
+     * @param {number} total 总数
+     * @returns {PageOf<T>}
+     */
+    CreatePageOf(list, page, size, total) {
+        const totalPages = Math.ceil(total / size);
+        return {
+            content: list,
+            number: page,
+            size,
+            numberOfElements: list.length,
+            totalPages,
+            totalElements: total,
+            last: page === totalPages,
+            first: page === 1,
+            empty: total,
+        };
+    },
 };
 
 export default {
