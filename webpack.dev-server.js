@@ -54,14 +54,26 @@ module.exports = function (port) {
             'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
         },
         proxy: {
+            '/api': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                autoRewrite: true,
+                onProxyReq,
+            },
+            "/rest": {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                autoRewrite: true,
+                onProxyReq,
+            },
             '^/gateway/': {
-                target: 'http://api.gateway.lowcode',
+                target: 'http://localhost:8080',
                 changeOrigin: true,
                 autoRewrite: true,
                 onProxyReq,
             },
             '^/gw/': {
-                target: `http://${platformConfig.tenant}.gateway.lowcode`,
+                target: `http://localhost:8080`,
                 changeOrigin: true,
                 autoRewrite: true,
                 onProxyReq,
