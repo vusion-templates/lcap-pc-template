@@ -1,7 +1,7 @@
 import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
 import { genInitData } from './tools';
 import auth from '../router/auth';
-import configService from '@/global/services/config';
+import configurationService from '@/global/services/configuration';
 
 export default {
     install(Vue, options = {}) {
@@ -90,11 +90,9 @@ export default {
                         location.reload();
                     });
             },
-            getConfig(name) {
-                const res = configService.getConfig({
-                    path: {
-                        configKey: name,
-                    },
+            async getCustomConfig(configKey = '') {
+                const res = await configurationService.getCustomConfig({
+                    path: { configKey },
                 });
                 return res;
             },

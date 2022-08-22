@@ -60,10 +60,7 @@ export const utils = {
         }
     },
     Concat(str1, str2) {
-        if (Array.isArray(str1) && Array.isArray(str2))
-            return [].concat(str1, str2);
-        else
-            return str1 + str2;
+        return String(str1) + String(str2);
     },
     Length(str1) {
         return str1 && str1.length;
@@ -282,13 +279,6 @@ export const utils = {
         const dateDiff = dateTime2Temp - dateTime1Temp;
         return Math.floor(dateDiff / (config.diff));
     },
-    GetProperties(name) {
-        let customerProperties = window.__LCAP_CONFIG__;
-        if (typeof customerProperties === 'string') {
-            customerProperties = JSON.parse(customerProperties);
-        }
-        return customerProperties[name];
-    },
     /**
      * 字符串查找
      * @param {string} str 字符串
@@ -359,6 +349,28 @@ export const utils = {
             length = 0;
         }
         return str.substr(start, length);
+    },
+    /**
+     * List<T> 转换为 PageOf<T>
+     * @param {List<T>} list 集合
+     * @param {number} page 页数
+     * @param {number} size 每页条数
+     * @param {number} total 总数
+     * @returns {PageOf<T>}
+     */
+    CreatePageOf(list, page, size, total) {
+        const totalPages = Math.ceil(total / size);
+        return {
+            content: list,
+            number: page,
+            size,
+            numberOfElements: list.length,
+            totalPages,
+            totalElements: total,
+            last: page === totalPages,
+            first: page === 1,
+            empty: total,
+        };
     },
 };
 
