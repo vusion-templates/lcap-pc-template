@@ -44,6 +44,7 @@ export default {
                     headers: getBaseHeaders(),
                     query: {
                         userId: Vue.prototype.$global.userInfo.UserId,
+                        userName: Vue.prototype.$global.userInfo.UserName,
                     },
                 }).then((result) => {
                     const resources = result.filter((resource) => resource.resourceType === 'ui');
