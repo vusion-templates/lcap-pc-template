@@ -60,7 +60,10 @@ export const genInitData = (
                         type: 'Identifier',
                         name: property.name,
                     },
-                    value: genInitData(property.typeAnnotation, dataTypesMap, true, usedSchemaRefs, level + 1),
+                    value: genInitData({
+                        ...property.typeAnnotation,
+                        defaultValue: property.defaultValue,
+                    }, dataTypesMap, true, usedSchemaRefs, level + 1),
                 });
             });
             return result;
@@ -93,20 +96,15 @@ export const genInitData = (
                 type: 'NumericLiteral',
                 value: parsedValue,
             };
-        } else if (typeName === 'Decimal') {
+        } else if (typeName === 'Double') {
             return {
                 type: 'NumericLiteral',
                 value: parsedValue,
             };
-        } else if (typeName === 'String') {
+        } else { // String, Date, Time, DateTime, Email
             return {
                 type: 'StringLiteral',
                 value: typeAnnotation.defaultValue,
-            };
-        } else {
-            return {
-                type: 'Identifier',
-                name: 'undefined',
             };
         }
     } else {

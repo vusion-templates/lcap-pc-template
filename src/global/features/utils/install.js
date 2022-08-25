@@ -48,11 +48,7 @@ export const utils = {
         if (!enumeration)
             return [];
         else {
-            const list = Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
-            list.forEach((item) => {
-                list[item.value] = item.value;
-            });
-            return list;
+            return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
         }
     },
     Split(str, seperator) {
@@ -64,10 +60,7 @@ export const utils = {
         }
     },
     Concat(str1, str2) {
-        if (Array.isArray(str1) && Array.isArray(str2))
-            return [].concat(str1, str2);
-        else
-            return str1 + str2;
+        return String(str1) + String(str2);
     },
     Length(str1) {
         return str1 && str1.length;
@@ -94,23 +87,23 @@ export const utils = {
     },
     Add(arr, item) {
         if (Array.isArray(arr)) {
-            return arr.push(item);
+            arr.push(item);
         }
     },
     Insert(arr, index, item) {
         if (Array.isArray(arr)) {
-            return arr.splice(index, 0, item);
+            arr.splice(index, 0, item);
         }
     },
     Remove(arr, item) {
         if (Array.isArray(arr)) {
             const index = arr.indexOf(item);
-            return ~index && arr.splice(index, 1);
+            ~index && arr.splice(index, 1);
         }
     },
     RemoveAt(arr, index) {
         if (Array.isArray(arr)) {
-            return arr.splice(index, 1);
+            return arr.splice(index, 1)[0];
         }
     },
     CurrDate() {
@@ -153,7 +146,7 @@ export const utils = {
      */
     Clear(obj) {
         if (Array.isArray(obj)) {
-            obj = [];
+            obj.splice(0, obj.length);
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
@@ -198,31 +191,29 @@ export const utils = {
 
         return result;
     },
-    Convert(value, schema) {
-        const { type, format: formatVar } = schema;
-
-        if (type === 'string') {
-            switch (formatVar) {
-                case 'date-time':
-                    return formatRFC3339(new Date(value));
-                case 'date':
-                    return format(new Date(value), 'yyyy-MM-dd');
-                case 'time':
+    Convert(value, typeAnnotation) {
+        if (typeAnnotation && typeAnnotation.typeKind === 'primitive') {
+            if (typeAnnotation.typeName === 'DateTime')
+                return formatRFC3339(new Date(value));
+            else if (typeAnnotation.typeName === 'Date')
+                return format(new Date(value), 'yyyy-MM-dd');
+            else if (typeAnnotation.typeName === 'Time') {
+                if (/^\d{2}:\d{2}:\d{2}$/.test(value)) // 纯时间 12:30:00
+                    return format(new Date('2022-01-01 ' + value), 'HH:mm:ss');
+                else
                     return format(new Date(value), 'HH:mm:ss');
-                case '': // 字符串
-                    return String(value);
-            }
+            } else if (typeAnnotation.typeName === 'String')
+                return String(value);
+            else if (typeAnnotation.typeName === 'Double') // 小数
+                return parseFloat(+value);
+            else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
+                // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
+                return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
+            else if (typeAnnotation.typeName === 'Boolean') // 布尔值
+                return !!value;
         }
 
-        if (type === 'number' && formatVar === 'double') // 小数
-            return parseFloat(+value);
-
-        if (type === 'integer')
-            // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
-            return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
-
-        if (type === 'boolean') // 布尔值
-            return !!value;
+        return value;
     },
     /**
      * 数字格式化
@@ -358,6 +349,28 @@ export const utils = {
             length = 0;
         }
         return str.substr(start, length);
+    },
+    /**
+     * List<T> 转换为 PageOf<T>
+     * @param {List<T>} list 集合
+     * @param {number} page 页数
+     * @param {number} size 每页条数
+     * @param {number} total 总数
+     * @returns {PageOf<T>}
+     */
+    CreatePageOf(list, page, size, total) {
+        const totalPages = Math.ceil(total / size);
+        return {
+            content: list,
+            number: page,
+            size,
+            numberOfElements: list.length,
+            totalPages,
+            totalElements: total,
+            last: page === totalPages,
+            first: page === 1,
+            empty: total,
+        };
     },
 };
 

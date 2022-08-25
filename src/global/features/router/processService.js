@@ -1,16 +1,16 @@
 import processService from '@/global/services/process';
 import $auth from './auth/index';
 
-let assignee;
+let user;
 export default {
     async getTasks(param = {}) {
         const userInfo = await $auth.getUserInfo() || {};
-        assignee = userInfo.UserName;
+        user = userInfo.UserName;
         const { query } = param;
         const res = await processService.getTasks({
             query: {
                 ...query,
-                assignee,
+                user,
             },
         });
         return res;
@@ -20,7 +20,7 @@ export default {
         const res = await processService.claimTask({
             path: { ...path },
             body: {
-                assignee,
+                user,
             },
         });
         return res;
@@ -30,7 +30,7 @@ export default {
         const res = await processService.getDestinationUrl({
             path: { id },
             query: {
-                assignee,
+                user,
             },
         });
         return res;

@@ -1,4 +1,5 @@
 import errHandles from './errHandles';
+import cloneDeep from '../../common/utils/cloneDeep';
 
 const isPromise = function (func) {
     return func && typeof func.then === 'function';
@@ -9,7 +10,7 @@ function httpCode(response, params, requestInfo) {
     if (serviceType && serviceType === 'external') {
         return response;
     }
-    const data = response.data;
+    const data = response.data; // cloneDeep(response.data, (value) => value === null ? undefined : value);
     const code = data.code || data.Code;
     if ((code === undefined) || (code === 'Success') || (code + '').startsWith('2')) {
         return response;

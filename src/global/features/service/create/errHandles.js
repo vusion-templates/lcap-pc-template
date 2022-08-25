@@ -4,7 +4,7 @@ import SToast from '@/global/components/common/s-toast.vue';
 const Ctr = Vue.component('s-toast', SToast);
 const instance = new Ctr();
 const getErrMessage = (err) => err.msg || err.Message || '暂无错误信息';
-const getErrStrack = (err) => err.stackTrace || '暂无错误信息';
+const getErrStrack = (err) => err.StackTrace || '暂无错误信息';
 export default {
     defaults({ config }, err) {
         if (!config.noErrorTip) {
@@ -13,12 +13,12 @@ export default {
     },
     500({ config }, err = {}) {
         if (!config.noErrorTip) {
-            instance.show(getErrMessage(), getErrStrack());
+            instance.show(getErrMessage(err), getErrStrack(err));
         }
     },
     400({ config }, err = {}) {
         if (!config.noErrorTip) {
-            instance.show(getErrMessage(), getErrStrack());
+            instance.show(getErrMessage(err), getErrStrack(err));
         }
     },
     403({ config }, err = {}) {

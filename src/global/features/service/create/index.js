@@ -5,6 +5,7 @@ import addConfigs from './add.configs';
 import { getFilenameFromContentDispositionHeader } from './tools';
 import paramsSerializer from './paramsSerializer';
 import cookie from '@/global/features/utils/cookie';
+import cloneDeep from '../../common/utils/cloneDeep';
 
 const formatContentType = function (contentType, data) {
     const map = {
@@ -58,6 +59,8 @@ function download(url) {
 }
 
 const requester = function (requestInfo) {
+    // requestInfo = cloneDeep(requestInfo, (value) => value === undefined ? null : value);
+
     const { url, config = {} } = requestInfo;
     const { path, method, body = {}, headers = {}, query = {} } = url;
     const baseURL = config.baseURL ? config.baseURL : '';
@@ -69,7 +72,7 @@ const requester = function (requestInfo) {
     }
     let data;
     const method2 = method.toUpperCase();
-    if (Object.keys(body).length || ['PUT', 'POST', 'PATCH'].includes(method2)) {
+    if (Array.isArray(body) || Object.keys(body).length || ['PUT', 'POST', 'PATCH', 'DELETE'].includes(method2)) {
         data = formatContentType(headers['Content-Type'], body);
     }
     const req = axios({

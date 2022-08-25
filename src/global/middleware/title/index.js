@@ -12,9 +12,9 @@ export default {
                     document.title = metaTitle(to, from);
                 } else {
                     if (appConfig.documentTitle) {
-                        document.title = appConfig.documentTitle.replace('$页面标题', metaTitle).replace('$应用名称', appConfig.project);
+                        document.title = appConfig.documentTitle.replaceAll('$页面标题', metaTitle).replaceAll('$应用名称', appConfig.project);
                     } else {
-                        document.title = metaTitle;
+                        document.title = `${metaTitle}-${appConfig.project}`;
                     }
                 }
             }
