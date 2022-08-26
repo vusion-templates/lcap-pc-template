@@ -117,7 +117,7 @@ export const utils = {
                 arr.sort((a, b) => {
                     const valueA = callback(a);
                     const valueB = callback(b);
-                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined') {
+                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
                         return 1;
                     } else {
                         if (valueA >= valueB) {
