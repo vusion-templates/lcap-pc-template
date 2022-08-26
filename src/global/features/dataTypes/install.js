@@ -2,6 +2,7 @@ import generate from 'babel-generator'; // @babel/generator use ES6, not support
 import { genInitData } from './tools';
 import auth from '../router/auth';
 import configurationService from '@/global/services/configuration';
+import processService from '@/global/features/service/process';
 
 export default {
     install(Vue, options = {}) {
@@ -97,6 +98,9 @@ export default {
                 return res;
             },
         };
+        Object.keys(processService).forEach((service) => {
+            $global[service] = processService[service];
+        });
         new Vue({
             data: {
                 $global,
