@@ -2,7 +2,25 @@ import { loginAuth } from './auth';
 import auth from '@/global/features/router/auth';
 import { getComponentOption } from '../util';
 export default function (appConfig) {
-    if (appConfig.auth) {
+    const pathNameList = window.location.pathname?.split('/')?.slice(1);
+    let authPass;
+    if (pathNameList.length === 0) {
+        authPass = appConfig.auth;
+    }
+    if (pathNameList.length > 1) {
+        let children = appConfig.subPage;
+        let res;
+        for (let i = 1; i < pathNameList.length; i++) {
+            for (const item of children) {
+                if (item.name === pathNameList[i]) {
+                    children = item.children;
+                    res = item.auth;
+                }
+            }
+        }
+        authPass = res;
+    }
+    if (authPass) {
         auth.init(appConfig.domainName);
     }
     return function ({ to, from, next, appConfig }) {
