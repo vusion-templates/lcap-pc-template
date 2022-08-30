@@ -182,7 +182,7 @@ export const utils = {
             return arr.slice((page - 1) * size, size);
         }
     },
-    addAll(arr, addList) {
+    AddAll(arr, addList) {
         if (Array.isArray(arr) && Array.isArray(addList)) {
             arr.push(...addList);
             return arr.length;
