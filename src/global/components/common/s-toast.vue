@@ -77,6 +77,7 @@ export default {
         padding: 0 5px 0;
         margin-left: 16px;
         padding-right: 16px;
+        min-width: 140px;
     }
 
     .copybox:hover {

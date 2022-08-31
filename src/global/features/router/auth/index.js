@@ -77,9 +77,13 @@ export default {
     },
     logout() {
         if (window.appInfo.hasUserCenter) {
-            // 用户中心，去除认证和用户名信息
-            cookie.erase('authorization');
-            cookie.erase('username');
+            return lowauthService.Logout({
+                headers: getBaseHeaders(),
+            }).then(() => {
+                // 用户中心，去除认证和用户名信息
+                cookie.erase('authorization');
+                cookie.erase('username');
+            });
         } else {
             return authService.Logout({
                 headers: getBaseHeaders(),

@@ -1,8 +1,11 @@
 import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
+import CryptoJS from 'crypto-js';
 import { genInitData } from './tools';
 import auth from '../router/auth';
 import configurationService from '@/global/services/configuration';
 import processService from '@/global/features/service/process';
+
+const aesKey = ';Z#^$;8+yhO!AhGo';
 
 export default {
     install(Vue, options = {}) {
@@ -16,6 +19,24 @@ export default {
             },
             hasAuth(authPath) {
                 return auth.has(authPath);
+            },
+            encryptByAES(message, key = aesKey) {
+                const keyHex = CryptoJS.enc.Utf8.parse(key); //
+                const messageHex = CryptoJS.enc.Utf8.parse(message);
+                const encrypted = CryptoJS.AES.encrypt(messageHex, keyHex, {
+                    mode: CryptoJS.mode.ECB,
+                    padding: CryptoJS.pad.Pkcs7,
+                });
+                return encrypted.toString();
+            },
+            decryptByAES(messageBase64, key = aesKey) {
+                const keyHex = CryptoJS.enc.Utf8.parse(key);
+                const decrypt = CryptoJS.AES.decrypt(messageBase64, keyHex, {
+                    mode: CryptoJS.mode.ECB,
+                    padding: CryptoJS.pad.Pkcs7,
+                });
+                const decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
+                return decryptedStr.toString();
             },
             getLocation() {
                 return new Promise((res, rej) => {
