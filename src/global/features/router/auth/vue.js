@@ -60,8 +60,10 @@ export default {
 
                 // const authPath = `${base + router.currentRoute.path}/${data.value ? data.value : vnode.data.ref}`;
                 const authPath = data.value;
-                const visible = $auth.has(authPath);
-
+                let visible = $auth.has(authPath);
+                if (!$auth._map) {
+                    visible = false;
+                }
                 el && (el.style.display = visible ? '' : 'none');
             },
             bind(el, binding, vnode, oldVnode) {
