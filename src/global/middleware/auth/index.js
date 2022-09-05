@@ -4,11 +4,11 @@ import { getComponentOption } from '../util';
 export default function (appConfig) {
     const pathNameList = window.location.pathname?.split('/')?.slice(1);
     let authPass;
-    if (pathNameList.length === 0) {
+    // 老版本ide生成的制品没有subpage字段，沿用根页面鉴权逻辑
+    if (pathNameList.length === 0 || !appConfig.subPage) {
         authPass = appConfig.auth;
-    }
-    if (pathNameList.length > 1) {
-        let children = appConfig.subPage;
+    } else {
+        let children = appConfig?.subPage;
         let res;
         for (let i = 1; i < pathNameList.length; i++) {
             for (const item of children) {
