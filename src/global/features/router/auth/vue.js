@@ -60,8 +60,10 @@ export default {
 
                 // const authPath = `${base + router.currentRoute.path}/${data.value ? data.value : vnode.data.ref}`;
                 const authPath = data.value;
+                // 用户未登录时，所有带有权限的组件都隐藏
+                const authorization = document.cookie.indexOf('authorization') > -1;
                 let visible = $auth.has(authPath);
-                if (!$auth._map) {
+                if (!authorization) {
                     visible = false;
                 }
                 el && (el.style.display = visible ? '' : 'none');
