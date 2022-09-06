@@ -1,9 +1,12 @@
 import Vue from 'vue';
-import { UToast } from 'cloud-ui.vusion';
+import * as CloudUI from 'cloud-ui.vusion';
+import { installComponents } from '@vusion/utils';
+installComponents(Vue, CloudUI);
 import SToast from '@/global/components/common/s-toast.vue';
 const Ctr = Vue.component('s-toast', SToast);
 const instance = new Ctr();
 window.toast = instance;
+window.CloudUI = CloudUI;
 const getErrMessage = (err) => err.msg || err.Message || '暂无错误信息';
 const getErrStrack = (err) => err.StackTrace || '暂无错误信息';
 
@@ -33,12 +36,12 @@ export default {
     },
     remoteError({ config }, err) {
         if (!config.noErrorTip) {
-            UToast.show('系统错误，请联系管理员！');
+            CloudUI.UToast.show('系统错误，请联系管理员！');
         }
     },
     localError({ config }, err) {
         if (!config.noErrorTip) {
-            UToast.show('系统错误，请联系管理员！');
+            CloudUI.UToast.show('系统错误，请联系管理员！');
         }
     },
 };
