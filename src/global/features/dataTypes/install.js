@@ -5,6 +5,7 @@ import auth from '../router/auth';
 import configurationService from '@/global/services/configuration';
 import processService from '@/global/features/service/process';
 
+window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 
 export default {
