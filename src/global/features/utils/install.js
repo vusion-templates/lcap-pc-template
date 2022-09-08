@@ -106,6 +106,88 @@ export const utils = {
             return arr.splice(index, 1)[0];
         }
     },
+    ListReverse(arr) {
+        if (Array.isArray(arr)) {
+            arr.reverse();
+        }
+    },
+    ListSort(arr, callback, sort) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                arr.sort((a, b) => {
+                    const valueA = callback(a);
+                    const valueB = callback(b);
+                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
+                        return 1;
+                    } else {
+                        if (valueA >= valueB) {
+                            if (sort) {
+                                return 1;
+                            }
+                            return -1;
+                        } else {
+                            if (sort) {
+                                return -1;
+                            }
+                            return 1;
+                        }
+                    }
+                });
+            }
+        }
+    },
+    ListFind(arr, callback) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                return arr.find(callback);
+            }
+        }
+    },
+    ListFindAll(arr, callback) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                return arr.filter(callback);
+            }
+        }
+    },
+    ListFindIndex(arr, callback) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                return arr.findIndex(callback);
+            }
+        }
+    },
+    ListSlice(arr, start, end) {
+        if (Array.isArray(arr)) {
+            return arr.slice(start, end);
+        }
+    },
+    ListDistinct(arr) {
+        if (Array.isArray(arr)) {
+            const map = new Map();
+            let i = 0;
+            while (i < arr.length) {
+                if (map.get(arr[i])) {
+                    arr.splice(i, 1);
+                    i--;
+                } else {
+                    map.set(arr[i], true);
+                }
+                i++;
+            }
+        }
+    },
+    ListSliceToPageOf(arr, page, size) {
+        if (Array.isArray(arr) && page) {
+            return arr.slice((page - 1) * size, size);
+        }
+    },
+    AddAll(arr, addList) {
+        if (Array.isArray(arr) && Array.isArray(addList)) {
+            arr.push(...addList);
+            return arr.length;
+        }
+    },
     CurrDate() {
         return new Date().toJSON().replace(/T.+?Z/, '');
     },
@@ -139,7 +221,7 @@ export const utils = {
         return cloneDeep(obj);
     },
     New(obj) {
-        return obj;
+        return utils.Vue.prototype.$genInitFromSchema(obj);
     },
     /**
      * 将内容置空，array 置为 []; object 沿用 ClearObject 逻辑; 其他置为 undefined

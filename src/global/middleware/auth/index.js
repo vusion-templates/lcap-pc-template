@@ -2,7 +2,25 @@ import { loginAuth } from './auth';
 import auth from '@/global/features/router/auth';
 import { getComponentOption } from '../util';
 export default function (appConfig) {
-    if (appConfig.auth) {
+    const pathNameList = window.location.pathname?.split('/')?.slice(1);
+    let authPass;
+    // 老版本ide生成的制品没有subpage字段，沿用根页面鉴权逻辑
+    if (pathNameList.length === 0 || !appConfig.subPage) {
+        authPass = appConfig.auth;
+    } else {
+        let children = appConfig?.subPage;
+        let res;
+        for (let i = 1; i < pathNameList.length; i++) {
+            for (const item of children) {
+                if (item.name === pathNameList[i]) {
+                    children = item.children;
+                    res = item.auth;
+                }
+            }
+        }
+        authPass = res;
+    }
+    if (authPass) {
         auth.init(appConfig.domainName);
     }
     return function ({ to, from, next, appConfig }) {

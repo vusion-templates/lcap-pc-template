@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.4.16",
+  "version": "0.4.17",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -93,6 +93,7 @@
     "babel-generator": "^6.26.1",
     "babel-polyfill": "^6.26.0",
     "cloud-ui.vusion": "^0.14.1",
+    "crypto-js": "^4.1.1",
     "date-fns": "^2.6.0",
     "event-hooks-webpack-plugin": "^2.1.6",
     "i-material-design.vue": "^5.1.0",

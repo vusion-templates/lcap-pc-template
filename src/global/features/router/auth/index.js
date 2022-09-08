@@ -16,7 +16,13 @@ export default {
     getUserInfo() {
         if (!userInfoPromise) {
             if (window.appInfo.hasUserCenter) {
-                userInfoPromise = Promise.resolve({});
+                // userInfoPromise = Promise.resolve({});
+                userInfoPromise = lowauthService.GetUser({
+                    headers: getBaseHeaders(),
+                    config: {
+                        noErrorTip: true,
+                    },
+                });
             } else {
                 userInfoPromise = authService.GetUser({
                     headers: getBaseHeaders(),
@@ -27,6 +33,10 @@ export default {
             }
             userInfoPromise = userInfoPromise.then((result) => {
                 const userInfo = result.Data;
+                if (!userInfo.UserId && userInfo.userId) {
+                    userInfo.UserId = userInfo.userId;
+                    userInfo.UserName = userInfo.userName;
+                }
                 const $global = Vue.prototype.$global || {};
                 $global.userInfo = userInfo;
                 return userInfo;
@@ -78,9 +88,13 @@ export default {
     },
     logout() {
         if (window.appInfo.hasUserCenter) {
-            // 用户中心，去除认证和用户名信息
-            cookie.erase('authorization');
-            cookie.erase('username');
+            return lowauthService.Logout({
+                headers: getBaseHeaders(),
+            }).then(() => {
+                // 用户中心，去除认证和用户名信息
+                cookie.erase('authorization');
+                cookie.erase('username');
+            });
         } else {
             return authService.Logout({
                 headers: getBaseHeaders(),
