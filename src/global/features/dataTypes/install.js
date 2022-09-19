@@ -12,6 +12,7 @@ export default {
     install(Vue, options = {}) {
         const $global = {
             userInfo: {},
+            frontendVariables: {},
             requestFullscreen() {
                 return document.body.requestFullscreen();
             },
