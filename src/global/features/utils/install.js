@@ -3,6 +3,8 @@ import isObject from 'lodash/isObject';
 import isEqual from 'lodash/isEqual';
 import { utils as cutils } from 'cloud-ui.vusion';
 import { addDays, subDays, addMonths, format, formatRFC3339, isValid } from 'date-fns';
+import { Decimal } from 'decimal.js';
+
 let enumsMap = {};
 
 function toValue(date, converter) {
@@ -288,6 +290,8 @@ export const utils = {
                 return String(value);
             else if (typeAnnotation.typeName === 'Double') // 小数
                 return parseFloat(+value);
+            else if (typeAnnotation.typeName === 'Decimal') // 精度小数
+                return new Decimal(value + '').toNumber();
             else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
                 // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
                 return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
