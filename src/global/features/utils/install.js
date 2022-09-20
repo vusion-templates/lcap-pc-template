@@ -288,10 +288,8 @@ export const utils = {
                     return format(new Date(value), 'HH:mm:ss');
             } else if (typeAnnotation.typeName === 'String')
                 return String(value);
-            else if (typeAnnotation.typeName === 'Double') // 小数
+            else if (typeAnnotation.typeName === 'Double' || typeAnnotation.typeName === 'Decimal') // 小数
                 return parseFloat(+value);
-            else if (typeAnnotation.typeName === 'Decimal') // 精度小数
-                return new Decimal(value + '').toNumber();
             else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
                 // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
                 return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
