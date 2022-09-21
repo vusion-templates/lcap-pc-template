@@ -86,7 +86,6 @@ const requester = function (requestInfo) {
         withCredentials: !baseURL,
         xsrfCookieName: 'csrfToken',
         xsrfHeaderName: 'x-csrf-token',
-
     });
     return req;
 };
@@ -99,6 +98,20 @@ export const createService = function createService(apiSchemaList, serviceConfig
         httpCode: true,
         httpError: true,
         shortResponse: true,
+    });
+    serviceConfig = fixServiceConfig;
+
+    return service.generator(apiSchemaList, dynamicServices, serviceConfig);
+};
+
+export const createLogicService = function createLogicService(apiSchemaList, serviceConfig, dynamicServices) {
+    const fixServiceConfig = serviceConfig || {};
+    fixServiceConfig.config = fixServiceConfig.config || {};
+    Object.assign(fixServiceConfig.config, {
+        httpCode: true,
+        httpError: true,
+        shortResponse: true,
+        concept: 'Logic',
     });
     serviceConfig = fixServiceConfig;
 
