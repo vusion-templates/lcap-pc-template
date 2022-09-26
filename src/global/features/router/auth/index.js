@@ -3,10 +3,15 @@ import authService from '@/global/services/auth';
 import lowauthService from '@/global/services/lowauth';
 import cookie from '@/global/features/utils/cookie';
 
-const getBaseHeaders = () => ({
-    Authorization: cookie.get('authorization'),
-    Env: window.appInfo && window.appInfo.env,
-});
+const getBaseHeaders = () => {
+    const headers = {
+        Env: window.appInfo && window.appInfo.env,
+    };
+    if (cookie.get('authorization')) {
+        headers.Authorization = cookie.get('authorization');
+    }
+    return headers;
+};
 
 let userInfoPromise = null;
 let userResourcesPromise = null;
