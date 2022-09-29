@@ -101,6 +101,11 @@ export const genInitData = (
                 type: 'NumericLiteral',
                 value: parsedValue,
             };
+        } else if (typeName === 'Decimal') {
+            return {
+                type: 'NumericLiteral',
+                value: parsedValue,
+            };
         } else { // String, Date, Time, DateTime, Email
             return {
                 type: 'StringLiteral',
