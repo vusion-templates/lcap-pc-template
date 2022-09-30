@@ -53,18 +53,27 @@ export const utils = {
             return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
         }
     },
-    Split(str, seperator) {
-        return str && str.split(seperator);
+    Split(str, separator) {
+        return str && str.split(separator);
     },
-    Join(arr, seperator) {
+    Join(arr, separator) {
         if (Array.isArray(arr)) {
-            return arr.join(seperator);
+            return arr.join(separator);
         }
     },
     Concat(str1, str2) {
         return String(str1) + String(str2);
     },
     Length(str1) {
+        // List类型
+        if (Array.isArray(str1)) {
+            return str1.length;
+        }
+        // Map类型
+        if (isObject(str1)) {
+            return Object.keys(str1).length;
+        }
+        // string类型
         return str1 && str1.length;
     },
     ToLower(str) {
@@ -106,6 +115,62 @@ export const utils = {
     RemoveAt(arr, index) {
         if (Array.isArray(arr)) {
             return arr.splice(index, 1)[0];
+        }
+    },
+    MapGet(map, key) {
+        if (isObject(map)) {
+            return map[key];
+        }
+    },
+    MapPut(map, key, value) {
+        if (isObject(map)) {
+            map[key] = value;
+        }
+    },
+    MapRemove(map, key) {
+        if (isObject(map)) {
+            delete map[key];
+        }
+    },
+    MapContains(map, key) {
+        if (isObject(map)) {
+            return key in map;
+        }
+        return false;
+    },
+    MapKeys(map) {
+        if (isObject(map)) {
+            return Object.keys(map);
+        }
+        return 0;
+    },
+    MapValues(map) {
+        if (isObject(map)) {
+            if ('values' in Object) {
+                return Object.values(map);
+            } else {
+                const res = [];
+                for (const key in map) {
+                    if (Object.hasOwnProperty.call(map, key)) {
+                        res.push(map[key]);
+                    }
+                }
+                return res;
+            }
+        }
+        return [];
+    },
+    MapFilter(map, filter) {
+        if (isObject(map) && typeof filter === 'function') {
+            const res = [];
+            for (const key in map) {
+                if (Object.hasOwnProperty.call(map, key)) {
+                    if (filter.call(this, map[key])) {
+                        res.push(map[key]);
+                    }
+                }
+            }
+            return res;
         }
     },
     ListReverse(arr) {
