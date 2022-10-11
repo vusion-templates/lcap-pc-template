@@ -4,6 +4,7 @@ import isEqual from 'lodash/isEqual';
 import { utils as cutils } from 'cloud-ui.vusion';
 import { addDays, subDays, addMonths, format, formatRFC3339, isValid } from 'date-fns';
 import { Decimal } from 'decimal.js';
+import Vue from 'vue';
 
 let enumsMap = {};
 
@@ -124,7 +125,7 @@ export const utils = {
     },
     MapPut(map, key, value) {
         if (isObject(map)) {
-            map[key] = value;
+            Vue.prototype.$set(map, key, value);
         }
     },
     MapRemove(map, key) {
