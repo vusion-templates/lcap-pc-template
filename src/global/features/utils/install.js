@@ -160,12 +160,12 @@ export const utils = {
         }
         return [];
     },
-    MapFilter(map, filter) {
-        if (isObject(map) && typeof filter === 'function') {
+    MapFilter(map, filterByKey, filterByVal) {
+        if (isObject(map) && typeof filterByKey === 'function' && typeof filterByVal === 'function') {
             const res = [];
             for (const key in map) {
                 if (Object.hasOwnProperty.call(map, key)) {
-                    if (filter.call(this, map[key])) {
+                    if (filterByKey.call(this, key) && filterByVal.call(this, map[key])) {
                         res.push(map[key]);
                     }
                 }
