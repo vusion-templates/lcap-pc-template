@@ -25,7 +25,6 @@ vusion_packages/
 .idea/
 
 # Build Output
-public/
 dist/
 
 # Coverage
