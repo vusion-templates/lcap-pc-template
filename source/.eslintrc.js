@@ -16,6 +16,7 @@ module.exports = {
 
     'no-unused-vars': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'vue/no-parsing-error': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'vue/no-unused-vars': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-empty': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-prototype-builtins': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-dupe-keys': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

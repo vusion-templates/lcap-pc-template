@@ -18,33 +18,32 @@ import { initRouter } from './router';
 
 window.appVue = Vue;
 
-const traverseRoutes = (route, allowedPaths, ancestorPaths, newRoutes) => {
-    const routePath = route.path;
-    if (!Array.isArray(ancestorPaths)) {
-        ancestorPaths = [];
-    }
-    const completePath = [...ancestorPaths, routePath].join('/');
-
-    let completeRedirectPath = '';
-    const redirectPath = route.redirect;
-    if (redirectPath) {
-        completeRedirectPath = [...ancestorPaths, redirectPath].join('/');
-    }
-    let newRoute = null;
-    if (allowedPaths.includes(completePath) || allowedPaths.includes(redirectPath)) {
-        newRoute = {
-            ...route,
-        };
-        newRoutes.push(newRoute);
-    }
-    const routeChildren = route.children;
-    if (newRoute && Array.isArray(routeChildren) && routeChildren.length) {
-        newRoute.children = [];
-        for (let i = 0; i < routeChildren.length; i++) {
-            const subView = routeChildren[i];
-            traverseRoutes(subView, allowedPaths, [...ancestorPaths, routePath], newRoute.children);
+const filterRoutes = (routes, ancestorPaths, compareFn) => {
+    const newRoutes = [];
+    if (Array.isArray(routes)) {
+        for (let i = 0; i < routes.length; i++) {
+            const route = routes[i];
+            const routePath = route.path;
+            if (!Array.isArray(ancestorPaths)) {
+                ancestorPaths = [];
+            }
+            let newRoute = null;
+            if (compareFn(route, ancestorPaths)) {
+                newRoute = {
+                    ...route,
+                };
+                newRoutes.push(newRoute);
+            }
+            const routeChildren = route.children;
+            if (newRoute && Array.isArray(routeChildren) && routeChildren.length) {
+                const children = filterRoutes(routeChildren, [...ancestorPaths, routePath], compareFn);
+                if (Array.isArray(children) && children.length) {
+                    newRoute.children = children;
+                }
+            }
         }
     }
+    return newRoutes;
 };
 
 const init = (appConfig, platformConfig, routes, metaData) => {
@@ -58,19 +57,73 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     Vue.use(installDataTypes, metaData);
     Vue.use(installUtils, metaData);
 
-    const baseResourcePaths = platformConfig.baseResourcePaths || [];
+    // 已经获取过权限接口
+    Vue.prototype.hasLoadedAuth = false;
 
-    const baseRoutes = [];
-    if (Array.isArray(routes)) {
-        for (let i = 0; i < routes.length; i++) {
-            const route = routes[i];
-            traverseRoutes(route, baseResourcePaths, null, baseRoutes);
+    // 是否已经登录
+    Vue.prototype.logined = true;
+    const baseResourcePaths = platformConfig.baseResourcePaths || [];
+    const authResourcePaths = platformConfig.authResourcePaths || [];
+    const baseRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
+        const routePath = route.path;
+        const completePath = [...ancestorPaths, routePath].join('/');
+        let completeRedirectPath = '';
+        const redirectPath = route.redirect;
+        if (redirectPath) {
+            completeRedirectPath = [...ancestorPaths, redirectPath].join('/');
         }
-    }
+        return baseResourcePaths.includes(completePath) || baseResourcePaths.includes(completeRedirectPath);
+    });
+
+    const router = initRouter(baseRoutes);
+
+    router.beforeEach((to, from, next) => {
+        if (!Vue.prototype.hasLoadedAuth) {
+            const toPath = to.redirectedFrom || to.path;
+            if (authResourcePaths.includes(toPath)) {
+                if (!Vue.prototype.logined) {
+                    next({ path: '/login' });
+                } else {
+                    const userResourcePaths = [
+                        {
+                            resourceType: 'ui',
+                            resourceValue: '/permission_center/addRoleUser',
+                        },
+                    ].map((resource) => resource.resourceValue);
+
+                    Vue.prototype.hasLoadedAuth = true;
+
+                    const otherRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
+                        const routePath = route.path;
+                        const completePath = [...ancestorPaths, routePath].join('/');
+                        let completeRedirectPath = '';
+                        const redirectPath = route.redirect;
+                        if (redirectPath) {
+                            completeRedirectPath = [...ancestorPaths, redirectPath].join('/');
+                        }
+                        let isAllow = false;
+                        userResourcePaths.forEach((userResourcePath) => {
+                            if (completeRedirectPath) {
+                                isAllow = userResourcePath.startsWith(completeRedirectPath);
+                            } else {
+                                isAllow = userResourcePath.startsWith(completePath);
+                            }
+                        });
+                        return isAllow;
+                    });
+                    otherRoutes.forEach((route) => {
+                        router.addRoute(route);
+                    });
+                    next({ path: toPath });
+                }
+            }
+        }
+        next();
+    });
 
     const app = new Vue({
         name: 'app',
-        router: initRouter(baseRoutes),
+        router,
         ...App,
     });
     app.$mount('#app');
