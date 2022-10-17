@@ -1,7 +1,8 @@
 import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
+
+import configuration from '@/apis/configuration';
+import authService from '../auth/authService';
 import { genInitData } from './tools';
-import auth from '@/global/auth/index';
-import configurationService from '@/apis/configuration';
 
 export default {
     install(Vue, options = {}) {
@@ -14,7 +15,7 @@ export default {
                 return document.exitFullscreen();
             },
             hasAuth(authPath) {
-                return auth.has(authPath);
+                return authService.has(authPath);
             },
             getLocation() {
                 return new Promise((res, rej) => {
@@ -91,7 +92,7 @@ export default {
                     });
             },
             async getCustomConfig(configKey = '') {
-                const res = await configurationService.getCustomConfig({
+                const res = await configuration.getCustomConfig({
                     path: { configKey },
                 });
                 return res;

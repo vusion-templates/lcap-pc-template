@@ -1,4 +1,4 @@
-import $auth from './index';
+import authService from './authService';
 
 export default {
     install(Vue, options = {}) {
@@ -11,13 +11,13 @@ export default {
         * 该方法只能在 Vue 中调用
         * @param {*} subPath 子权限路径，如 /createButton/enabled
         */
-        $auth.hasSub = function (subPath) {
+        authService.hasSub = function (subPath) {
             const currentPath = base + router.currentRoute.path;
             if (subPath[0] !== '/')
                 subPath = '/' + subPath;
             return this.has(currentPath + subPath);
         };
-        $auth.hasFullPath = function (path) {
+        authService.hasFullPath = function (path) {
             if (path[0] !== '/')
                 path = '/' + path;
             return this.has(base + path);
@@ -25,7 +25,7 @@ export default {
         /**
          * 账号与权限中心
          */
-        Vue.prototype.$auth = $auth;
+        Vue.prototype.$auth = authService;
 
         // designer 和 环境直接放行认证和鉴权
         if (process.env.NODE_ENV === 'development' || process.env.VUE_APP_DESIGNER) {
@@ -60,7 +60,7 @@ export default {
 
                 // const authPath = `${base + router.currentRoute.path}/${data.value ? data.value : vnode.data.ref}`;
                 const authPath = data.value;
-                const visible = $auth.has(authPath);
+                const visible = authService.has(authPath);
 
                 el && (el.style.display = visible ? '' : 'none');
             },
@@ -88,7 +88,7 @@ export default {
                     // 有 v-auth 了就不处理 to 的了。
                     if (this.$vnode.data.directives && this.$vnode.data.directives.some((directive) => directive.name === 'auth'))
                         return;
-                    if (!$auth.isInit())
+                    if (!authService.isInit())
                         return;
 
                     let visible = true;
@@ -100,7 +100,7 @@ export default {
                             toPath = this.to.split('?')[0];
                         // 去掉末尾的 / 导致的权限不匹配
                         const fullPath = (base + toPath).replace(/\/+$/, '');
-                        visible = visible && $auth.has(fullPath);
+                        visible = visible && authService.has(fullPath);
                     }
 
                     this.$el && (this.$el.style.display = visible ? '' : 'none');

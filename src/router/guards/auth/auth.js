@@ -1,5 +1,6 @@
 import Vue from 'vue';
-import auth from '@/global/auth/index';
+
+import authService from '@/plugins/auth/authService';
 
 export const loginAuth = function (to, from, next, appConfig, item) {
     const currentPath = (appConfig.router.base + (appConfig.router.rule === 'scope' ? item.path : to.path)).replace(/\/$/, '');
@@ -9,8 +10,8 @@ export const loginAuth = function (to, from, next, appConfig, item) {
         unauthorized: appConfig.router.unauthorized,
         domainName: appConfig.domainName,
     };
-    return auth.getUserInfo().then(() => auth.getUserResources(authOptions.domainName).then(() => {
-        if (auth.has(currentPath))
+    return authService.getUserInfo().then(() => authService.getUserResources(authOptions.domainName).then(() => {
+        if (authService.has(currentPath))
             next();
         else
             throw new Error('Unauthorized');

@@ -3,11 +3,11 @@ import { installFilters, installComponents } from '@vusion/utils';
 
 import '@/assets/css/index.css';
 import '@/assets/css/theme.css';
-import installDataTypes from '@/global/dataTypes/install';
-import installLogics from '@/global/logic/install';
-import installRouter from '@/global/router/install';
-import installServices from '@/global/service/install';
-import installUtils from '@/global/utils/install';
+import DataTypesPlugin from '@/plugins/dataTypes/install';
+import LogicsPlugin from '@/plugins/logic/install';
+import RouterPlugin from '@/plugins/router/install';
+import ServicesPlugin from '@/plugins/service/install';
+import UtilsPlugin from '@/plugins/utils/install';
 import filters from '@/filters';
 import * as Components from '@/components';
 
@@ -53,11 +53,11 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     installFilters(Vue, filters);
     installComponents(Vue, Components);
 
-    Vue.use(installLogics, metaData);
-    Vue.use(installRouter);
-    Vue.use(installServices, metaData);
-    Vue.use(installDataTypes, metaData);
-    Vue.use(installUtils, metaData);
+    Vue.use(LogicsPlugin, metaData);
+    Vue.use(RouterPlugin);
+    Vue.use(ServicesPlugin, metaData);
+    Vue.use(DataTypesPlugin, metaData);
+    Vue.use(UtilsPlugin, metaData);
 
     // 已经获取过权限接口
     Vue.prototype.hasLoadedAuth = false;

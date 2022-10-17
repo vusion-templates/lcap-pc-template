@@ -1,12 +1,10 @@
-import { loginAuth } from './auth';
-
-import auth from '@/global/auth/index';
-
+import authService from '@/plugins/auth/authService';
 import { getComponentOption } from '../util';
+import { loginAuth } from './auth';
 
 export default function (appConfig) {
     if (appConfig.auth) {
-        auth.init(appConfig.domainName);
+        authService.init(appConfig.domainName);
     }
     return function ({ to, from, next, appConfig }) {
         // designer 和 环境直接放行认证和鉴权
@@ -36,7 +34,7 @@ export default function (appConfig) {
                             const done = () => {
                                 _next();
                             };
-                            return auth.init(appConfig.domainName).catch(done, done);
+                            return authService.init(appConfig.domainName).catch(done, done);
                         } else if (metaAuth === 'loginAuth') {
                             out = loginAuth(to, from, _next, appConfig, item);
                         } else {

@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import authService from '@/apis/auth';
-import lowauthService from '@/apis/lowauth';
+import auth from '@/apis/auth';
+import lowauth from '@/apis/lowauth';
 import cookie from '@/utils/cookie';
 
 const getBaseHeaders = () => ({
@@ -18,7 +18,7 @@ export default {
             if (window.appInfo.hasUserCenter) {
                 userInfoPromise = Promise.resolve({});
             } else {
-                userInfoPromise = authService.GetUser({
+                userInfoPromise = auth.GetUser({
                     headers: getBaseHeaders(),
                     config: {
                         noErrorTip: true,
@@ -40,7 +40,7 @@ export default {
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
             if (window.appInfo.hasAuth) {
-                userResourcesPromise = lowauthService.GetUserResources({
+                userResourcesPromise = lowauth.GetUserResources({
                     headers: getBaseHeaders(),
                     query: {
                         userId: Vue.prototype.$global.userInfo.UserId,
@@ -56,7 +56,7 @@ export default {
                     userResourcesPromise = null;
                 });
             } else {
-                userResourcesPromise = authService.GetUserResources({
+                userResourcesPromise = auth.GetUserResources({
                     headers: getBaseHeaders(),
                     query: {
                         DomainName,
@@ -81,7 +81,7 @@ export default {
             cookie.erase('authorization');
             cookie.erase('username');
         } else {
-            return authService.Logout({
+            return auth.Logout({
                 headers: getBaseHeaders(),
             }).then(() => {
                 cookie.erase('authorization');
