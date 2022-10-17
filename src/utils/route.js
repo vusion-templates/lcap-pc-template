@@ -1,29 +1,31 @@
-export default {
-    hasRoute(routes, targetRoute) {
-        let hasRoute = false;
-        routes.forEach((route) => {
-            const formatPath = '/' + route.path;
-            if (targetRoute.startsWith(formatPath)) {
-                let target = route;
-                let current = route.children;
-                targetRoute.replace(formatPath, '').split('/').every((routeItem) => {
-                    if (!routeItem) {
-                        return true;
-                    }
-                    if (current) {
-                        target = current.find((item) => item.path === routeItem);
-                        if (target) {
-                            current = target.children;
-                            return true;
-                        }
-                    } else {
-                        target = null;
-                    }
-                    return false;
-                });
-                hasRoute = !!target;
+const filterRoutes = (routes, ancestorPaths, compareFn) => {
+    const newRoutes = [];
+    if (Array.isArray(routes)) {
+        for (let i = 0; i < routes.length; i++) {
+            const route = routes[i];
+            const routePath = route.path;
+            if (!Array.isArray(ancestorPaths)) {
+                ancestorPaths = [];
             }
-        });
-        return hasRoute;
-    },
+            let newRoute = null;
+            if (compareFn(route, ancestorPaths)) {
+                newRoute = {
+                    ...route,
+                };
+                newRoutes.push(newRoute);
+            }
+            const routeChildren = route.children;
+            if (newRoute && Array.isArray(routeChildren) && routeChildren.length) {
+                const children = filterRoutes(routeChildren, [...ancestorPaths, routePath], compareFn);
+                if (Array.isArray(children) && children.length) {
+                    newRoute.children = children;
+                }
+            }
+        }
+    }
+    return newRoutes;
+};
+
+export {
+    filterRoutes,
 };
