@@ -62,8 +62,8 @@ export const utils = {
             return arr.join(separator);
         }
     },
-    Concat(str1, str2) {
-        return String(str1) + String(str2);
+    Concat(...arr) {
+        return arr.join('');
     },
     Length(str1) {
         // List类型
