@@ -13,13 +13,10 @@ import ServicesPlugin from '@/plugins/service/install';
 import UtilsPlugin from '@/plugins/utils/install';
 import filters from '@/filters';
 import * as Components from '@/components';
-
-import { userInfoGuard } from './router/guards/userInfo';
-import { getAuthGuard } from './router/guards/auth';
+import { userInfoGuard, getAuthGuard, getTitleGuard } from '@/router/guards';
 
 import App from './App.vue';
-
-import { initRouter } from './router';
+import { initRouter } from '@/router/init';
 
 window.appVue = Vue;
 
@@ -57,6 +54,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
 
     router.beforeEach(userInfoGuard);
     router.beforeEach(getAuthGuard(router, routes, authResourcePaths));
+    router.beforeEach(getTitleGuard(appConfig));
 
     const app = new Vue({
         name: 'app',

@@ -8,8 +8,7 @@ module.exports = function (app) {
         res.json(Mock.mock(json));
     });
 
-
-    app.get('/gateway/nuims/nuims', function () {
+    app.get('/gateway/nuims/nuims', function (rep, res) {
         res.json({
             "RequestId": "5f8b879d7c3b48119f1a6d53e57c9461",
             "Code": "Success",
