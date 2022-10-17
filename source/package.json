@@ -8,6 +8,7 @@
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
+        "webpack": "4.46.0",
         "babel-generator": "^6.26.1",
         "cloud-ui.vusion": "0.14.16",
         "core-js": "^3.6.5",
