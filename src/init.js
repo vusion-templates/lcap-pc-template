@@ -74,7 +74,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         if (redirectPath) {
             completeRedirectPath = [...ancestorPaths, redirectPath].join('/');
         }
-        return baseResourcePaths.includes(completePath) || baseResourcePaths.includes(completeRedirectPath);
+        return baseResourcePaths.includes(completePath) || completeRedirectPath;
     });
 
     const router = initRouter(baseRoutes);
@@ -82,7 +82,13 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     router.beforeEach((to, from, next) => {
         if (!Vue.prototype.hasLoadedAuth) {
             const toPath = to.redirectedFrom || to.path;
-            if (authResourcePaths.includes(toPath)) {
+            const authPath = authResourcePaths.find((authResourcePath) => {
+                if (authResourcePath === toPath || `${authResourcePath}/` === toPath) {
+                    return true;
+                }
+                return false;
+            });
+            if (authPath) {
                 if (!Vue.prototype.logined) {
                     next({ path: '/login' });
                 } else {
@@ -98,20 +104,8 @@ const init = (appConfig, platformConfig, routes, metaData) => {
                     const otherRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
                         const routePath = route.path;
                         const completePath = [...ancestorPaths, routePath].join('/');
-                        let completeRedirectPath = '';
-                        const redirectPath = route.redirect;
-                        if (redirectPath) {
-                            completeRedirectPath = [...ancestorPaths, redirectPath].join('/');
-                        }
-                        let isAllow = false;
-                        userResourcePaths.forEach((userResourcePath) => {
-                            if (completeRedirectPath) {
-                                isAllow = userResourcePath.startsWith(completeRedirectPath);
-                            } else {
-                                isAllow = userResourcePath.startsWith(completePath);
-                            }
-                        });
-                        return isAllow;
+                        const authPath = userResourcePaths.find((userResourcePath) => userResourcePath.startsWith(completePath));
+                        return authPath;
                     });
                     otherRoutes.forEach((route) => {
                         router.addRoute(route);
