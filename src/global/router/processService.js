@@ -1,4 +1,4 @@
-import processService from '@/global/services/process';
+import processService from '@/apis/process';
 import $auth from '../auth/index';
 
 let user;

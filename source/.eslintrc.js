@@ -22,7 +22,7 @@ module.exports = {
     'no-dupe-keys': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-undef': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-constant-condition': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-fallthrough': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
-
+    'no-fallthrough': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-irregular-whitespace': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
   }
 }

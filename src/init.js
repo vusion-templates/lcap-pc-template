@@ -3,9 +3,10 @@ import { installFilters, installComponents } from '@vusion/utils';
 
 import '@/assets/css/index.css';
 import '@/assets/css/theme.css';
-import installLogics from '@/global/logic/install';
-import installServices from '@/global/service/install';
 import installDataTypes from '@/global/dataTypes/install';
+import installLogics from '@/global/logic/install';
+import installRouter from '@/global/router/install';
+import installServices from '@/global/service/install';
 import installUtils from '@/global/utils/install';
 import filters from '@/filters';
 import * as Components from '@/components';
@@ -53,6 +54,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     installComponents(Vue, Components);
 
     Vue.use(installLogics, metaData);
+    Vue.use(installRouter);
     Vue.use(installServices, metaData);
     Vue.use(installDataTypes, metaData);
     Vue.use(installUtils, metaData);
