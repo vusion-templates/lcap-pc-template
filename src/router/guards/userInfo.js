@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-export const userInfoGuard = function (to, from, next) {
-    Vue.prototype.$auth.getUserInfo();
+export const userInfoGuard = async (to, from, next) => {
+    await Vue.prototype.$auth.getUserInfo();
     next();
 };

@@ -39,39 +39,47 @@ export default {
     },
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
-            if (window.appInfo.hasAuth) {
-                userResourcesPromise = lowauth.GetUserResources({
-                    headers: getBaseHeaders(),
-                    query: {
-                        userId: Vue.prototype.$global.userInfo.UserId,
-                    },
-                }).then((result) => {
-                    const resources = result.filter((resource) => resource.resourceType === 'ui');
-                    // 初始化权限项
+            // if (window.appInfo.hasAuth) {
+            userResourcesPromise = lowauth.GetUserResources({
+                headers: getBaseHeaders(),
+                query: {
+                    userId: Vue.prototype.$global.userInfo.UserId,
+                },
+            }).then((result) => {
+                const resources = result.filter((resource) => resource.resourceType === 'ui');
+                // 初始化权限项
+                this._map = new Map();
+                resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
+                return resources;
+            }).catch((e) => {
+                // console.error('获取权限异常', e);
+                userResourcesPromise = null;
+            }).finally(() => {
+                if (!this._map) {
                     this._map = new Map();
-                    resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
-                    return resources;
-                }).catch((e) => {
-                    console.error('获取权限异常', e);
-                    userResourcesPromise = null;
-                });
-            } else {
-                userResourcesPromise = auth.GetUserResources({
-                    headers: getBaseHeaders(),
-                    query: {
-                        DomainName,
-                    },
-                }).then((result) => {
-                    const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
-                    // 初始化权限项
-                    this._map = new Map();
-                    resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
-                    return resources;
-                }).catch((e) => {
-                    console.error('获取权限异常', e);
-                    userResourcesPromise = null;
-                });
-            }
+                }
+            });
+            // } else {
+            //     userResourcesPromise = auth.GetUserResources({
+            //         headers: getBaseHeaders(),
+            //         query: {
+            //             DomainName,
+            //         },
+            //     }).then((result) => {
+            //         const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
+            //         // 初始化权限项
+            //         this._map = new Map();
+            //         resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
+            //         return resources;
+            //     }).catch((e) => {
+            //         console.error('获取权限异常', e);
+            //         userResourcesPromise = null;
+            //     }).finally(() => {
+            //         if (!this._map) {
+            //             this._map = new Map();
+            //         }
+            //     });
+            // }
         }
         return userResourcesPromise;
     },
