@@ -34,16 +34,17 @@ const httpError = {
             throw err;
         }
         let handle;
-        if (!err.response) {
+        if (!err.response || err.code === undefined) {
             handle = errHandles.remoteError;
         } else {
-            handle = errHandles[err.response.status];
+            const code = err.response && err.response.status || err.code;
+            handle = errHandles[code];
             if (!handle)
                 handle = errHandles.defaults;
         }
         const handleOut = handle({
             config, baseURL: (config.baseURL || ''), url, method, body, headers,
-        }, err.response.data);
+        }, err.response && err.response.data || err);
 
         if (isPromise(handleOut))
             return handleOut;
