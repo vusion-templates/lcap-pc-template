@@ -1,7 +1,9 @@
 const encodeReserveRE = /[!'()*]/g;
+
 const encodeReserveReplacer = function (e) {
     return '%' + e.charCodeAt(0).toString(16);
 };
+
 const commaRE = /%2C/g;
 
 function parsePath(path) {

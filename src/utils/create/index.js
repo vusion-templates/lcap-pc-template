@@ -1,10 +1,11 @@
-import Service from 'request-pre';
 import axios from 'axios';
+import Service from 'request-pre';
 import { stringify } from 'qs';
+
+import cookie from '@/utils/cookie';
 import addConfigs from './add.configs';
 import { getFilenameFromContentDispositionHeader } from './tools';
 import paramsSerializer from './paramsSerializer';
-import cookie from '@/utils/cookie';
 
 const formatContentType = function (contentType, data) {
     const map = {
@@ -58,8 +59,6 @@ function download(url) {
 }
 
 const requester = function (requestInfo) {
-    // requestInfo = cloneDeep(requestInfo, (value) => value === undefined ? null : value);
-
     const { url, config = {} } = requestInfo;
     const { path, method, body = {}, headers = {}, query = {} } = url;
     const baseURL = config.baseURL ? config.baseURL : '';
@@ -89,8 +88,10 @@ const requester = function (requestInfo) {
     });
     return req;
 };
+
 const service = new Service(requester);
 addConfigs(service);
+
 export const createService = function createService(apiSchemaList, serviceConfig, dynamicServices) {
     const fixServiceConfig = serviceConfig || {};
     fixServiceConfig.config = fixServiceConfig.config || {};

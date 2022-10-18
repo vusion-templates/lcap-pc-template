@@ -3,6 +3,7 @@ import errHandles from './errHandles';
 const isPromise = function (func) {
     return func && typeof func.then === 'function';
 };
+
 function httpCode(response, params, requestInfo) {
     const { config } = requestInfo;
     const serviceType = config?.serviceType;
@@ -19,9 +20,11 @@ function httpCode(response, params, requestInfo) {
         msg: data.msg || data.Message,
     });
 }
+
 function shortResponse(response, params, requestInfo) {
     return response.data;
 }
+
 const httpError = {
     reject(err, params, requestInfo) {
         const { url, config = {} } = requestInfo;
@@ -48,6 +51,7 @@ const httpError = {
         throw err;
     },
 };
+
 export default function (service) {
     if (process.env.NODE_ENV === 'development') {
         service.preConfig.set('baseURL', (requestInfo, baseURL) => {

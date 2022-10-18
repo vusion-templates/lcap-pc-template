@@ -1,10 +1,13 @@
 import Vue from 'vue';
 import { UToast } from 'cloud-ui.vusion/dist';
+
 import SToast from '@/components/s-toast.vue';
+
 const Ctr = Vue.component('s-toast', SToast);
 const instance = new Ctr();
 const getErrMessage = (err) => err.msg || err.Message || '暂无错误信息';
 const getErrStrack = (err) => err.StackTrace || '暂无错误信息';
+
 export default {
     defaults({ config }, err) {
         if (!config.noErrorTip) {

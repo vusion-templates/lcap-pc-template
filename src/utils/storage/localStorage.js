@@ -1,6 +1,7 @@
 function noop() {
     return '';
 }
+
 const noSupport = {
     set: noop,
     get: noop,
@@ -38,4 +39,3 @@ const storageObj = !storage ? noSupport : {
 };
 
 export default storageObj;
-

@@ -1,4 +1,5 @@
 import { format, isYesterday, startOfToday, addDays, isSameDay } from 'date-fns';
+
 const formatDate = function (value) {
     if (!value)
         return '-';
@@ -8,6 +9,7 @@ const formatDate = function (value) {
     }
     return new Date(timestamp);
 };
+
 const dateFormat = (value, formatter = 'yyyy-MM-dd HH:mm:ss') => {
     const timestamp = formatDate(value);
     if (timestamp === '-') {
