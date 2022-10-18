@@ -1,0 +1,7 @@
+:root {
+    /* your variables */
+}
+
+body::backdrop {
+    background-color: var(--background-color-default);
+}

@@ -2,21 +2,12 @@ import Vue from 'vue';
 import { installFilters, installComponents } from '@vusion/utils';
 
 import '@/assets/css/index.css';
-import '@/assets/css/theme.css';
-
-import { filterRoutes } from '@/utils/route';
-import AuthPlugin from '@/plugins/auth/install';
-import DataTypesPlugin from '@/plugins/dataTypes/install';
-import LogicsPlugin from '@/plugins/logic/install';
-import RouterPlugin from '@/plugins/router/install';
-import ServicesPlugin from '@/plugins/service/install';
-import UtilsPlugin from '@/plugins/utils/install';
-import filters from '@/filters';
 import * as Components from '@/components';
-import { userInfoGuard, getAuthGuard, getTitleGuard } from '@/router/guards';
-
+import filters from '@/filters';
+import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin, UtilsPlugin } from '@/plugins';
+import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter } from '@/router';
+import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
-import { initRouter } from '@/router/init';
 
 window.appVue = Vue;
 

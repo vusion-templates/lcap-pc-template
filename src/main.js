@@ -1,6 +1,6 @@
 import metaData from './metaData.json';
 import platformConfig from './platform.config.json';
-import routes from './router/routes.js';
+import { routes } from './router';
 import './library';
 import { init } from './init';
 
