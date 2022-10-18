@@ -1,5 +1,6 @@
-import { createService } from '@/utils/create';
 import isPlainObject from 'lodash/isPlainObject';
+
+import { createService } from '@/utils/create';
 
 export default {
     install(Vue, options = {}) {

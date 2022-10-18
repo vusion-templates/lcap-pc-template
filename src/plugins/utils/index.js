@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
-import isObject from 'lodash/isObject';
 import isEqual from 'lodash/isEqual';
+import isObject from 'lodash/isObject';
 import { utils as cutils } from 'cloud-ui.vusion/dist';
 import { addDays, subDays, addMonths, format, formatRFC3339, isValid } from 'date-fns';
 import { Decimal } from 'decimal.js';
