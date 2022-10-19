@@ -26,7 +26,7 @@ Vue.prototype.$destination = function (url) {
             this.$router.push(url);
         else {
             const oldPath = location.pathname.split('/');
-            if (url.startsWith('/' + (oldPath[1] || '')))
+            if (url.startsWith('/' + (oldPath[1] || '') + '/'))
                 this.$router.push(url.replace('/' + (oldPath[1] || ''), ''));
             else
                 location.href = encodeUrl(url);

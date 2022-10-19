@@ -16,5 +16,71 @@
             "path": "/api/system/process/task/{id}/destinationUrl",
             "method": "get"
         }
+    },
+    "getProcessDefinitionList": {
+        "url": {
+            "path": "/api/system/process/getProcessDefinitionList",
+            "method": "post"
+        }
+    },
+    "getProcessDefinition": {
+        "url": {
+            "path": "/api/system/process/getProcessDefinition",
+            "method": "post"
+        }
+    },
+    "getProcessInstanceList": {
+        "url": {
+            "path": "/api/system/process/getProcessInstanceList",
+            "method": "post"
+        }
+    },
+    "getProcessInstance": {
+        "url": {
+            "path": "/api/system/process/getProcessInstance",
+            "method": "post"
+        }
+    },
+    "getTaskDefinitionList": {
+        "url": {
+            "path": "/api/system/process/getTaskDefinitionList",
+            "method": "post"
+        }
+    },
+    "getTaskDefinition": {
+        "url": {
+            "path": "/api/system/process/getTaskDefinition",
+            "method": "post"
+        }
+    },
+    "getTaskInstanceList": {
+        "url": {
+            "path": "/api/system/process/getTaskInstanceList",
+            "method": "post"
+        }
+    },
+    "getTaskInstance": {
+        "url": {
+            "path": "/api/system/process/getTaskInstance",
+            "method": "post"
+        }
+    },
+    "claimTaskInstance": {
+        "url": {
+            "path": "/api/system/process/claimTaskInstance",
+            "method": "post"
+        }
+    },
+    "unclaimTaskInstance": {
+        "url": {
+            "path": "/api/system/process/unclaimTaskInstance",
+            "method": "post"
+        }
+    },
+    "getTaskDestinationUrl": {
+        "url": {
+            "path": " /api/system/process/getTaskDestinationUrl",
+            "method": "post"
+        }
     }
 }

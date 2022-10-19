@@ -3,6 +3,9 @@ import isObject from 'lodash/isObject';
 import isEqual from 'lodash/isEqual';
 import { utils as cutils } from 'cloud-ui.vusion';
 import { addDays, subDays, addMonths, format, formatRFC3339, isValid } from 'date-fns';
+import { Decimal } from 'decimal.js';
+import Vue from 'vue';
+
 let enumsMap = {};
 
 function toValue(date, converter) {
@@ -51,18 +54,27 @@ export const utils = {
             return Object.keys(enumeration).map((key) => ({ text: enumeration[key], value: key }));
         }
     },
-    Split(str, seperator) {
-        return str && str.split(seperator);
+    Split(str, separator) {
+        return str && str.split(separator);
     },
-    Join(arr, seperator) {
+    Join(arr, separator) {
         if (Array.isArray(arr)) {
-            return arr.join(seperator);
+            return arr.join(separator);
         }
     },
-    Concat(str1, str2) {
-        return String(str1) + String(str2);
+    Concat(...arr) {
+        return arr.join('');
     },
     Length(str1) {
+        // List类型
+        if (Array.isArray(str1)) {
+            return str1.length;
+        }
+        // Map类型
+        if (isObject(str1)) {
+            return Object.keys(str1).length;
+        }
+        // string类型
         return str1 && str1.length;
     },
     ToLower(str) {
@@ -106,6 +118,144 @@ export const utils = {
             return arr.splice(index, 1)[0];
         }
     },
+    MapGet(map, key) {
+        if (isObject(map)) {
+            return map[key];
+        }
+    },
+    MapPut(map, key, value) {
+        if (isObject(map)) {
+            Vue.prototype.$set(map, key, value);
+        }
+    },
+    MapRemove(map, key) {
+        if (isObject(map)) {
+            delete map[key];
+        }
+    },
+    MapContains(map, key) {
+        if (isObject(map)) {
+            return key in map;
+        }
+        return false;
+    },
+    MapKeys(map) {
+        if (isObject(map)) {
+            return Object.keys(map);
+        }
+        return 0;
+    },
+    MapValues(map) {
+        if (isObject(map)) {
+            if ('values' in Object) {
+                return Object.values(map);
+            } else {
+                const res = [];
+                for (const key in map) {
+                    if (Object.hasOwnProperty.call(map, key)) {
+                        res.push(map[key]);
+                    }
+                }
+                return res;
+            }
+        }
+        return [];
+    },
+    MapFilter(map, filterByKey, filterByVal) {
+        if (isObject(map) && typeof filterByKey === 'function' && typeof filterByVal === 'function') {
+            const res = [];
+            for (const key in map) {
+                if (Object.hasOwnProperty.call(map, key)) {
+                    if (filterByKey.call(this, key) && filterByVal.call(this, map[key])) {
+                        res.push(map[key]);
+                    }
+                }
+            }
+            return res;
+        }
+    },
+    ListReverse(arr) {
+        if (Array.isArray(arr)) {
+            arr.reverse();
+        }
+    },
+    ListSort(arr, callback, sort) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                arr.sort((a, b) => {
+                    const valueA = callback(a);
+                    const valueB = callback(b);
+                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
+                        return 1;
+                    } else {
+                        if (valueA >= valueB) {
+                            if (sort) {
+                                return 1;
+                            }
+                            return -1;
+                        } else {
+                            if (sort) {
+                                return -1;
+                            }
+                            return 1;
+                        }
+                    }
+                });
+            }
+        }
+    },
+    ListFind(arr, callback) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                return arr.find(callback);
+            }
+        }
+    },
+    ListFindAll(arr, callback) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                return arr.filter(callback);
+            }
+        }
+    },
+    ListFindIndex(arr, callback) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                return arr.findIndex(callback);
+            }
+        }
+    },
+    ListSlice(arr, start, end) {
+        if (Array.isArray(arr)) {
+            return arr.slice(start, end);
+        }
+    },
+    ListDistinct(arr) {
+        if (Array.isArray(arr)) {
+            const map = new Map();
+            let i = 0;
+            while (i < arr.length) {
+                if (map.get(arr[i])) {
+                    arr.splice(i, 1);
+                    i--;
+                } else {
+                    map.set(arr[i], true);
+                }
+                i++;
+            }
+        }
+    },
+    ListSliceToPageOf(arr, page, size) {
+        if (Array.isArray(arr) && page) {
+            return arr.slice((page - 1) * size, size);
+        }
+    },
+    AddAll(arr, addList) {
+        if (Array.isArray(arr) && Array.isArray(addList)) {
+            arr.push(...addList);
+            return arr.length;
+        }
+    },
     CurrDate() {
         return new Date().toJSON().replace(/T.+?Z/, '');
     },
@@ -139,7 +289,7 @@ export const utils = {
         return cloneDeep(obj);
     },
     New(obj) {
-        return obj;
+        return utils.Vue.prototype.$genInitFromSchema(obj);
     },
     /**
      * 将内容置空，array 置为 []; object 沿用 ClearObject 逻辑; 其他置为 undefined
@@ -204,7 +354,7 @@ export const utils = {
                     return format(new Date(value), 'HH:mm:ss');
             } else if (typeAnnotation.typeName === 'String')
                 return String(value);
-            else if (typeAnnotation.typeName === 'Double') // 小数
+            else if (typeAnnotation.typeName === 'Double' || typeAnnotation.typeName === 'Decimal') // 小数
                 return parseFloat(+value);
             else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
                 // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'

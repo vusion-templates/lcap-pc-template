@@ -1,16 +1,23 @@
 {
-	"GetUser": {
-			"url": {
-					"method": "get",
-					"path": "/system/getUser",
-					"query": {}
-			}
+	"Logout": {
+	    "url": {
+	        "method": "get",
+	        "path": "/system/logout",
+	        "query": {}
+	    }
+	},
+    "GetUser": {
+	    "url": {
+	        "method": "get",
+	        "path": "/user/system/getUser",
+	        "query": {}
+	    }
 	},
 	"GetUserResources": {
-			"url": {
-					"method": "get",
-					"path": "/rest/getUserResources",
-					"query": {}
-			}
+        "url": {
+                "method": "get",
+                "path": "/rest/getUserResources",
+                "query": {}
+        }
 	}
 }

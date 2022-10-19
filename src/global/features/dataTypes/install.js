@@ -1,12 +1,69 @@
 import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
+import CryptoJS from 'crypto-js';
 import { genInitData } from './tools';
 import auth from '../router/auth';
 import configurationService from '@/global/services/configuration';
+import processService from '@/global/features/service/process';
+import { Decimal } from 'decimal.js';
+
+window.CryptoJS = CryptoJS;
+const aesKey = ';Z#^$;8+yhO!AhGo';
 
 export default {
     install(Vue, options = {}) {
         const $global = {
             userInfo: {},
+            // 加
+            add(x, y) {
+                if (typeof (x) !== 'number' || typeof (y) !== 'number') {
+                    return x + y;
+                }
+                if (!x) {
+                    x = 0;
+                }
+                if (!y) {
+                    y = 0;
+                }
+                const xx = new Decimal(x + '');
+                const yy = new Decimal(y + '');
+                return xx.plus(yy).toNumber();
+            },
+            // 减
+            minus(x, y) {
+                if (!x) {
+                    x = 0;
+                }
+                if (!y) {
+                    y = 0;
+                }
+                const xx = new Decimal(x + '');
+                const yy = new Decimal(y + '');
+                return xx.minus(yy).toNumber();
+            },
+            // 乘
+            multiply(x, y) {
+                if (!x) {
+                    x = 0;
+                }
+                if (!y) {
+                    y = 0;
+                }
+                const xx = new Decimal(x + '');
+                const yy = new Decimal(y + '');
+                return xx.mul(yy).toNumber();
+            },
+            // 除
+            divide(x, y) {
+                if (!x) {
+                    x = 0;
+                }
+                if (!y) {
+                    y = 0;
+                }
+                const xx = new Decimal(x + '');
+                const yy = new Decimal(y + '');
+                return xx.div(yy).toNumber();
+            },
             requestFullscreen() {
                 return document.body.requestFullscreen();
             },
@@ -15,6 +72,24 @@ export default {
             },
             hasAuth(authPath) {
                 return auth.has(authPath);
+            },
+            encryptByAES(message, key = aesKey) {
+                const keyHex = CryptoJS.enc.Utf8.parse(key); //
+                const messageHex = CryptoJS.enc.Utf8.parse(message);
+                const encrypted = CryptoJS.AES.encrypt(messageHex, keyHex, {
+                    mode: CryptoJS.mode.ECB,
+                    padding: CryptoJS.pad.Pkcs7,
+                });
+                return encrypted.toString();
+            },
+            decryptByAES(messageBase64, key = aesKey) {
+                const keyHex = CryptoJS.enc.Utf8.parse(key);
+                const decrypt = CryptoJS.AES.decrypt(messageBase64, keyHex, {
+                    mode: CryptoJS.mode.ECB,
+                    padding: CryptoJS.pad.Pkcs7,
+                });
+                const decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
+                return decryptedStr.toString();
             },
             getLocation() {
                 return new Promise((res, rej) => {
@@ -97,6 +172,9 @@ export default {
                 return res;
             },
         };
+        Object.keys(processService).forEach((service) => {
+            $global[service] = processService[service];
+        });
         new Vue({
             data: {
                 $global,
