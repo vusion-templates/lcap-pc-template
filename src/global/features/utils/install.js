@@ -401,6 +401,12 @@ export const utils = {
     DateDiff(dateTime1, dateTime2, calcType) {
         if (!dateTime1 || !dateTime2)
             return;
+        // Time
+        const timeReg = /^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
+        if (timeReg.test(dateTime1) && timeReg.test(dateTime2)) {
+            dateTime1 = `1970-01-01 ${dateTime1}`;
+            dateTime2 = `1970-01-01 ${dateTime2}`;
+        }
         if (!isValid(new Date(dateTime1)) || !isValid(new Date(dateTime2)))
             return;
         const map = {
@@ -416,7 +422,7 @@ export const utils = {
         if (!map[calcType])
             return;
         const method = dateFns[map[calcType]];
-        return method(new Date(dateTime1), new Date(dateTime2));
+        return method(new Date(dateTime2), new Date(dateTime1));
     },
     /**
      * 字符串查找
