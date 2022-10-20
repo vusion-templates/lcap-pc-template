@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const util = require('./util');
-const pages = require('../pages.json');
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 
 const fixDll = function () {
@@ -26,7 +25,7 @@ module.exports = {
         const entryKeys = Object.keys(config.entryPoints.entries());
         entryKeys.forEach((entryKey) => {
             config.plugin(`${entryKey}-dll`).after(`html-${entryKey}`).use(AddAssetHtmlPlugin, [{
-                files: Object.values(pages).map((page) => page.filename),
+                file: 'index.html',
                 filepath: path.resolve(__dirname, dllPath),
                 outputPath: 'public/js',
                 publicPath: (publicPathPrefix + '/public/js').replace('//public/', '/public/'),

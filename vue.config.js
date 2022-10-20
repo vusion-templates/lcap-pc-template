@@ -1,13 +1,5 @@
 const pkg = require('./package.json');
-const pages = require('./pages.json');
 const argv = require('minimist')(process.argv.slice(2));
-if (argv.pages) {
-    argv.pages = argv.pages.split(',');
-    Object.keys(pages).forEach((key) => {
-        if (!argv.pages.includes(key))
-            delete pages[key];
-    });
-}
 const isDevelopment = process.env.NODE_ENV === 'development';
 const publicPathPrefix = process.env.SITE_TYPE === 'gh-pages' ? `https://vusion-templates.github.io/${pkg.name}` : '/';
 
@@ -38,14 +30,13 @@ const baseConfig = {
 };
 
 if (isDesigner) {
-    webpackDesigner.config(baseConfig, pages);
+    webpackDesigner.config(baseConfig);
 }
 const vueConfig = {
     ...baseConfig,
-    pages,
     chainWebpack(config) {
         if (isDesigner) {
-            webpackDesigner.chain(config, pages);
+            webpackDesigner.chain(config);
         } else {
             webpackHtml.chain(config, isDevelopment);
             webpackDll.chain(config, publicPathPrefix, isDevelopment);

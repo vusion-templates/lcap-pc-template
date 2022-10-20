@@ -1,0 +1,16 @@
+{
+	"GetUser": {
+		"url": {
+			"method": "get",
+			"path": "/system/getUser",
+			"query": {}
+		}
+	},
+	"GetUserResources": {
+		"url": {
+			"method": "get",
+			"path": "/rest/getUserResources",
+			"query": {}
+		}
+	}
+}
