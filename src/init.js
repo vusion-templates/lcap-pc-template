@@ -57,6 +57,6 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     return app;
 };
 
-export {
+export default {
     init,
 };

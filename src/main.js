@@ -6,11 +6,11 @@ import metaData from './metaData.json';
 import platformConfig from './platform.config.json';
 import { routes } from './router/routes';
 import './library';
-import { init } from './init';
+import * as cloudAdminDesigner from './init';
 
 import 'cloud-ui.vusion/dist/index.css';
 
-init(platformConfig?.appConfig, platformConfig, routes, metaData);
+cloudAdminDesigner.init(platformConfig?.appConfig, platformConfig, routes, metaData);
 
 installOptions(Vue);
 installDirectives(Vue, CloudUI.directives);
