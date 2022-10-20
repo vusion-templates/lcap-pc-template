@@ -2,7 +2,15 @@ import cloneDeep from 'lodash/cloneDeep';
 import isObject from 'lodash/isObject';
 import isEqual from 'lodash/isEqual';
 import { utils as cutils } from 'cloud-ui.vusion';
-import dateFns, { addDays, subDays, addMonths, format, formatRFC3339, isValid } from 'date-fns';
+import { addDays, subDays, addMonths, format, formatRFC3339, isValid,
+    differenceInYears,
+    differenceInQuarters,
+    differenceInMonths,
+    differenceInWeeks,
+    differenceInDays,
+    differenceInHours,
+    differenceInMinutes,
+    differenceInSeconds } from 'date-fns';
 import { Decimal } from 'decimal.js';
 import Vue from 'vue';
 
@@ -410,18 +418,18 @@ export const utils = {
         if (!isValid(new Date(dateTime1)) || !isValid(new Date(dateTime2)))
             return;
         const map = {
-            y: 'differenceInYears',
-            q: 'differenceInQuarters',
-            M: 'differenceInMonths',
-            w: 'differenceInWeeks',
-            d: 'differenceInDays',
-            h: 'differenceInHours',
-            m: 'differenceInMinutes',
-            s: 'differenceInSeconds',
+            y: differenceInYears,
+            q: differenceInQuarters,
+            M: differenceInMonths,
+            w: differenceInWeeks,
+            d: differenceInDays,
+            h: differenceInHours,
+            m: differenceInMinutes,
+            s: differenceInSeconds,
         };
         if (!map[calcType])
             return;
-        const method = dateFns[map[calcType]];
+        const method = map[calcType];
         return method(new Date(dateTime2), new Date(dateTime1));
     },
     /**
