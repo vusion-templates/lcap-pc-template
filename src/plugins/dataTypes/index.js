@@ -8,7 +8,10 @@ import { genInitData } from './tools';
 export default {
     install(Vue, options = {}) {
         const $global = {
+            // 用户信息
             userInfo: {},
+            // 前端全局变量
+            frontendVariables: {},
             // 加
             add(x, y) {
                 if (typeof (x) !== 'number' || typeof (y) !== 'number') {
