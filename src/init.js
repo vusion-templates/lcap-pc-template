@@ -1,7 +1,5 @@
 import Vue from 'vue';
-import { installOptions, installFilters, installDirectives, installComponents } from '@vusion/utils';
-import 'cloud-ui.vusion/dist/index.css';
-import * as CloudUI from 'cloud-ui.vusion/dist';
+import { installFilters, installComponents } from '@vusion/utils';
 
 import '@/assets/css/index.css';
 import * as Components from '@/components';
@@ -15,12 +13,6 @@ window.appVue = Vue;
 
 const init = (appConfig, platformConfig, routes, metaData) => {
     window.appInfo = Object.assign(appConfig, platformConfig);
-
-    installOptions(Vue);
-    installDirectives(Vue, CloudUI.directives);
-    installComponents(Vue, CloudUI);
-    Vue.mixin(CloudUI.MEmitter);
-    Vue.mixin(CloudUI.MPubSub);
 
     installFilters(Vue, filters);
     installComponents(Vue, Components);
