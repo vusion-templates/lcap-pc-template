@@ -2,7 +2,17 @@ import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import isObject from 'lodash/isObject';
 import { utils as cutils } from 'cloud-ui.vusion/dist';
-import { addDays, subDays, addMonths, format, formatRFC3339, isValid } from 'date-fns';
+import {
+    addDays, subDays, addMonths, format, formatRFC3339, isValid,
+    differenceInYears,
+    differenceInQuarters,
+    differenceInMonths,
+    differenceInWeeks,
+    differenceInDays,
+    differenceInHours,
+    differenceInMinutes,
+    differenceInSeconds,
+} from 'date-fns';
 import { Decimal } from 'decimal.js';
 import Vue from 'vue';
 
@@ -62,8 +72,8 @@ export const utils = {
             return arr.join(seperator);
         }
     },
-    Concat(str1, str2) {
-        return String(str1) + String(str2);
+    Concat(...arr) {
+        return arr.join('');
     },
     Length(str1) {
         return str1 && str1.length;
@@ -387,38 +397,33 @@ export const utils = {
      * 时间差
      * @param {dateTime1} 时间
      * @param {dateTime2} 时间
-     * @param {calcType} 计算类型：天数(day)、小时数(hour)、分钟数(minute)、秒数(second)
+     * @param {calcType} 计算类型：年(y)、季度(q)、月(M)、星期(w)、天数(d)、小时数(h)、分钟数(m)、秒数(s)
     */
     DateDiff(dateTime1, dateTime2, calcType) {
         if (!dateTime1 || !dateTime2)
             return;
+        // Time
+        const timeReg = /^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
+        if (timeReg.test(dateTime1) && timeReg.test(dateTime2)) {
+            dateTime1 = `1970-01-01 ${dateTime1}`;
+            dateTime2 = `1970-01-01 ${dateTime2}`;
+        }
         if (!isValid(new Date(dateTime1)) || !isValid(new Date(dateTime2)))
             return;
         const map = {
-            d: {
-                diff: 24 * 60 * 60 * 1000,
-                formatter: 'yyyy-MM-dd',
-            },
-            h: {
-                diff: 60 * 60 * 1000,
-                formatter: 'yyyy-MM-dd HH:mm',
-            },
-            m: {
-                diff: 60 * 1000,
-                formatter: 'yyyy-MM-dd HH:mm',
-            },
-            s: {
-                diff: 1000,
-                formatter: 'yyyy-MM-dd HH:mm:ss',
-            },
+            y: differenceInYears,
+            q: differenceInQuarters,
+            M: differenceInMonths,
+            w: differenceInWeeks,
+            d: differenceInDays,
+            h: differenceInHours,
+            m: differenceInMinutes,
+            s: differenceInSeconds,
         };
         if (!map[calcType])
             return;
-        const config = map[calcType];
-        const dateTime1Temp = new Date(format(new Date(dateTime1), config.formatter)).getTime();
-        const dateTime2Temp = new Date(format(new Date(dateTime2), config.formatter)).getTime();
-        const dateDiff = dateTime2Temp - dateTime1Temp;
-        return Math.floor(dateDiff / (config.diff));
+        const method = map[calcType];
+        return method(new Date(dateTime2), new Date(dateTime1));
     },
     /**
      * 字符串查找
