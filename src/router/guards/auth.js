@@ -18,18 +18,24 @@ export const getAuthGuard = (router, routes, authResourcePaths) => async (to, fr
             if (!userInfo.UserId) {
                 next({ path: '/login' });
             } else {
-                const resources = await $auth.getUserResources();
-                const userResourcePaths = (resources || []).map((resource) => resource.resourceValue);
-                const otherRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
-                    const routePath = route.path;
-                    const completePath = [...ancestorPaths, routePath].join('/');
-                    const authPath = userResourcePaths.find((userResourcePath) => userResourcePath.startsWith(completePath));
-                    return authPath;
-                });
-                otherRoutes.forEach((route) => {
-                    router.addRoute(route);
-                });
-                next({ path: toPath });
+                try {
+                    const resources = await $auth.getUserResources();
+                    if (resources && resources.length) {
+                        const userResourcePaths = (resources || []).map((resource) => resource.resourceValue);
+                        const otherRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
+                            const routePath = route.path;
+                            const completePath = [...ancestorPaths, routePath].join('/');
+                            const authPath = userResourcePaths.find((userResourcePath) => userResourcePath.startsWith(completePath));
+                            return authPath;
+                        });
+                        otherRoutes.forEach((route) => {
+                            router.addRoute(route);
+                        });
+                        next({ path: toPath });
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
             }
         }
     }
