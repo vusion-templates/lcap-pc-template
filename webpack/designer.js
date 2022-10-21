@@ -1,13 +1,10 @@
 const path = require('path');
 const fs = require('fs-extra');
 module.exports = {
-    config(baseConfig, pages) {
+    config(baseConfig) {
         baseConfig.outputDir = (baseConfig.outputDir || 'public');
         fs.emptyDirSync(path.resolve(baseConfig.outputDir));
         fs.emptyDirSync(path.resolve('vusion_packages'));
-        Object.keys(pages).forEach((pageName) => {
-            delete pages[pageName];
-        });
         baseConfig.configureWebpack = {
             ...baseConfig.configureWebpack,
             output: {
