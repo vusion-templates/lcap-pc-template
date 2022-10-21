@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import isObject from 'lodash/isObject';
-import { utils as cutils } from 'cloud-ui.vusion/dist';
+import { utils as cutils } from 'cloud-ui.vusion';
 import {
     addDays, subDays, addMonths, format, formatRFC3339, isValid,
     differenceInYears,
