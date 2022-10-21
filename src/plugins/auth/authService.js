@@ -39,7 +39,6 @@ export default {
     },
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
-            // if (window.appInfo.hasAuth) {
             userResourcesPromise = lowauth.GetUserResources({
                 headers: getBaseHeaders(),
                 query: {
@@ -59,27 +58,6 @@ export default {
                     this._map = new Map();
                 }
             });
-            // } else {
-            //     userResourcesPromise = auth.GetUserResources({
-            //         headers: getBaseHeaders(),
-            //         query: {
-            //             DomainName,
-            //         },
-            //     }).then((result) => {
-            //         const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
-            //         // 初始化权限项
-            //         this._map = new Map();
-            //         resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
-            //         return resources;
-            //     }).catch((e) => {
-            //         console.error('获取权限异常', e);
-            //         userResourcesPromise = null;
-            //     }).finally(() => {
-            //         if (!this._map) {
-            //             this._map = new Map();
-            //         }
-            //     });
-            // }
         }
         return userResourcesPromise;
     },

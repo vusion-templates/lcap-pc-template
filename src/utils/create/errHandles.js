@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { UToast } from 'cloud-ui.vusion/dist';
+import { UToast } from 'cloud-ui.vusion';
 
 import SToast from '@/components/s-toast.vue';
 

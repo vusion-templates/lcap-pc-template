@@ -20,8 +20,11 @@ function httpCode(response, params, requestInfo) {
         msg: data.msg || data.Message,
     });
 }
-
 function shortResponse(response, params, requestInfo) {
+    if (requestInfo.config?.concept === 'Logic') {
+        return response.data?.Data ? response.data?.Data : response.data;
+    }
+
     return response.data;
 }
 

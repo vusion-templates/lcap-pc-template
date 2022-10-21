@@ -1,6 +1,6 @@
 import isPlainObject from 'lodash/isPlainObject';
 
-import { createService } from '@/utils/create';
+import { createLogicService } from '@/utils/create';
 
 export default {
     install(Vue, options = {}) {
@@ -13,7 +13,7 @@ export default {
                 }
                 const service = services[key];
                 if (isPlainObject(service)) {
-                    services[key] = createService(service);
+                    services[key] = createLogicService(service);
                 }
             });
         }
