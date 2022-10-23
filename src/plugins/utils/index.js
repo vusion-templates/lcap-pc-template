@@ -423,7 +423,7 @@ export const utils = {
         if (!map[calcType])
             return;
         const method = map[calcType];
-        return method(new Date(dateTime2), new Date(dateTime1));
+        return Math.abs(method(new Date(dateTime2), new Date(dateTime1)));
     },
     /**
      * 字符串查找
