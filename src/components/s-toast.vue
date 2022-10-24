@@ -44,16 +44,6 @@ export default {
             });
         },
     },
-    install(Vue, id) {
-        const Ctor = Vue.component(id);
-        if (!Ctor)
-            return;
-        const toast = (Vue.prototype.$toast = this.toast = new Ctor());
-        const METHODS = [
-            'show',
-        ];
-        METHODS.forEach((method) => (this[method] = toast[method].bind(toast)));
-    },
 };
 
 </script>

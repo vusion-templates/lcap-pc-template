@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import { UToast } from 'cloud-ui.vusion';
 
 import SToast from '@/components/s-toast.vue';
 
@@ -34,12 +33,12 @@ export default {
     },
     remoteError({ config }, err) {
         if (!config.noErrorTip) {
-            UToast.show('系统错误，请联系管理员！');
+            instance.show('系统错误，请联系管理员！');
         }
     },
     localError({ config }, err) {
         if (!config.noErrorTip) {
-            UToast.show('系统错误，请联系管理员！');
+            instance.show('系统错误，请联系管理员！');
         }
     },
 };
