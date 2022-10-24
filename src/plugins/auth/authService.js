@@ -3,10 +3,15 @@ import auth from '@/apis/auth';
 import lowauth from '@/apis/lowauth';
 import cookie from '@/utils/cookie';
 
-const getBaseHeaders = () => ({
-    Authorization: cookie.get('authorization'),
-    Env: window.appInfo && window.appInfo.env,
-});
+const getBaseHeaders = () => {
+    const headers = {
+        Env: window.appInfo && window.appInfo.env,
+    };
+    if (cookie.get('authorization')) {
+        headers.Authorization = cookie.get('authorization');
+    }
+    return headers;
+};
 
 let userInfoPromise = null;
 let userResourcesPromise = null;
@@ -16,7 +21,12 @@ export default {
     getUserInfo() {
         if (!userInfoPromise) {
             if (window.appInfo.hasUserCenter) {
-                userInfoPromise = Promise.resolve({});
+                userInfoPromise = lowauth.GetUser({
+                    headers: getBaseHeaders(),
+                    config: {
+                        noErrorTip: true,
+                    },
+                });
             } else {
                 userInfoPromise = auth.GetUser({
                     headers: getBaseHeaders(),
@@ -27,6 +37,10 @@ export default {
             }
             userInfoPromise = userInfoPromise.then((result) => {
                 const userInfo = result.Data;
+                if (!userInfo.UserId && userInfo.userId) {
+                    userInfo.UserId = userInfo.userId;
+                    userInfo.UserName = userInfo.userName;
+                }
                 const $global = Vue.prototype.$global || {};
                 $global.userInfo = userInfo;
                 return userInfo;
@@ -39,33 +53,52 @@ export default {
     },
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
-            userResourcesPromise = lowauth.GetUserResources({
-                headers: getBaseHeaders(),
-                query: {
-                    userId: Vue.prototype.$global.userInfo.UserId,
-                },
-            }).then((result) => {
-                const resources = result.filter((resource) => resource.resourceType === 'ui');
-                // 初始化权限项
-                this._map = new Map();
-                resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
-                return resources;
-            }).catch((e) => {
-                // console.error('获取权限异常', e);
-                userResourcesPromise = null;
-            }).finally(() => {
-                if (!this._map) {
+            if (window.appInfo.hasUserCenter) {
+                userResourcesPromise = lowauth.GetUserResources({
+                    headers: getBaseHeaders(),
+                    query: {
+                        userId: Vue.prototype.$global.userInfo.UserId,
+                        userName: Vue.prototype.$global.userInfo.UserName,
+                    },
+                }).then((result) => {
+                    const resources = result.filter((resource) => resource.resourceType === 'ui');
+                    // 初始化权限项
                     this._map = new Map();
-                }
-            });
+                    resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
+                    return resources;
+                }).catch((e) => {
+                    console.error('获取权限异常', e);
+                    userResourcesPromise = null;
+                });
+            } else {
+                userResourcesPromise = auth.GetUserResources({
+                    headers: getBaseHeaders(),
+                    query: {
+                        DomainName,
+                    },
+                }).then((result) => {
+                    const resources = result.Data.items.filter((resource) => resource.ResourceType === 'ui');
+                    // 初始化权限项
+                    this._map = new Map();
+                    resources.forEach((resource) => this._map.set(resource.ResourceValue, resource));
+                    return resources;
+                }).catch((e) => {
+                    console.error('获取权限异常', e);
+                    userResourcesPromise = null;
+                });
+            }
         }
         return userResourcesPromise;
     },
     logout() {
         if (window.appInfo.hasUserCenter) {
-            // 用户中心，去除认证和用户名信息
-            cookie.erase('authorization');
-            cookie.erase('username');
+            return lowauth.Logout({
+                headers: getBaseHeaders(),
+            }).then(() => {
+                // 用户中心，去除认证和用户名信息
+                cookie.erase('authorization');
+                cookie.erase('username');
+            });
         } else {
             return auth.Logout({
                 headers: getBaseHeaders(),
