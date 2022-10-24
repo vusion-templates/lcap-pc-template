@@ -12,6 +12,7 @@ import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
 
 window.appVue = Vue;
+window.CloudUI = CloudUI;
 
 // 预览沙箱不需要调用init来初始化，但是需要使用到CloudUI和Vant组件，所以放在外边
 installOptions(Vue);
