@@ -2,7 +2,7 @@ import Vue from 'vue';
 
 import { filterRoutes } from '@/utils/route';
 
-export const getAuthGuard = (router, routes, authResourcePaths) => async (to, from, next) => {
+export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => async (to, from, next) => {
     const userInfo = Vue.prototype.$global.userInfo || {};
     const $auth = Vue.prototype.$auth;
 
@@ -19,7 +19,7 @@ export const getAuthGuard = (router, routes, authResourcePaths) => async (to, fr
                 next({ path: '/login' });
             } else {
                 try {
-                    const resources = await $auth.getUserResources();
+                    const resources = await $auth.getUserResources(appConfig.domainName);
                     if (resources && resources.length) {
                         const userResourcePaths = (resources || []).map((resource) => resource.resourceValue);
                         const otherRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
