@@ -60,7 +60,12 @@ export default {
                 const authPath = data.value;
                 const visible = authService.has(authPath);
 
-                el && (el.style.display = visible ? '' : 'none');
+                // 表格列不起作用，特殊处理
+                if (el.__vue__ && el.__vue__.$options.name === 'u-table-view-column')
+                    el.__vue__.hidden = !visible;
+                else {
+                    el && (el.style.display = visible ? '' : 'none');
+                }
             },
             bind(el, binding, vnode, oldVnode) {
                 vAuth.handle(el, binding, vnode, oldVnode);
