@@ -20,8 +20,8 @@ export default {
         const frontendVariables = {};
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
-                const { name, typeAnnotation } = frontendVariable;
-                frontendVariables[name] = genInitFromSchema(typeAnnotation);
+                const { name, typeAnnotation, defaultValue } = frontendVariable;
+                frontendVariables[name] = genInitFromSchema(typeAnnotation, defaultValue);
             });
         }
 
