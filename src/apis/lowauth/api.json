@@ -1,8 +1,15 @@
 {
+	"Logout": {
+		"url": {
+			"method": "get",
+			"path": "/system/logout",
+			"query": {}
+		}
+	},
 	"GetUser": {
 		"url": {
 			"method": "get",
-			"path": "/system/getUser",
+			"path": "/user/system/getUser",
 			"query": {}
 		}
 	},
