@@ -22,7 +22,7 @@ function httpCode(response, params, requestInfo) {
 }
 function shortResponse(response, params, requestInfo) {
     if (requestInfo.config?.concept === 'Logic') {
-        return response.data?.Data ? response.data?.Data : response.data;
+        return response.data?.Data !== undefined ? response.data?.Data : response.data;
     }
 
     return response.data;
