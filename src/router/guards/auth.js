@@ -1,13 +1,15 @@
 import Vue from 'vue';
 
-import { filterRoutes } from '@/utils/route';
+import { filterRoutes, parsePath } from '@/utils/route';
 
 export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => async (to, from, next) => {
     const userInfo = Vue.prototype.$global.userInfo || {};
     const $auth = Vue.prototype.$auth;
 
     if (!$auth.isInit()) {
-        const toPath = to.redirectedFrom || to.path;
+        const redirectedFrom = parsePath(to.redirectedFrom);
+        const toPath = redirectedFrom?.path || to.path;
+        const toQuery = redirectedFrom?.query || to.query;
         const authPath = authResourcePaths.find((authResourcePath) => {
             if (authResourcePath === toPath || `${authResourcePath}/` === toPath) {
                 return true;
@@ -31,9 +33,13 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                         otherRoutes.forEach((route) => {
                             router.addRoute(route);
                         });
-                        next({ path: toPath });
+                        next({
+                            path: toPath,
+                            query: toQuery,
+                        });
                     }
                 } catch (err) {
+                    next({ path: '/noAuth' });
                     console.log(err);
                 }
             }
