@@ -43,13 +43,16 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                         otherRoutes.forEach((route) => {
                             router.addRoute(route);
                         });
-                        next({
-                            path: toPath,
-                            query: toQuery,
-                        });
                     }
+                    // 即使没有查到权限，也需要重新进一遍，来决定去 无权限页面 还是 404页面
+                    next({
+                        path: toPath,
+                        query: toQuery,
+                    });
                 } catch (err) {
-                    next({ path: noAuthView.path });
+                    if (noAuthView?.path) {
+                        next({ path: noAuthView.path });
+                    }
                     console.log(err);
                 }
             }
