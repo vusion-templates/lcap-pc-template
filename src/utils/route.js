@@ -27,6 +27,9 @@ const filterRoutes = (routes, ancestorPaths, compareFn) => {
 };
 
 function parsePath(path) {
+    if (!path) {
+        return;
+    }
     let hash = '';
     const query = {};
     const hashIndex = path.indexOf('#');
