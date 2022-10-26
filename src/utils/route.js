@@ -26,6 +26,39 @@ const filterRoutes = (routes, ancestorPaths, compareFn) => {
     return newRoutes;
 };
 
+function parsePath(path) {
+    let hash = '';
+    const query = {};
+    const hashIndex = path.indexOf('#');
+    if (hashIndex >= 0) {
+        hash = path.slice(hashIndex);
+        path = path.slice(0, hashIndex);
+    }
+    const queryIndex = path.indexOf('?');
+    if (queryIndex >= 0) {
+        const queryStr = path.slice(queryIndex + 1);
+        if (queryStr) {
+            const paramPairStrArr = queryStr.split('&');
+            if (Array.isArray(paramPairStrArr)) {
+                paramPairStrArr.forEach((paramPairStr) => {
+                    const paramPairArr = paramPairStr.split('=');
+                    if (Array.isArray(paramPairArr)) {
+                        query[paramPairArr[0]] = paramPairArr[1];
+                    }
+                });
+            }
+        }
+        path = path.slice(0, queryIndex);
+    }
+
+    return {
+        path,
+        query,
+        hash,
+    };
+}
+
 export {
     filterRoutes,
+    parsePath,
 };
