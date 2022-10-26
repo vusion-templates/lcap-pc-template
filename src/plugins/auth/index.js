@@ -62,7 +62,7 @@ export default {
 
                 // 表格列不起作用，特殊处理
                 if (el.__vue__ && el.__vue__.$options.name === 'u-table-view-column')
-                    el.__vue__.hidden = !visible;
+                    el.__vue__.currentHidden = !visible;
                 else {
                     el && (el.style.display = visible ? '' : 'none');
                 }
