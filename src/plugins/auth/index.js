@@ -50,7 +50,13 @@ export default {
          * modifiers 的名字用于子权限行为，组件属性那里有问题，暂时没有实现
          */
         const vAuth = {
-            handle(el, binding, vnode, oldVnode) {
+            async handle(el, binding, vnode, oldVnode) {
+                // 初始化操作，防止先出现后消失
+                if (el.__vue__ && el.__vue__.$options.name === 'u-table-view-column')
+                    el.__vue__.currentHidden = false;
+                else {
+                    el && (el.style.display = 'none');
+                }
                 const data = {
                     value: binding.value || '',
                     actions: Object.keys(binding.modifiers),
@@ -58,7 +64,7 @@ export default {
 
                 // const authPath = `${base + router.currentRoute.path}/${data.value ? data.value : vnode.data.ref}`;
                 const authPath = data.value;
-                const visible = authService.has(authPath);
+                const visible = await authService.has(authPath);
 
                 // 表格列不起作用，特殊处理
                 if (el.__vue__ && el.__vue__.$options.name === 'u-table-view-column')
