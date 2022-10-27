@@ -14,9 +14,14 @@
 </template>
 
 <script>
+import { UToast, UCopy } from 'cloud-ui.vusion';
 
 export default {
     name: 's-toast',
+    components: {
+        UToast,
+        UCopy,
+    },
     data() {
         return {
             copySuccess: false,
