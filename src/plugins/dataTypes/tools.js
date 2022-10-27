@@ -14,14 +14,11 @@ const isNil = (value) => value === undefined || value === null || value === '';
 export const genInitData = (
     typeAnnotation,
     dataTypesMap,
-    useDefaultValue = false,
-    usedSchemaRefs = {},
     level = 0,
 ) => {
     const { typeKind, typeNamespace, typeName } = typeAnnotation || {};
     const typeKey = `${typeNamespace}.${typeName}`;
     const next = dataTypesMap[typeKey];
-    usedSchemaRefs = Object.assign({}, usedSchemaRefs);
     if (next) {
         if (next.concept === 'Enum') {
             if (typeAnnotation.defaultValue === null || typeAnnotation.defaultValue === undefined) {
@@ -63,7 +60,7 @@ export const genInitData = (
                     value: genInitData({
                         ...property.typeAnnotation,
                         defaultValue: property.defaultValue,
-                    }, dataTypesMap, true, usedSchemaRefs, level + 1),
+                    }, dataTypesMap, level + 1),
                 });
             });
             return result;

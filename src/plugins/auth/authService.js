@@ -59,6 +59,9 @@ export default {
                     userId: Vue.prototype.$global.userInfo.UserId,
                     userName: Vue.prototype.$global.userInfo.UserName,
                 },
+                config: {
+                    noErrorTip: true,
+                },
             }).then((result) => {
                 const resources = result.filter((resource) => resource.resourceType === 'ui');
                 // 初始化权限项
@@ -106,7 +109,10 @@ export default {
      * 是否有权限
      * @param {*} authPath 权限路径，如 /dashboard/entity/list
      */
-    has(authPath) {
-        return this._map ? this._map.has(authPath) : true;
+    async has(authPath) {
+        if (!this.isInit()) {
+            await this.getUserResources();
+        }
+        return (this._map && this._map.has(authPath)) || false;
     },
 };
