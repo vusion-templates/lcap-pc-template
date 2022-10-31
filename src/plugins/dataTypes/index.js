@@ -5,6 +5,7 @@ import CryptoJS from 'crypto-js';
 import configuration from '@/apis/configuration';
 import authService from '../auth/authService';
 import { genInitData } from './tools';
+import { porcessPorts } from '../router/processService';
 
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
@@ -193,6 +194,9 @@ export default {
                 return res;
             },
         };
+        Object.keys(porcessPorts).forEach((service) => {
+            $global[service] = porcessPorts[service];
+        });
         new Vue({
             data: {
                 $global,
