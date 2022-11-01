@@ -36,3 +36,94 @@ export default {
         return res;
     },
 };
+
+export const porcessPorts = {
+    async getProcessDefinitionList(query) {
+        const res = await process.getProcessDefinitionList({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getProcessDefinition(query) {
+        const res = await process.getProcessDefinition({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getProcessInstanceList(query) {
+        const res = await process.getProcessInstanceList({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getProcessInstance(query) {
+        const res = await process.getProcessInstance({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getTaskDefinitionList(query) {
+        const res = await process.getTaskDefinitionList({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getTaskDefinition(query) {
+        const res = await process.getTaskDefinition({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getTaskInstanceList(query) {
+        const res = await process.getTaskInstanceList({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getTaskInstance(query) {
+        const res = await process.getTaskInstance({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async claimTaskInstance(query) {
+        const res = await process.claimTaskInstance({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async unclaimTaskInstance(query) {
+        const res = await process.unclaimTaskInstance({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getTaskDestinationUrl(query) {
+        const res = await process.getTaskDestinationUrl({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+};
