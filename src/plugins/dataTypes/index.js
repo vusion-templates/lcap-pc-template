@@ -193,6 +193,10 @@ export default {
                 });
                 return res;
             },
+            async getCurrentIp() {
+                const res = await configuration.getCurrentIp();
+                return res;
+            },
         };
         Object.keys(porcessPorts).forEach((service) => {
             $global[service] = porcessPorts[service];
