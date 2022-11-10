@@ -201,16 +201,16 @@ export default {
             async downloadFile(url, fileName) {
                 const res = await io.downloadFile({
                     body: {
-                        urlList: [url],
+                        urls: [url],
                         fileName,
                     },
                 });
                 return res;
             },
-            async downloadFiles(urlList, fileName) {
+            async downloadFiles(urls, fileName) {
                 const res = await io.downloadFiles({
                     body: {
-                        urlList,
+                        urls,
                         fileName,
                     },
                 });
