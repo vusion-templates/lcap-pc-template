@@ -199,22 +199,38 @@ export default {
                 return res;
             },
             async downloadFile(url, fileName) {
-                const res = await io.downloadFile({
+                await io.downloadFile({
                     body: {
                         urls: [url],
                         fileName,
                     },
-                });
-                return res;
+                }).then((res) => {
+                    downloadFile(res);
+                }).catch((err) =>
+                    // 基于 AxiosError 的错误类型 https://github.com/axios/axios/blob/b7e954eba3911874575ed241ec2ec38ff8af21bb/index.d.ts#L85
+                    Promise.resolve({
+                        data: {
+                            code: err.code,
+                            msg: err.response.statusText,
+                        },
+                    }));
             },
             async downloadFiles(urls, fileName) {
-                const res = await io.downloadFiles({
+                await io.downloadFiles({
                     body: {
                         urls,
                         fileName,
                     },
-                });
-                return res;
+                }).then((res) => {
+                    downloadFile(res);
+                }).catch((err) =>
+                    // 基于 AxiosError 的错误类型 https://github.com/axios/axios/blob/b7e954eba3911874575ed241ec2ec38ff8af21bb/index.d.ts#L85
+                    Promise.resolve({
+                        data: {
+                            code: err.code,
+                            msg: err.response.statusText,
+                        },
+                    }));
             },
         };
         Object.keys(porcessPorts).forEach((service) => {
@@ -254,4 +270,17 @@ export default {
             }
         };
     },
+};
+
+
+const downloadFile = (res) => {
+    console.log(res);
+    // 包含 content-disposition， 从中解析名字，不包含 content-disposition 的获取请求地址的后缀
+    const downloadUrl = window.URL.createObjectURL(new Blob([res]));
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download'); // any other extension
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
 };
