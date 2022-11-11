@@ -1,0 +1,14 @@
+{
+    "downloadFile": {
+        "url": {
+            "path": "upload/downloadFile",
+            "method": "post"
+        }
+    },
+    "downloadFiles": {
+        "url": {
+            "path": "upload/downloadFiles",
+            "method": "post"
+        }
+    }
+}
