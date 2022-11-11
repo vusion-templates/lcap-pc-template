@@ -3,6 +3,7 @@ import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
 
 import configuration from '@/apis/configuration';
+import lowauth from '@/apis/lowauth';
 import authService from '../auth/authService';
 import { genInitData } from './tools';
 import { porcessPorts } from '../router/processService';
@@ -195,6 +196,19 @@ export default {
             },
             async getCurrentIp() {
                 const res = await configuration.getCurrentIp();
+                return res;
+            },
+            async getProcessStartBy(query) {
+                const appEnv = window.appInfo.env;
+                const cookies = document.cookie.split(';');
+                const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization').split('=')[1];
+                const res = await lowauth.getProcessStartBy({
+                    body: {
+                        appEnv,
+                        token,
+                        ...query,
+                    },
+                });
                 return res;
             },
         };
