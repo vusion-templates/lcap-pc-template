@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { installOptions, installDirectives, installFilters, installComponents } from '@vusion/utils';
 import * as CloudUI from 'cloud-ui.vusion';
 import 'cloud-ui.vusion.css';
-
+import VueI18n from 'vue-i18n';
 import '@/assets/css/index.css';
 import * as Components from '@/components';
 import filters from '@/filters';
@@ -13,6 +13,11 @@ import App from './App.vue';
 
 window.appVue = Vue;
 window.CloudUI = CloudUI;
+
+Vue.use(VueI18n);
+Vue.i18n = new VueI18n({
+    locale: localStorage.i18nLocale || 'zh-CN',
+});
 
 // 预览沙箱不需要调用init来初始化，但是需要使用到CloudUI和Vant组件，所以放在外边
 installOptions(Vue);
@@ -62,6 +67,9 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     const app = new Vue({
         name: 'app',
         router,
+        i18n: {
+            locale: localStorage.i18nLocale || 'zh-CN',
+        },
         ...App,
     });
     app.$mount('#app');
