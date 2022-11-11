@@ -3,6 +3,7 @@ import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
 
 import configuration from '@/apis/configuration';
+import io from '@/apis/io';
 import authService from '../auth/authService';
 import { genInitData } from './tools';
 import { porcessPorts } from '../router/processService';
@@ -195,6 +196,24 @@ export default {
             },
             async getCurrentIp() {
                 const res = await configuration.getCurrentIp();
+                return res;
+            },
+            async downloadFile(url, fileName) {
+                const res = await io.downloadFile({
+                    body: {
+                        urls: [url],
+                        fileName,
+                    },
+                });
+                return res;
+            },
+            async downloadFiles(urls, fileName) {
+                const res = await io.downloadFiles({
+                    body: {
+                        urls,
+                        fileName,
+                    },
+                });
                 return res;
             },
         };
