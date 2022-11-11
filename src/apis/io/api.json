@@ -3,12 +3,18 @@
         "url": {
             "path": "upload/downloadFile",
             "method": "post"
-        }
+        },
+		"config": {
+			"download": true
+		}
     },
     "downloadFiles": {
         "url": {
             "path": "upload/downloadFiles",
             "method": "post"
-        }
+        },
+		"config": {
+			"download": true
+		}
     }
 }
