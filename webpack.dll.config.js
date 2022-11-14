@@ -26,7 +26,7 @@ module.exports = (env = {}) => {
             vendor: [
                 'vue',
                 'vue-router',
-                // 'vue-i18n',
+                'vue-i18n',
             ],
         },
         output: {
