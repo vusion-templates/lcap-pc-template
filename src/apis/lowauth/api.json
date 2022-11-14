@@ -19,5 +19,11 @@
 			"path": "/rest/getUserResources",
 			"query": {}
 		}
+	},
+	"getProcessStartBy": {
+		"url": {
+			"method": "post",
+			"path": "/system/user/userListFromNuimOrApp"
+		}
 	}
 }
