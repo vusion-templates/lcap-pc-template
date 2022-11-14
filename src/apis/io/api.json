@@ -1,0 +1,22 @@
+{
+    "downloadFile": {
+        "url": {
+            "path": "upload/downloadFile",
+            "method": "post",
+            "timeout": 180000
+        },
+		"config": {
+			"download": true
+		}
+    },
+    "downloadFiles": {
+        "url": {
+            "path": "upload/downloadFiles",
+            "method": "post",
+            "timeout": 180000
+        },
+		"config": {
+			"download": true
+		}
+    }
+}

@@ -4,6 +4,7 @@ import CryptoJS from 'crypto-js';
 
 import configuration from '@/apis/configuration';
 import lowauth from '@/apis/lowauth';
+import io from '@/apis/io';
 import authService from '../auth/authService';
 import { genInitData } from './tools';
 import { porcessPorts } from '../router/processService';
@@ -188,6 +189,24 @@ export default {
                         location.reload();
                     });
             },
+            async downloadFile(url, fileName) {
+                await io.downloadFile({
+                    body: {
+                        urls: [url],
+                        fileName,
+                    },
+                }).then((res) => Promise.resolve(res))
+                    .catch((err) => Promise.resolve(err));
+            },
+            async downloadFiles(urls, fileName) {
+                await io.downloadFiles({
+                    body: {
+                        urls,
+                        fileName,
+                    },
+                }).then((res) => Promise.resolve(res))
+                    .catch((err) => Promise.resolve(err));
+            },
             async getCustomConfig(configKey = '') {
                 const res = await configuration.getCustomConfig({
                     path: { configKey },
@@ -255,3 +274,5 @@ export default {
         };
     },
 };
+
+
