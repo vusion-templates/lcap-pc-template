@@ -93,7 +93,7 @@ export default {
             exitFullscreen() {
                 return document.exitFullscreen();
             },
-            encryptByAES(message, key = aesKey) {
+            encryptByAES({ string: message }, key = aesKey) {
                 const keyHex = CryptoJS.enc.Utf8.parse(key); //
                 const messageHex = CryptoJS.enc.Utf8.parse(message);
                 const encrypted = CryptoJS.AES.encrypt(messageHex, keyHex, {
@@ -102,7 +102,7 @@ export default {
                 });
                 return encrypted.toString();
             },
-            decryptByAES(messageBase64, key = aesKey) {
+            decryptByAES({ string: messageBase64 }, key = aesKey) {
                 const keyHex = CryptoJS.enc.Utf8.parse(key);
                 const decrypt = CryptoJS.AES.decrypt(messageBase64, keyHex, {
                     mode: CryptoJS.mode.ECB,
@@ -111,7 +111,7 @@ export default {
                 const decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
                 return decryptedStr.toString();
             },
-            hasAuth(authPath) {
+            hasAuth({ string: authPath }) {
                 return authService.has(authPath);
             },
             getLocation() {
