@@ -23,7 +23,7 @@ const formatContentType = function (contentType, data) {
  * 支持 query 参数
  */
 function download(url) {
-    const { path, method, body = {}, headers = {}, query = {} } = url;
+    const { path, method, body = {}, headers = {}, query = {}, timeout } = url;
 
     return axios({
         url: path,
@@ -31,6 +31,7 @@ function download(url) {
         params: query,
         data: formatContentType(headers['Content-Type'], body),
         responseType: 'blob',
+        timeout,
     }).then((res) => {
         console.log(res, 333333);
         // 包含 content-disposition， 从中解析名字，不包含 content-disposition 的获取请求地址的后缀
