@@ -218,7 +218,6 @@ export default {
                 return res;
             },
             async getProcessStartBy(query) {
-                const { userNameFilter, limit, offset } = query;
                 const appEnv = window.appInfo.env;
                 const cookies = document.cookie.split(';');
                 const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization').split('=')[1];
@@ -226,11 +225,7 @@ export default {
                     body: {
                         appEnv,
                         token,
-                        userNameFilter,
-                    },
-                    query: {
-                        limit,
-                        offset,
+                        ...query,
                     },
                 });
                 return res;
