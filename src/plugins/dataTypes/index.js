@@ -113,6 +113,7 @@ export default {
                 return decryptedStr.toString();
             },
             hasAuth({ string: authPath }) {
+                console.log('auth');
                 return authService.has(authPath);
             },
             getLocation() {
@@ -219,8 +220,8 @@ export default {
             },
             async getProcessStartBy(query) {
                 const appEnv = window.appInfo.env;
-                const cookies = document.cookie.split(';');
-                const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization').split('=')[1];
+                const cookies = document.cookie.split('; ');
+                const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization')?.split('=')[1];
                 const res = await lowauth.getProcessStartBy({
                     body: {
                         appEnv,
