@@ -8,7 +8,7 @@
     "build": "vue-cli-service build --apply-theme",
     "build:stage": "vue-cli-service build --mode staging",
     "build:site": "vue-cli-service build  --apply-theme --mode site",
-    "lint": "npx eslint --quiet",
+    "lint": "npx eslint",
     "lint:fix": "npm run lint -- \"./src/**/*.{js,vue}\" --fix",
     "dll": "npx webpack --config webpack.dll.config.js --env.NODE_ENV production && npx webpack --config webpack.dll.config.js --env.NODE_ENV development",
     "test:unit": "vue-cli-service test:unit",
