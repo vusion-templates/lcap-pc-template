@@ -22,9 +22,7 @@ export default {
     },
     methods: {
         jumpPage() {
-            const { tenant, envConfig } = window.appInfo;
-            const url = `//${tenant}.${envConfig.lowcodeDomain}/sso`;
-            console.log('url: ', url);
+            const url = 'https://id.163yun.com/login?h=shufanqz&t=shufanqz&locale=zh_CN&referrer=https://community1.user.lcap.qz.163yun.com/cb%3Fredirect%3Dhttps%3A%2F%2Fcommunity1.lcap.qz.163yun.com%2Flogin%253FloginSuccessUrl%253Dhttps%253A%252F%252Fcommunity1.lcap.qz.163yun.com%252Fsso%253FtenantSource%253D2%26env%3Donline%26span%3Dshufan_nologin%26';
             window.location.href = url;
         },
     },

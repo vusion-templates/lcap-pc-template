@@ -5,7 +5,7 @@
         </template>
         <template #body>
             <div :class="$style.title">轻舟低代码，人人都可开发专属应用</div>
-            <u-iframe ref="iframe2" style="width:100%;height:350px;" src="https://id-test.sf.163.com/sdk-login?cmsKey=SdkLoginPage&i18nEnable=true&locale=zh_CN&h=youshuform&t=youshuform"></u-iframe>
+            <u-iframe ref="iframe2" style="width:100%;height:350px;" src="https://id-test.163yun.com/sdk-login?cmsKey=SdkLoginPage&i18nEnable=true&locale=zh_CN&h=shufanqzlcap&t=shufanqzlcap"></u-iframe>
             <div :class="$style.content">
                 <div style="width:14px;height:14px;margin-top:3px;">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -21,7 +21,6 @@
 
 <script>
 import auth from '@/apis/auth';
-import lowauth from '@/apis/lowauth';
 import cookie from '@/utils/cookie';
 
 export default {
@@ -36,18 +35,15 @@ export default {
     },
     methods: {
         async dealMessage(msg) {
-            if (msg?.data && JSON.parse(msg?.data)?.token) {
+            if (msg?.data && typeof msg?.data === 'string' && JSON.parse(msg?.data)?.token) {
+                const userId = JSON.parse(msg?.data)?.token.userId;
+                cookie.set({ authorization_extend_token_key: userId }, 15);
                 this.close();
-
-                const res = await auth.NuimsLogin({});
-                console.log('res: ', res);
-                const AuthorizationExtendToken = res?.headers?.AuthorizationExtendToken;
-                if (AuthorizationExtendToken) {
-                    // todo 这个cookie有效期多久
-                    cookie.set({ AuthorizationExtendToken });
+                const res = await auth.GenerateExtendToken({});
+                const token = res?.Data;
+                if (token) {
+                    cookie.set({ authorization_extend_token: token }, 15);
                 }
-                // todo: 需要判断token authrition 没有  这里应该不需要跳转 页面本身会跳转
-                // window.location.href = '/login';
             }
         },
         open() {

@@ -1,4 +1,14 @@
 {
+    "GenerateExtendToken": {
+        "url": {
+            "method": "get",
+            "path": "/gateway/nuims/nuims",
+            "query": {
+                "Action": "GenerateExtendToken",
+                "Version": "2020-06-01"
+            }
+        }
+    },
     "NuimsLogin": {
         "url": {
             "method": "post",
@@ -11,7 +21,7 @@
     },
     "CheckExtendToken": {
         "url": {
-            "method": "post",
+            "method": "get",
             "path": "/gateway/nuims/nuims",
             "query": {
                 "Action": "CheckExtendToken",
