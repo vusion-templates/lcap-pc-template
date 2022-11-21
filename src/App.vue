@@ -15,12 +15,14 @@ export default {
     components: { SFreesassLogin, SFreesassBanner },
     computed: {
         isSharePage() {
-            const { env, dnsAddr } = window.appInfo;
-            if (env === 'dev') {
-                return `dev.${dnsAddr}` === location.host;
-            } else {
-                return `${dnsAddr}` === location.host;
-            }
+            const neteaseStrList = 'lcap.qz.163yun'.split('.');
+            return neteaseStrList.some((it) => location.host.includes(it));
+            // const { env, dnsAddr } = window.appInfo;
+            // if (env === 'dev') {
+            //     return `dev.${dnsAddr}` === location.host;
+            // } else {
+            //     return `${dnsAddr}` === location.host;
+            // }
         },
         isFreeSass() {
             return +window.appInfo?.tenantType === 1;
