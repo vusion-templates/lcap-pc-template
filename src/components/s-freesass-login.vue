@@ -74,4 +74,7 @@ export default {
         align-items: flex-start;
         gap:10px;
      }
+    [class^=u-modal_close__] {
+        display: none!important;
+    }
 </style>
