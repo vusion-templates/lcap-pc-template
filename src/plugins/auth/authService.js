@@ -52,7 +52,7 @@ export default {
         return userInfoPromise;
     },
     getUserResources(DomainName) {
-        if (!userResourcesPromise) {
+        if (window.appInfo.hasUserCenter) {
             userResourcesPromise = lowauth.GetUserResources({
                 headers: getBaseHeaders(),
                 query: {
@@ -63,13 +63,31 @@ export default {
                     noErrorTip: true,
                 },
             }).then((result) => {
-                const resources = result.filter((resource) => resource.resourceType === 'ui');
+                let resources = [];
                 // 初始化权限项
                 this._map = new Map();
-                resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
+                if (Array.isArray(result)) {
+                    resources = result.filter((resource) => resource?.resourceType === 'ui');
+                    resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
+                }
                 return resources;
-            }).catch((e) => {
-                userResourcesPromise = null;
+            });
+        } else {
+            userResourcesPromise = auth.GetUserResources({
+                headers: getBaseHeaders(),
+                query: {
+                    DomainName,
+                },
+                config: {
+                    noErrorTip: true,
+                },
+            }).then((res) => {
+                this._map = new Map();
+                const result = res?.Data?.items || [];
+                const resources = result.filter((resource) => resource?.ResourceType === 'ui');
+                // 初始化权限项
+                resources.forEach((resource) => this._map.set(resource?.ResourceValue, resource));
+                return resources;
             });
         }
         return userResourcesPromise;
