@@ -52,7 +52,7 @@ export default {
         return userInfoPromise;
     },
     getUserResources(DomainName) {
-        if (window.appInfo.hasUserCenter) {
+        if (window.appInfo.hasAuth) {
             userResourcesPromise = lowauth.GetUserResources({
                 headers: getBaseHeaders(),
                 query: {
