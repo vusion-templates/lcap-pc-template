@@ -1,5 +1,12 @@
 {
-	"CheckExtendToken": {
+	"getAppLoginTypes": {
+	    "url": {
+	        "method": "get",
+	        "path": "/system/getAppLoginTypes",
+	        "query": {}
+	    }
+	},
+    "CheckExtendToken": {
 	    "url": {
 	        "method": "get",
 	        "path": "/system/checkExtendToken",
