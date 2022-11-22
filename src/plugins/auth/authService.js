@@ -102,7 +102,7 @@ export default {
                     TenantName: window.appInfo.tenant,
                 },
             });
-            const KeycloakConfig = res?.data?.Data.Keycloak;
+            const KeycloakConfig = res?.Data.Keycloak;
             if (KeycloakConfig) {
                 logoutUrl = `${KeycloakConfig?.config?.logout_url}?redirect_uri=${window.location.protocol}//${window.location.host}/login`;
             }
