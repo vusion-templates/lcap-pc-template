@@ -30,7 +30,7 @@
 	"GetUser": {
 		"url": {
 			"method": "get",
-			"path": "/user/system/getUser",
+			"path": "/api/user/system/getUser",
 			"query": {}
 		}
 	},
