@@ -59,6 +59,16 @@
             }
         }
     },
+    "getNuimsTenantLoginTypes": {
+        "url": {
+            "method": "get",
+            "path": "/gateway/nuims/nuims",
+            "query": {
+                "Action": "getNuimsTenantLoginTypes",
+                "Version": "2020-06-01"
+            }
+        }
+    },
     "IsUserHasPermission": {
         "url": {
             "method": "post",

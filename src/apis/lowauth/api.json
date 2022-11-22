@@ -5,6 +5,27 @@
 			"path": "/system/logout",
 			"query": {}
 		}
+    },
+	"getAppLoginTypes": {
+	    "url": {
+	        "method": "get",
+	        "path": "/system/getAppLoginTypes",
+	        "query": {}
+	    }
+	},
+    "CheckExtendToken": {
+	    "url": {
+	        "method": "get",
+	        "path": "/system/checkExtendToken",
+	        "query": {}
+	    }
+	},
+    "Logout": {
+	    "url": {
+	        "method": "get",
+	        "path": "/system/logout",
+	        "query": {}
+	    }
 	},
 	"GetUser": {
 		"url": {
