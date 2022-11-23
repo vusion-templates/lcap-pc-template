@@ -113,6 +113,7 @@ export default {
                 return decryptedStr.toString();
             },
             hasAuth({ string: authPath }) {
+                console.log('auth');
                 return authService.has(authPath);
             },
             getLocation() {
@@ -189,29 +190,6 @@ export default {
                         location.reload();
                     });
             },
-            async getCustomConfig(configKey = '') {
-                const res = await configuration.getCustomConfig({
-                    path: { configKey },
-                });
-                return res;
-            },
-            async getCurrentIp() {
-                const res = await configuration.getCurrentIp();
-                return res;
-            },
-            async getProcessStartBy(query) {
-                const appEnv = window.appInfo.env;
-                const cookies = document.cookie.split(';');
-                const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization').split('=')[1];
-                const res = await lowauth.getProcessStartBy({
-                    body: {
-                        appEnv,
-                        token,
-                        ...query,
-                    },
-                });
-                return res;
-            },
             async downloadFile(url, fileName) {
                 await io.downloadFile({
                     body: {
@@ -229,6 +207,29 @@ export default {
                     },
                 }).then((res) => Promise.resolve(res))
                     .catch((err) => Promise.resolve(err));
+            },
+            async getCustomConfig(configKey = '') {
+                const res = await configuration.getCustomConfig({
+                    path: { configKey },
+                });
+                return res;
+            },
+            async getCurrentIp() {
+                const res = await configuration.getCurrentIp();
+                return res;
+            },
+            async getProcessStartBy(query) {
+                const appEnv = window.appInfo.env;
+                const cookies = document.cookie.split('; ');
+                const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization')?.split('=')[1];
+                const res = await lowauth.getProcessStartBy({
+                    body: {
+                        appEnv,
+                        token,
+                        ...query,
+                    },
+                });
+                return res;
             },
         };
         Object.keys(porcessPorts).forEach((service) => {
@@ -269,5 +270,4 @@ export default {
         };
     },
 };
-
 

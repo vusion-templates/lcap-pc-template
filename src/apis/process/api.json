@@ -82,5 +82,29 @@
             "path": " /api/system/process/getTaskDestinationUrl",
             "method": "post"
         }
+    },
+    "transferTaskInstance": {
+        "url": {
+            "path": "/api/system/process/transferTaskInstance",
+            "method": "post"
+        }
+    },
+    "withdrawProcessInstance": {
+        "url": {
+            "path": "/api/system/process/withdrawProcessInstance",
+            "method": "post"
+        }
+    },
+    "endProcessInstance": {
+        "url": {
+            "path": "/api/system/process/endProcessInstance",
+            "method": "post"
+        }
+    },
+    "getRejectableTaskDefinitionList": {
+        "url": {
+            "path": "/api/system/process/getRejectableTaskDefinitionList",
+            "method": "post"
+        }
     }
 }
