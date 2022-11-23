@@ -127,7 +127,7 @@ export const porcessPorts = {
         return res;
     },
     async transferTaskInstance(query) {
-        const res = await process.getTaskDestinationUrl({
+        const res = await process.transferTaskInstance({
             body: {
                 ...query,
             },
@@ -135,7 +135,7 @@ export const porcessPorts = {
         return res;
     },
     async withdrawProcessInstance(query) {
-        const res = await process.getTaskDestinationUrl({
+        const res = await process.withdrawProcessInstance({
             body: {
                 ...query,
             },
@@ -143,7 +143,7 @@ export const porcessPorts = {
         return res;
     },
     async endProcessInstance(query) {
-        const res = await process.getTaskDestinationUrl({
+        const res = await process.endProcessInstance({
             body: {
                 ...query,
             },
@@ -151,7 +151,7 @@ export const porcessPorts = {
         return res;
     },
     async getRejectableTaskDefinitionList(query) {
-        const res = await process.getTaskDestinationUrl({
+        const res = await process.getRejectableTaskDefinitionList({
             body: {
                 ...query,
             },
