@@ -83,7 +83,7 @@
             "method": "post"
         }
     },
-    "transferProcessTask": {
+    "transferTaskInstance": {
         "url": {
             "path": "/api/system/process/transferTaskInstance",
             "method": "post"
