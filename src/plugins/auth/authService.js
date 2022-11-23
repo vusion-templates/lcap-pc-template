@@ -52,7 +52,7 @@ export default {
         return userInfoPromise;
     },
     getUserResources(DomainName) {
-        if (!userResourcesPromise) {
+        if (window.appInfo.hasAuth) {
             userResourcesPromise = lowauth.GetUserResources({
                 headers: getBaseHeaders(),
                 query: {
@@ -63,34 +63,97 @@ export default {
                     noErrorTip: true,
                 },
             }).then((result) => {
-                const resources = result.filter((resource) => resource.resourceType === 'ui');
+                let resources = [];
                 // 初始化权限项
                 this._map = new Map();
-                resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
+                if (Array.isArray(result)) {
+                    resources = result.filter((resource) => resource?.resourceType === 'ui');
+                    resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
+                }
                 return resources;
-            }).catch((e) => {
-                console.error('获取权限异常', e);
-                userResourcesPromise = null;
+            });
+        } else {
+            userResourcesPromise = auth.GetUserResources({
+                headers: getBaseHeaders(),
+                query: {
+                    DomainName,
+                },
+                config: {
+                    noErrorTip: true,
+                },
+            }).then((res) => {
+                this._map = new Map();
+                const result = res?.Data?.items || [];
+                const resources = result.filter((resource) => resource?.ResourceType === 'ui');
+                // 初始化权限项
+                resources.forEach((resource) => this._map.set(resource?.ResourceValue, resource));
+                return resources;
             });
         }
         return userResourcesPromise;
     },
-    logout() {
+    async getKeycloakLogoutUrl() {
+        let logoutUrl = '';
         if (window.appInfo.hasUserCenter) {
-            return lowauth.Logout({
-                headers: getBaseHeaders(),
-            }).then(() => {
-                // 用户中心，去除认证和用户名信息
-                cookie.erase('authorization');
-                cookie.erase('username');
+            const res = await lowauth.getAppLoginTypes({
+                query: {
+                    Action: 'GetTenantLoginTypes',
+                    Version: '2020-06-01',
+                    TenantName: window.appInfo.tenant,
+                },
             });
+            const KeycloakConfig = res?.Data.Keycloak;
+            if (KeycloakConfig) {
+                logoutUrl = `${KeycloakConfig?.config?.logout_url}?redirect_uri=${window.location.protocol}//${window.location.host}/login`;
+            }
         } else {
-            return auth.Logout({
-                headers: getBaseHeaders(),
-            }).then(() => {
-                cookie.erase('authorization');
-                cookie.erase('username');
+            const res = await auth.getNuimsTenantLoginTypes({
+                query: {
+                    Action: 'GetTenantLoginTypes',
+                    Version: '2020-06-01',
+                    TenantName: window.appInfo.tenant,
+                },
             });
+            const KeycloakConfig = res?.Data.find((item) => (item.LoginType === 'Keycloak'));
+            if (KeycloakConfig) {
+                logoutUrl = `${KeycloakConfig?.extendProperties?.logoutUrl}?redirect_uri=${window.location.protocol}//${window.location.host}/login`;
+            }
+        }
+
+        return logoutUrl;
+    },
+    async logout() {
+        const sleep = (t) => new Promise((r) => setTimeout(r, t));
+
+        if (window.appInfo.hasUserCenter) {
+            const logoutUrl = await this.getKeycloakLogoutUrl();
+            localStorage.setItem('logoutUrl', logoutUrl);
+            if (logoutUrl) {
+                window.location.href = logoutUrl;
+                await sleep(1000);
+            } else {
+                return lowauth.Logout({
+                    headers: getBaseHeaders(),
+                }).then(() => {
+                    // 用户中心，去除认证和用户名信息
+                    cookie.erase('authorization');
+                    cookie.erase('username');
+                });
+            }
+        } else {
+            const logoutUrl = await this.getKeycloakLogoutUrl();
+            localStorage.setItem('logoutUrl', logoutUrl);
+            if (logoutUrl) {
+                window.location.href = logoutUrl;
+                await sleep(1000);
+            } else {
+                return auth.Logout({
+                    headers: getBaseHeaders(),
+                }).then(() => {
+                    cookie.erase('authorization');
+                    cookie.erase('username');
+                });
+            }
         }
     },
     /**
