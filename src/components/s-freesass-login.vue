@@ -34,7 +34,16 @@ export default {
         window.addEventListener('message', this.dealMessage);
     },
     methods: {
+        updateHeight(value) {
+            if (value < 700) {
+                return;
+            }
+            this.$refs.iframe2.$el.style.height = `${value - 50}px`;
+        },
         async dealMessage(msg) {
+            if (msg?.data && typeof msg?.data === 'string' && JSON.parse(msg?.data)?.name === 'updateHeight') {
+                this.updateHeight(JSON.parse(msg?.data)?.value);
+            }
             if (msg?.data && typeof msg?.data === 'string' && JSON.parse(msg?.data)?.token) {
                 const userId = JSON.parse(msg?.data)?.token.userId;
                 cookie.set({ authorization_extend_token_key: userId }, 15);
