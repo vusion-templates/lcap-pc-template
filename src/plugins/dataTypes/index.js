@@ -177,7 +177,12 @@ export default {
                 return d * 1000;
             },
             logout() {
-                Vue.prototype.$confirm('确定退出登录吗？', '提示')
+                Vue.prototype.$confirm({
+                    content: '确定退出登录吗？',
+                    title: '提示',
+                    okButton: '确定',
+                    cancelButton: '取消',
+                })
                     .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
                         cookie.erase('authorization');
