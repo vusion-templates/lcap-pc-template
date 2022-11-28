@@ -104,7 +104,7 @@ export default {
             });
             const KeycloakConfig = res?.Data.Keycloak;
             if (KeycloakConfig) {
-                logoutUrl = `${KeycloakConfig?.config?.logout_url}?redirect_uri=${window.location.protocol}//${window.location.host}/login`;
+                logoutUrl = `${KeycloakConfig?.config?.logoutUrl}?redirect_uri=${window.location.protocol}//${window.location.host}/login`;
             }
         } else {
             const res = await auth.getNuimsTenantLoginTypes({

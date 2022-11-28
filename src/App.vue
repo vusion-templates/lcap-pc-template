@@ -17,19 +17,13 @@ export default {
         isSharePage() {
             const neteaseStrList = 'lcap.qz.163yun'.split('.');
             return neteaseStrList.some((it) => location.host.includes(it));
-            // const { env, dnsAddr } = window.appInfo;
-            // if (env === 'dev') {
-            //     return `dev.${dnsAddr}` === location.host;
-            // } else {
-            //     return `${dnsAddr}` === location.host;
-            // }
         },
         isFreeSass() {
             return +window.appInfo?.tenantType === 1;
         },
     },
     async mounted() {
-        if (this.isSharePage && this.isFreeSass) {
+        if (0 && this.isSharePage && this.isFreeSass) {
             try {
                 await auth.CheckExtendToken({ config: {
                     noErrorTip: true,

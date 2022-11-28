@@ -60,7 +60,7 @@ module.exports = function (port) {
                 autoRewrite: true,
                 onProxyReq,
             },
-            "/rest": {
+            '/rest': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
                 autoRewrite: true,

@@ -1,6 +1,7 @@
 import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
 import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
+import cookie from '@/utils/cookie';
 
 import configuration from '@/apis/configuration';
 import lowauth from '@/apis/lowauth';
@@ -179,14 +180,8 @@ export default {
                 Vue.prototype.$confirm('确定退出登录吗？', '提示')
                     .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
-                        const cookies = document.cookie.split(';');
-                        cookies.forEach((cookie) => {
-                            const eqPos = cookie.indexOf('=');
-                            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                            const d = new Date();
-                            d.setTime(d.getTime() - (1 * 24 * 60 * 60 * 1000));
-                            document.cookie = `${name}=; expires=${d.toGMTString()}; path=/`;
-                        });
+                        cookie.erase('authorization');
+                        cookie.erase('username');
                         location.reload();
                     });
             },
@@ -270,5 +265,4 @@ export default {
         };
     },
 };
-
 
