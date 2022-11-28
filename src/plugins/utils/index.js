@@ -31,6 +31,10 @@ function toValue(date, converter) {
         return date;
 }
 
+function uniqueByKey(array, key) {
+    return [...new Map(array.map((x) => [x[key], x])).values()];
+}
+
 export const utils = {
     Vue: undefined,
     Enum(enumName, value) {
@@ -125,6 +129,155 @@ export const utils = {
     ListContains(arr, item) {
         return typeof arr.find((ele) => isEqual(ele, item)) !== 'undefined';
     },
+    ListReverse(arr) {
+        if (Array.isArray(arr)) {
+            arr.reverse();
+        }
+    },
+    ListSort(arr, callback, sort) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                arr.sort((a, b) => {
+                    const valueA = callback(a);
+                    const valueB = callback(b);
+                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
+                        return 1;
+                    } else {
+                        if (valueA >= valueB) {
+                            if (sort) {
+                                return 1;
+                            }
+                            return -1;
+                        } else {
+                            if (sort) {
+                                return -1;
+                            }
+                            return 1;
+                        }
+                    }
+                });
+            }
+        }
+    },
+    ListFind(arr, predicate) {
+        if (Array.isArray(arr)) {
+            if (typeof predicate === 'function') {
+                return arr.find(predicate);
+            }
+        }
+    },
+    ListFindAll(arr, predicate) {
+        if (Array.isArray(arr)) {
+            if (typeof predicate === 'function') {
+                return arr.filter(predicate);
+            }
+        }
+    },
+    ListFindIndex(arr, callback) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                return arr.findIndex(callback);
+            }
+        }
+    },
+    ListSlice(arr, start, end) {
+        if (Array.isArray(arr)) {
+            return arr.slice(start, end);
+        }
+    },
+    // 不修改原 list，返回新 list
+    ListDistinctBy(arr, paths) {
+        // 类型检查应当保证. Basic checks.
+        console.assert(Array.isArray(arr));
+        console.assert(paths.length > 0);
+
+        const byField = paths.reduce((prev, cur) => prev[`${cur}`], arr);
+        if (typeof byField == 'object') {
+            uniqueByKey(arr, byField);
+        } else {
+            console.log("unimplemented");
+            console.assert(false);
+        }
+    },
+    ListGroupBy(arr, paths) {
+        console.log("MapDistinctBy is not implemented yet.");
+        console.assert(false);
+    },
+    ListSliceToPageOf(arr, page, size) {
+        if (Array.isArray(arr) && page) {
+            return arr.slice((page - 1) * size, size);
+        }
+    },
+    ListHead(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null;
+        } else {
+            return arr[0];
+        }
+    },
+    ListLast(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null;
+        } else {
+            return arr[arr.length - 1];
+        }
+    },
+    ListFlatten(arr) {
+        if (Array.isArray(arr) && arr.every(elem => Array.isArray(elem))) {
+            return arr.flat();
+        } else {
+            return null;
+        }
+    },
+    ListTransform(arr, trans) {
+        if (Array.isArray(arr)) {
+            return arr.map(elem => trans(elem));
+        } else {
+            return null;
+        }
+    },
+    ListSum(arr) {
+        if (Array.isArray(arr)) {
+            return arr.reduce((prev, cur) => prev + cur, 0);
+        } else {
+            return null;
+        }
+    },
+    ListProduct(arr) {
+        if (Array.isArray(arr)) {
+            return arr.reduce((prev, cur) => prev * cur, 0);
+        } else {
+            return null;
+        }
+    },
+    ListAverage(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null;
+        } else {
+            this.ListSum(arr) / arr.length;
+        }
+    },
+    ListMax(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null
+        } else {
+            return arr.reduce((prev, cur) => prev >= cur ? prev : cur, arr[0]);
+        }
+    },
+    ListMin(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null
+        } else {
+            return arr.reduce((prev, cur) => prev <= cur ? prev : cur, arr[0]);
+        }
+    },
+    ListLength(arr) {
+        if (Array.isArray(arr)) {
+            return arr.length;
+        } else {
+            return null;
+        }
+    },
     MapGet(map, key) {
         if (isObject(map)) {
             return map[key];
@@ -169,95 +322,38 @@ export const utils = {
         return [];
     },
     MapFilter(map, predicate) {
-        if (isObject(map) && typeof predicate === 'function') {
-            const res = new Map();
-            for (const key in map) {
-                if (Object.hasOwnProperty.call(map, key) && predicate.call(this, key, map[key])) {
-                    res.push(key, map[key]);
-                }
-            }
-            if (!Object.keys(res).length) {
-                return null;
-            }
-            return res;
+        if (!isObject(map) || !(typeof predicate === 'function')) {
+            return null;
         }
-        return null;
-    },
-    ListReverse(arr) {
-        if (Array.isArray(arr)) {
-            arr.reverse();
-        }
-    },
-    ListSort(arr, callback, sort) {
-        if (Array.isArray(arr)) {
-            if (typeof callback === 'function') {
-                arr.sort((a, b) => {
-                    const valueA = callback(a);
-                    const valueB = callback(b);
-                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
-                        return 1;
-                    } else {
-                        if (valueA >= valueB) {
-                            if (sort) {
-                                return 1;
-                            }
-                            return -1;
-                        } else {
-                            if (sort) {
-                                return -1;
-                            }
-                            return 1;
-                        }
-                    }
-                });
+        const res = new Map();
+        for (const key in map) {
+            if (Object.hasOwnProperty.call(map, key) && predicate.call(this, key, map[key])) {
+                res.push(key, map[key]);
             }
         }
+        return res;
     },
-    ListFind(arr, callback) {
-        if (Array.isArray(arr)) {
-            if (typeof callback === 'function') {
-                return arr.find(callback);
-            }
+    MapTransform(map, trans) {
+        if (!isObject(map) || !(typeof predicate === 'function')) {
+            return null;
         }
+        const res = new Map();
+        for (const key in map) {
+            res.push(trans(key, map[key]));
+        }
+        return res;
     },
-    ListFindAll(arr, callback) {
-        if (Array.isArray(arr)) {
-            if (typeof callback === 'function') {
-                return arr.filter(callback);
-            }
-        }
+    MapDistinctBy(map, paths) {
+        console.log("MapDistinctBy is not implemented yet.");
+        console.assert(false);
     },
-    ListFindIndex(arr, callback) {
-        if (Array.isArray(arr)) {
-            if (typeof callback === 'function') {
-                return arr.findIndex(callback);
-            }
-        }
+    MapGroupBy(map, paths) {
+        console.log("MapGroupBy is not implemented yet.");
+        console.assert(false);
     },
-    ListSlice(arr, start, end) {
-        if (Array.isArray(arr)) {
-            return arr.slice(start, end);
-        }
-    },
-    ListDistinct(arr) {
-        if (Array.isArray(arr)) {
-            const map = new Map();
-            let i = 0;
-            while (i < arr.length) {
-                if (map.get(arr[i])) {
-                    arr.splice(i, 1);
-                    i--;
-                } else {
-                    map.set(arr[i], true);
-                }
-                i++;
-            }
-        }
-    },
-    ListSliceToPageOf(arr, page, size) {
-        if (Array.isArray(arr) && page) {
-            return arr.slice((page - 1) * size, size);
-        }
+    ListToMap(list) {
+        console.log("ListToMap is not implemented yet.");
+        console.assert(false);
     },
     CurrDate() {
         return new Date().toJSON().replace(/T.+?Z/, '');
