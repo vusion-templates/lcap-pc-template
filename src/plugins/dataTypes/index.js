@@ -191,7 +191,7 @@ export default {
                     });
             },
             async downloadFile(url, fileName) {
-                await io.downloadFile({
+                await io.downloadFiles({
                     body: {
                         urls: [url],
                         fileName,
