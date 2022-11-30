@@ -91,43 +91,113 @@ export const utils = {
     Trim(str) {
         return str && str.trim();
     },
-    ListAdd(arr, item) {
+    Get(arr, index) {
+        if (Array.isArray(arr)) {
+            return arr[index];
+        }
+    },
+    Set(arr, index, item) {
+        return utils.Vue.set(arr, index, item);
+    },
+    Contains(arr, item) {
+        return typeof arr.find((ele) => isEqual(ele, item)) !== 'undefined';
+    },
+    Add(arr, item) {
         if (Array.isArray(arr)) {
             arr.push(item);
         }
     },
-    ListAddAll(arr, addList) {
+    AddAll(arr, addList) {
         if (Array.isArray(arr) && Array.isArray(addList)) {
             arr.push(...addList);
             return arr.length;
         }
     },
-    ListInsert(arr, index, item) {
+    Insert(arr, index, item) {
         if (Array.isArray(arr)) {
             arr.splice(index, 0, item);
         }
     },
-    ListRemove(arr, item) {
+    Remove(arr, item) {
         if (Array.isArray(arr)) {
             const index = arr.indexOf(item);
             ~index && arr.splice(index, 1);
         }
     },
-    ListRemoveAt(arr, index) {
+    RemoveAt(arr, index) {
         if (Array.isArray(arr)) {
             return arr.splice(index, 1)[0];
         }
     },
-    ListGet(arr, index) {
-        if (Array.isArray(arr)) {
-            return arr[index];
+    ListHead(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null;
+        } else {
+            return arr[0];
         }
     },
-    ListSet(arr, index, item) {
-        return utils.Vue.set(arr, index, item);
+    ListLast(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null;
+        } else {
+            return arr[arr.length - 1];
+        }
     },
-    ListContains(arr, item) {
-        return typeof arr.find((ele) => isEqual(ele, item)) !== 'undefined';
+    ListFlatten(arr) {
+        if (Array.isArray(arr) && arr.every(elem => Array.isArray(elem))) {
+            return arr.flat();
+        } else {
+            return null;
+        }
+    },
+    ListTransform(arr, trans) {
+        if (Array.isArray(arr)) {
+            return arr.map(elem => trans(elem));
+        } else {
+            return null;
+        }
+    },
+    ListSum(arr) {
+        if (Array.isArray(arr)) {
+            return arr.reduce((prev, cur) => prev + cur, 0);
+        } else {
+            return null;
+        }
+    },
+    ListProduct(arr) {
+        if (Array.isArray(arr)) {
+            return arr.reduce((prev, cur) => prev * cur, 0);
+        } else {
+            return null;
+        }
+    },
+    ListAverage(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null;
+        } else {
+            this.ListSum(arr) / arr.length;
+        }
+    },
+    ListMax(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null
+        } else {
+            return arr.reduce((prev, cur) => prev >= cur ? prev : cur, arr[0]);
+        }
+    },
+    ListMin(arr) {
+        if (!Array.isArray(arr) || arr.length == 0) {
+            return null
+        } else {
+            return arr.reduce((prev, cur) => prev <= cur ? prev : cur, arr[0]);
+        }
+    },
+    ListLength(arr) {
+        if (Array.isArray(arr)) {
+            return arr.length;
+        } else {
+            return null;
+        }
     },
     ListReverse(arr) {
         if (Array.isArray(arr)) {
@@ -206,76 +276,6 @@ export const utils = {
     ListSliceToPageOf(arr, page, size) {
         if (Array.isArray(arr) && page) {
             return arr.slice((page - 1) * size, size);
-        }
-    },
-    ListHead(arr) {
-        if (!Array.isArray(arr) || arr.length == 0) {
-            return null;
-        } else {
-            return arr[0];
-        }
-    },
-    ListLast(arr) {
-        if (!Array.isArray(arr) || arr.length == 0) {
-            return null;
-        } else {
-            return arr[arr.length - 1];
-        }
-    },
-    ListFlatten(arr) {
-        if (Array.isArray(arr) && arr.every(elem => Array.isArray(elem))) {
-            return arr.flat();
-        } else {
-            return null;
-        }
-    },
-    ListTransform(arr, trans) {
-        if (Array.isArray(arr)) {
-            return arr.map(elem => trans(elem));
-        } else {
-            return null;
-        }
-    },
-    ListSum(arr) {
-        if (Array.isArray(arr)) {
-            return arr.reduce((prev, cur) => prev + cur, 0);
-        } else {
-            return null;
-        }
-    },
-    ListProduct(arr) {
-        if (Array.isArray(arr)) {
-            return arr.reduce((prev, cur) => prev * cur, 0);
-        } else {
-            return null;
-        }
-    },
-    ListAverage(arr) {
-        if (!Array.isArray(arr) || arr.length == 0) {
-            return null;
-        } else {
-            this.ListSum(arr) / arr.length;
-        }
-    },
-    ListMax(arr) {
-        if (!Array.isArray(arr) || arr.length == 0) {
-            return null
-        } else {
-            return arr.reduce((prev, cur) => prev >= cur ? prev : cur, arr[0]);
-        }
-    },
-    ListMin(arr) {
-        if (!Array.isArray(arr) || arr.length == 0) {
-            return null
-        } else {
-            return arr.reduce((prev, cur) => prev <= cur ? prev : cur, arr[0]);
-        }
-    },
-    ListLength(arr) {
-        if (Array.isArray(arr)) {
-            return arr.length;
-        } else {
-            return null;
         }
     },
     MapGet(map, key) {
