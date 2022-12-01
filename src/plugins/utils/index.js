@@ -15,6 +15,7 @@ import {
 } from 'date-fns';
 import { Decimal } from 'decimal.js';
 import Vue from 'vue';
+import { type } from 'vusion.config';
 
 let enumsMap = {};
 
@@ -29,10 +30,6 @@ function toValue(date, converter) {
         return date.getTime();
     else
         return date;
-}
-
-function uniqueByKey(array, key) {
-    return [...new Map(array.map((x) => [x[key], x])).values()];
 }
 
 export const utils = {
@@ -256,22 +253,35 @@ export const utils = {
         }
     },
     // 不修改原 list，返回新 list
-    ListDistinctBy(arr, paths) {
-        // 类型检查应当保证. Basic checks.
-        console.assert(Array.isArray(arr));
-        console.assert(paths.length > 0);
-
-        const byField = paths.reduce((prev, cur) => prev[`${cur}`], arr);
-        if (typeof byField == 'object') {
-            uniqueByKey(arr, byField);
-        } else {
-            console.log("unimplemented");
-            console.assert(false);
+    ListDistinctBy(arr, getVal) {
+        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
+        if (!arr || typeof getVal != 'function') {
+            return null;
         }
+        if (arr.length === 0) {
+            return arr;
+        }
+        return [...new Map(arr.map((x) => [getVal(x), x])).values()]
     },
-    ListGroupBy(arr, paths) {
-        console.log("MapDistinctBy is not implemented yet.");
-        console.assert(false);
+    ListGroupBy(arr, getVal) {
+        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
+        if (!arr || typeof getVal != 'function') {
+            return null;
+        }
+        if (arr.length === 0) {
+            return arr;
+        }
+        const res = new Map();
+        arr.forEach(e => {
+            const val = getVal(e);
+            if (res.has(val)) {
+                // res.get(val) 是一个 array
+                res.get(val).push(e);
+            } else {
+                res.set(val, [e]);
+            }
+        });
+        return res;
     },
     ListSliceToPageOf(arr, page, size) {
         if (Array.isArray(arr) && page) {
@@ -322,7 +332,7 @@ export const utils = {
         return [];
     },
     MapFilter(map, predicate) {
-        if (!isObject(map) || !(typeof predicate === 'function')) {
+        if (!isObject(map) || typeof predicate != 'function') {
             return null;
         }
         const res = new Map();
@@ -334,23 +344,34 @@ export const utils = {
         return res;
     },
     MapTransform(map, trans) {
-        if (!isObject(map) || !(typeof predicate === 'function')) {
+        if (!isObject(map) || typeof predicate != 'function') {
             return null;
         }
         const res = new Map();
-        for (const key in map) {
-            res.push(trans(key, map[key]));
+        for (const [k, v] of map) {
+            res.push(trans(k, v));
         }
         return res;
     },
-    MapDistinctBy(map, paths) {
-        console.log("MapDistinctBy is not implemented yet.");
-        console.assert(false);
+    MapDistinctBy(map, getVal) {
+        // getVal : <K, V, A>. (K, V) => A     A 是 K 或 V 中的某个属性的值的类型
+        // 如 K 是 Student， A 是 K 中的属性 'id' 的值的类型 Int。
+        if (typeof map != 'object' || typeof getVal != 'function') {
+            return null;
+        }
+        const res = new Map();
+        const distinctVals = new Set();
+        for (const [k, v] of map) {
+            const byVal = getVal(k, v);
+            if (!distinctVals.has(byVal)) {
+                distinctVals.add(byVal);
+                res.set(k, v);
+            }
+        }
+        return [res];
     },
-    MapGroupBy(map, paths) {
-        console.log("MapGroupBy is not implemented yet.");
-        console.assert(false);
-    },
+    // let mmm2 = new Map([['a', 1], ['b', 1], ['c', 1], ['d', 4]]);
+    // let mmm3 = MapDistinctBy(mmm2, (k, v) => v); // [ Map(2) { 'a' => 1, 'd' => 4 } ]
     ListToMap(list) {
         console.log("ListToMap is not implemented yet.");
         console.assert(false);
