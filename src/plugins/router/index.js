@@ -14,7 +14,14 @@ export default {
             if (url.startsWith('http'))
                 location.href = encodeUrl(url);
             else {
-                this.$router.push(url);
+                // 处理同页面锚点跳转无效的问题
+                if (location.hash && url === location.pathname + location.hash) {
+                    if (document.getElementById(location.hash.replace('#', ''))) {
+                        document.getElementById(location.hash.replace('#', '')).scrollIntoView();
+                    }
+                } else {
+                    this.$router.push(url);
+                }
             }
         };
     },
