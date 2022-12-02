@@ -15,13 +15,14 @@ export default {
                 location.href = encodeUrl(url);
             else {
                 // 处理同页面锚点跳转无效的问题
-                if (location.hash && url === location.pathname + location.hash) {
-                    if (document.getElementById(location.hash.replace('#', ''))) {
-                        document.getElementById(location.hash.replace('#', '')).scrollIntoView();
+                const beforeHashUrl = url.slice(0, url.indexOf('#'));
+                if (url.indexOf('#') !== -1 && beforeHashUrl === location.pathname) {
+                    const hash = url.slice(url.indexOf('#'))?.replace('#', '');
+                    if (document.getElementById(hash)) {
+                        document.getElementById(hash).scrollIntoView();
                     }
-                } else {
-                    this.$router.push(url);
                 }
+                this.$router.push(url);
             }
         };
     },
