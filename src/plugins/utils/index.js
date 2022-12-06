@@ -13,7 +13,6 @@ import {
     differenceInMinutes,
     differenceInSeconds,
 } from 'date-fns';
-import { Decimal } from 'decimal.js';
 import Vue from 'vue';
 
 let enumsMap = {};
@@ -101,6 +100,12 @@ export const utils = {
     Add(arr, item) {
         if (Array.isArray(arr)) {
             arr.push(item);
+        }
+    },
+    AddAll(arr, addList) {
+        if (Array.isArray(arr) && Array.isArray(addList)) {
+            arr.push(...addList);
+            return arr.length;
         }
     },
     Insert(arr, index, item) {
@@ -266,12 +271,6 @@ export const utils = {
                 first: page === 1,
                 empty: total,
             };
-        }
-    },
-    AddAll(arr, addList) {
-        if (Array.isArray(arr) && Array.isArray(addList)) {
-            arr.push(...addList);
-            return arr.length;
         }
     },
     CurrDate() {
