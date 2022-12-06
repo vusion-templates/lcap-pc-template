@@ -252,7 +252,20 @@ export const utils = {
     },
     ListSliceToPageOf(arr, page, size) {
         if (Array.isArray(arr) && page) {
-            return arr.slice((page - 1) * size, size);
+            const content = arr.slice((page - 1) * size, size);
+            const total = arr.length;
+            const totalPages = Math.ceil(total / size);
+            return {
+                content,
+                number: page,
+                size,
+                numberOfElements: content.length,
+                totalPages,
+                totalElements: total,
+                last: page === totalPages,
+                first: page === 1,
+                empty: total,
+            };
         }
     },
     AddAll(arr, addList) {
