@@ -1,4 +1,3 @@
-import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
 import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
 import cookie from '@/utils/cookie';
@@ -7,7 +6,7 @@ import configuration from '@/apis/configuration';
 import lowauth from '@/apis/lowauth';
 import io from '@/apis/io';
 import authService from '../auth/authService';
-import { genInitData } from './tools';
+import { initApplicationConstructor, genInitData, isInstanceOf } from './tools';
 import { porcessPorts } from '../router/processService';
 
 window.CryptoJS = CryptoJS;
@@ -15,16 +14,15 @@ const aesKey = ';Z#^$;8+yhO!AhGo';
 
 export default {
     install(Vue, options = {}) {
+        const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
+
+        initApplicationConstructor(dataTypesMap);
+
         const genInitFromSchema = (schema = {}, defaultValue) => {
             schema.defaultValue = defaultValue;
-
-            // read from file
-            const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
-            const expressDataTypeObject = genInitData(schema, dataTypesMap);
-            const expression = generate(expressDataTypeObject).code;
-            // eslint-disable-next-line no-new-func
-            return Function('return ' + expression)();
+            return genInitData(schema);
         };
+
         const frontendVariables = {};
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
@@ -32,7 +30,6 @@ export default {
                 frontendVariables[name] = genInitFromSchema(typeAnnotation, defaultValue);
             });
         }
-
         const $global = {
             // 用户信息
             userInfo: {},
@@ -236,6 +233,8 @@ export default {
          * @param {*} schema 是前端用的 refSchema
          */
         Vue.prototype.$genInitFromSchema = genInitFromSchema;
+
+        Vue.prototype.$isInstanceOf = isInstanceOf;
 
         const enumsMap = options.enumsMap || {};
         function createEnum(items) {

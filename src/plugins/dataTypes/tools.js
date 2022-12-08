@@ -8,106 +8,93 @@ function tryJSONParse(str) {
     return result;
 }
 
-const isNil = (value) => value === undefined || value === null || value === '';
+const typeMap = new Map();
 
-// typeAnnotation 和 dataTypes 解析出最终结构是在 template 内部， 所以从 low-code-fe 迁移过来的转化方法
-export const genInitData = (
-    typeAnnotation,
-    dataTypesMap,
-    level = 0,
-) => {
-    const { typeKind, typeNamespace, typeName } = typeAnnotation || {};
-    const typeKey = `${typeNamespace}.${typeName}`;
-    const next = dataTypesMap[typeKey];
-    if (next) {
-        if (next.concept === 'Enum') {
-            if (typeAnnotation.defaultValue === null || typeAnnotation.defaultValue === undefined) {
-                return {
-                    type: 'Identifier',
-                    name: 'undefined',
-                };
-            } else {
-                return {
-                    type: 'StringLiteral',
-                    value: typeAnnotation.defaultValue,
-                };
-            }
-        } else if (next.concept === 'Entity' || next.concept === 'Structure') {
-            if (next.name === 'List') {
-                return {
-                    type: 'ArrayExpression',
-                    elements: [],
-                };
-            }
-
-            if (level >= 2) {
-                return {
-                    type: 'Identifier',
-                    name: 'undefined',
-                };
-            }
-            const result = {
-                type: 'ObjectExpression',
-                properties: [],
-            };
-            next.properties.forEach((property) => {
-                result.properties.push({
-                    type: 'ObjectProperty',
-                    key: {
-                        type: 'Identifier',
-                        name: property.name,
-                    },
-                    value: genInitData({
-                        ...property.typeAnnotation,
-                        defaultValue: property.defaultValue,
-                    }, dataTypesMap, level + 1),
-                });
+function genTypeKeyArr(typeAnnotation) {
+    const {
+        typeKind, typeNamespace, typeName,
+        typeArguments,
+    } = typeAnnotation || {};
+    const typeKeyArr = [];
+    typeNamespace && typeKeyArr.push(typeNamespace);
+    typeName && typeKeyArr.push(typeName);
+    if (typeKind === 'generic') {
+        if (Array.isArray(typeArguments)) {
+            typeArguments.forEach((typeArgument) => {
+                typeKeyArr.push(...genTypeKeyArr(typeArgument));
             });
-            return result;
-        } else {
-            return {
-                type: 'Identifier',
-                name: 'undefined',
-            };
         }
-    } else if (typeKind === 'primitive') {
-        const parsedValue = tryJSONParse(typeAnnotation.defaultValue);
-        // 输入框为空，或解析的情况
-        if (isNil(typeAnnotation.defaultValue)) {
-            return {
-                type: 'Identifier',
-                name: 'undefined',
-            };
-        } else if (typeName === 'Boolean') {
-            return {
-                type: 'BooleanLiteral',
-                value: parsedValue,
-            };
-        } else if (typeName === 'Integer') {
-            return {
-                type: 'NumericLiteral',
-                value: parsedValue,
-            };
-        } else if (typeName === 'Long') {
-            return {
-                type: 'NumericLiteral',
-                value: parsedValue,
-            };
-        } else if (typeName === 'Double') {
-            return {
-                type: 'NumericLiteral',
-                value: parsedValue,
-            };
-        } else { // String, Date, Time, DateTime, Email
-            return {
-                type: 'StringLiteral',
-                value: typeAnnotation.defaultValue,
-            };
-        }
+    }
+    return typeKeyArr;
+}
+
+export function genTypeKey(typeAnnotation) {
+    return genTypeKeyArr(typeAnnotation).join('.');
+}
+
+function genConstructor(typeName, definition) {
+    if (typeMap[typeName]) {
+        return typeMap[typeName];
     } else {
-        return {
-            type: 'Identifier',
-            name: 'undefined',
-        };
+        const { properties } = definition;
+        let fnStr = '';
+        if (Array.isArray(properties)) {
+            properties.forEach((property) => {
+                fnStr += `this.${property.name} = params && params.${property.name};\n`;
+            });
+        }
+        const fn = Function('params', fnStr);
+        typeMap[typeName] = fn;
+        return fn;
+    }
+}
+
+export const primitiveTypes = [
+    'Boolean',
+    'Integer',
+    'Long',
+    'Double',
+    'Decimal',
+    'String',
+    'Text',
+    'Binary',
+    'Date',
+    'Time',
+    'DateTime',
+    'Email',
+];
+
+export function initApplicationConstructor(dataTypesMap) {
+    if (dataTypesMap) {
+        for (const typeName in dataTypesMap) {
+            genConstructor(typeName, dataTypesMap[typeName]);
+        }
+    }
+}
+
+export function isInstanceOf(variable, typeAnnotation) {
+    const { typeKind } = typeAnnotation;
+    const typeKey = genTypeKey(typeAnnotation);
+    const typeConstructor = typeMap[typeKey];
+    if (typeConstructor && variable instanceof typeConstructor) {
+        console.log(111);
+    } else if (typeKind === 'primitive') {
+
+    }
+    return false;
+}
+
+export const genInitData = (typeAnnotation) => {
+    const { typeKind, defaultValue } = typeAnnotation || {};
+    const parsedValue = tryJSONParse(defaultValue);
+    const typeKey = genTypeKey(typeAnnotation);
+    let TypeConstructor = typeMap[typeKey];
+    if (typeKind === 'generic') {
+        TypeConstructor = genConstructor(typeKey, typeAnnotation);
+    }
+    if (TypeConstructor) {
+        return new TypeConstructor(parsedValue);
+    } else if (typeKind === 'primitive') {
+        return parsedValue;
     }
 };
