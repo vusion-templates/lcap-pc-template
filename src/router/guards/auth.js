@@ -53,7 +53,6 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                     if (noAuthView?.path) {
                         next({ path: noAuthView.path });
                     }
-                    console.log(err);
                 }
             }
         } else if (redirectedFrom?.path !== to.path && to.path === '/notFound') {

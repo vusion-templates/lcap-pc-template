@@ -114,21 +114,16 @@ export default {
                 return decryptedStr.toString();
             },
             hasAuth({ string: authPath }) {
-                console.log('auth');
                 return authService.has(authPath);
             },
             getLocation() {
                 return new Promise((res, rej) => {
                     function showPosition(position) {
                         const { latitude, longitude } = position.coords;
-                        // eslint-disable-next-line no-console
-                        console.log(latitude, longitude);
                         const [mglng, mglat] = [longitude, latitude];
                         res(`${mglng},${mglat}`);
                     }
                     function showError(error) {
-                        // eslint-disable-next-line no-console
-                        console.log(error, error.code);
                         switch (error.code) {
                             case error.PERMISSION_DENIED:
                                 this.$toast.show('用户禁止获取地理定位');
@@ -151,8 +146,6 @@ export default {
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(showPosition, showError);
                     } else {
-                        // eslint-disable-next-line no-console
-                        console.log('Geolocation is not supported by this browser.');
                         this.$toast.show('当前系统不支持地理定位');
                         rej({ code: 666, msg: '当前系统不支持地理定位' });
                     }
