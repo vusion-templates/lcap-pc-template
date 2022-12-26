@@ -12,6 +12,16 @@ import { porcessPorts } from '../router/processService';
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 
+// // 获取真实值
+// function getActualValue(value) {
+//    let actualValue = value;
+//    const { __isPrimitive, value: primitiveVal } = value || {};
+//    if (__isPrimitive) {
+//        actualValue = primitiveVal;
+//    }
+//    return actualValue;
+// }
+
 export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
@@ -86,6 +96,59 @@ export default {
                 const yy = new Decimal(y + '');
                 return xx.div(yy).toNumber();
             },
+            // // 相等
+            // isEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX == actualY;
+            // },
+            // // 不相等
+            // isNotEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX != actualY;
+            // },
+            // // 大于
+            // isGreater(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX > actualY;
+            // },
+            // // 大于等于
+            // isGreaterOrEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX >= actualY;
+            // },
+            // // 小于
+            // isLess(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX < actualY;
+            // },
+            // // 小于等于
+            // isLessOrEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX <= actualY;
+            // },
+            // // 与
+            // isAnd(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX && actualY;
+            // },
+            // // 或
+            // isOr(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX || actualY;
+            // },
+            // // 非
+            // isNot(val) {
+            //    const actualVal = getActualValue(val);
+            //    return !actualVal;
+            // },
             requestFullscreen() {
                 return document.body.requestFullscreen();
             },
