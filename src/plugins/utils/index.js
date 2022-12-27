@@ -306,7 +306,7 @@ export const utils = {
         return cloneDeep(obj);
     },
     New(obj) {
-        return obj;
+        return utils.Vue.prototype.$genInitFromSchema(obj);
     },
     /**
      * 将内容置空，array 置为 []; object 沿用 ClearObject 逻辑; 其他置为 undefined
