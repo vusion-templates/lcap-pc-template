@@ -96,12 +96,10 @@ export default {
                 const yy = new Decimal(y + '');
                 return xx.div(yy).toNumber();
             },
-            // // 相等
-            // isEqual(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX == actualY;
-            // },
+            // 相等
+            isEqual(x, y) {
+                return x == y;
+            },
             // // 不相等
             // isNotEqual(x, y) {
             //    const actualX = getActualValue(x);

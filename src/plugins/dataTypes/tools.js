@@ -45,12 +45,12 @@ function genConstructor(typeKey, definition) {
     if (typeMap[typeKey]) {
         return typeMap[typeKey];
     } else {
-        const { isPrimitive, properties } = definition || {};
+        const { properties } = definition || {};
         let fnStr = '';
-        if (definition) {
-            fnStr += `this.__isPrimitive = ${isPrimitive} ?? false;\n`;
-            fnStr += `this.__typeKey = '${typeKey}';\n`;
-        }
+        // if (definition) {
+        //    fnStr += `this.__isPrimitive = ${isPrimitive} ?? false;\n`;
+        //    fnStr += `this.__typeKey = '${typeKey}';\n`;
+        // }
         if (Array.isArray(properties)) {
             properties.forEach((property) => {
                 const {
@@ -62,11 +62,11 @@ function genConstructor(typeKey, definition) {
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
                     parsedValue = `'${parsedValue}'`;
                 }
-                if (isPrimitive) {
-                    fnStr += `this.${propertyName} = params && params.${propertyName};\n`;
-                } else {
-                    fnStr += `this.${propertyName} = (params && params.${propertyName}) ?? Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, ${parsedValue});\n`;
-                }
+                // if (isPrimitive) {
+                //    fnStr += `this.${propertyName} = params && params.${propertyName};\n`;
+                // } else {
+                fnStr += `this.${propertyName} = (params && params.${propertyName}) ?? Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, ${parsedValue});\n`;
+                // }
             });
         }
         const fn = Function('params', fnStr);
