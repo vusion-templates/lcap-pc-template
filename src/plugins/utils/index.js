@@ -226,19 +226,18 @@ export const utils = {
             }
         }
     },
-    ListFind(arr, predicate) {
+    ListFind(arr, by) {
         if (Array.isArray(arr)) {
-            if (typeof predicate === 'function') {
-                return arr.find(predicate);
+            if (typeof by === 'function') {
+                return arr.find(by);
             }
         }
     },
-    ListFindAll(arr, predicate) {
-        if (Array.isArray(arr)) {
-            if (typeof predicate === 'function') {
-                return arr.filter(predicate);
-            }
+    ListFilter(arr, by) {
+        if (!Array.isArray(arr) || typeof by !== 'function') {
+            return null;
         }
+        return arr.filter(by);
     },
     ListFindIndex(arr, callback) {
         if (Array.isArray(arr)) {
@@ -332,7 +331,7 @@ export const utils = {
         }
     },
     MapFilter(map, by) {
-        if (!isObject(map) || !(typeof predicate === 'function')) {
+        if (!isObject(map) || typeof by !== 'function') {
             return null;
         }
         const res = new Map();
@@ -343,37 +342,18 @@ export const utils = {
         }
         return res;
     },
-    MapTransform(map, by) {
-        if (!isObject(map) || typeof predicate !== 'function') {
+    MapTransform(map, toKey, toValue) {
+        if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
             return null;
         }
         const res = new Map();
         for (const [k, v] of map) {
-            res.set(...by(k, v));
+            res.set(toKey(k, v), toValue(k, v));
         }
         return res;
     },
-    MapDistinctBy(map, getVal) {
-        // getVal : <K, V, A>. (K, V) => A     A 是 K 或 V 中的某个属性的值的类型
-        // 如 K 是 Student， A 是 K 中的属性 'id' 的值的类型 Int。
-        if (typeof map != 'object' || typeof getVal != 'function') {
-            return null;
-        }
-        const res = new Map();
-        const distinctVals = new Set();
-        for (const [k, v] of map) {
-            const byVal = getVal(k, v);
-            if (!distinctVals.has(byVal)) {
-                distinctVals.add(byVal);
-                res.set(k, v);
-            }
-        }
-        return [res];
-    },
-    // let mmm2 = new Map([['a', 1], ['b', 1], ['c', 1], ['d', 4]]);
-    // let mmm3 = MapDistinctBy(mmm2, (k, v) => v); // [ Map(2) { 'a' => 1, 'd' => 4 } ]
     ListToMap(arr, toKey, toValue) {
-        if (typeof arr != 'object' || typeof toKey != 'function' || typeof toValue != 'function') {
+        if (typeof arr !== 'object' || typeof toKey !== 'function' || typeof toValue !== 'function') {
             return null;
         }
         const res = new Map();
