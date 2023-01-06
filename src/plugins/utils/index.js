@@ -255,6 +255,7 @@ export const utils = {
             }
         }
     },
+    // 随着 PageOf 失效，可删除
     ListSliceToPageOf(arr, page, size) {
         if (Array.isArray(arr) && page) {
             const content = arr.slice((page - 1) * size, size);
@@ -271,6 +272,15 @@ export const utils = {
                 first: page === 1,
                 empty: total,
             };
+        }
+    },
+    SliceToListPage(arr, page, size) {
+        if (Array.isArray(arr) && page) {
+            const list = arr.slice((page - 1) * size, size);
+            const total = arr.length;
+            return { list, total };
+        } else {
+            return { list: [], total: 0 };
         }
     },
     CurrDate() {
@@ -512,6 +522,7 @@ export const utils = {
         }
         return str.substr(start, length);
     },
+    // 随着 PageOf 失效，可删除
     /**
      * List<T> 转换为 PageOf<T>
      * @param {List<T>} list 集合
@@ -533,6 +544,15 @@ export const utils = {
             first: page === 1,
             empty: total,
         };
+    },
+    /**
+     * List<T> 转换为 { list: List<T>, total: Integer }
+     * @param {List<T>} list 集合
+     * @param {number} total 总数
+     * @returns {PageOf<T>}
+     */
+    CreateListPage(list, total) {
+        return { list, total };
     },
 };
 
