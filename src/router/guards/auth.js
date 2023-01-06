@@ -32,12 +32,12 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
             } else {
                 try {
                     const resources = await $auth.getUserResources(appConfig.domainName);
-                    if (resources && resources.length) {
-                        const userResourcePaths = (resources || []).map((resource) => resource.resourceValue);
+                    if (Array.isArray(resources) && resources.length) {
+                        const userResourcePaths = (resources || []).map((resource) => resource?.resourceValue || resource?.ResourceValue);
                         const otherRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
                             const routePath = route.path;
                             const completePath = [...ancestorPaths, routePath].join('/');
-                            const authPath = userResourcePaths.find((userResourcePath) => userResourcePath.startsWith(completePath));
+                            const authPath = userResourcePaths.find((userResourcePath) => userResourcePath?.startsWith(completePath));
                             return authPath;
                         });
                         otherRoutes.forEach((route) => {
@@ -53,7 +53,6 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                     if (noAuthView?.path) {
                         next({ path: noAuthView.path });
                     }
-                    console.log(err);
                 }
             }
         } else if (redirectedFrom?.path !== to.path && to.path === '/notFound') {

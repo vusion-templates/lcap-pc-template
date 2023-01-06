@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="height:100%">
         <s-freesass-banner v-if="isFreeSass"></s-freesass-banner>
         <router-view></router-view>
         <s-freesass-login ref="freeSassLogin"></s-freesass-login>
@@ -15,18 +15,13 @@ export default {
     components: { SFreesassLogin, SFreesassBanner },
     computed: {
         isSharePage() {
-            const { env, dnsAddr } = window.appInfo;
-            if (env === 'dev') {
-                return `dev.${dnsAddr}` === location.host;
-            } else {
-                return `${dnsAddr}` === location.host;
-            }
+            const neteaseStrList = 'lcap.qz.163yun'.split('.');
+            return neteaseStrList.some((it) => location.host.includes(it));
         },
         isFreeSass() {
             return +window.appInfo?.tenantType === 1;
         },
     },
-    watch: {},
     async mounted() {
         if (this.isSharePage && this.isFreeSass) {
             try {
@@ -38,9 +33,6 @@ export default {
                 this.$refs.freeSassLogin.open();
             }
         }
-    },
-    methods: {
-
     },
 };
 

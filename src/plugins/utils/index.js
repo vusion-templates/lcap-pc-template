@@ -13,7 +13,6 @@ import {
     differenceInMinutes,
     differenceInSeconds,
 } from 'date-fns';
-import { Decimal } from 'decimal.js';
 import Vue from 'vue';
 
 let enumsMap = {};
@@ -103,6 +102,12 @@ export const utils = {
             arr.push(item);
         }
     },
+    AddAll(arr, addList) {
+        if (Array.isArray(arr) && Array.isArray(addList)) {
+            arr.push(...addList);
+            return arr.length;
+        }
+    },
     Insert(arr, index, item) {
         if (Array.isArray(arr)) {
             arr.splice(index, 0, item);
@@ -164,16 +169,20 @@ export const utils = {
     },
     MapFilter(map, filterByKey, filterByVal) {
         if (isObject(map) && typeof filterByKey === 'function' && typeof filterByVal === 'function') {
-            const res = [];
+            const res = {};
             for (const key in map) {
                 if (Object.hasOwnProperty.call(map, key)) {
                     if (filterByKey.call(this, key) && filterByVal.call(this, map[key])) {
-                        res.push(map[key]);
+                        res[key] = map[key];
                     }
                 }
             }
+            if (!Object.keys(res).length) {
+                return null;
+            }
             return res;
         }
+        return null;
     },
     ListReverse(arr) {
         if (Array.isArray(arr)) {
@@ -248,13 +257,20 @@ export const utils = {
     },
     ListSliceToPageOf(arr, page, size) {
         if (Array.isArray(arr) && page) {
-            return arr.slice((page - 1) * size, size);
-        }
-    },
-    AddAll(arr, addList) {
-        if (Array.isArray(arr) && Array.isArray(addList)) {
-            arr.push(...addList);
-            return arr.length;
+            const content = arr.slice((page - 1) * size, size);
+            const total = arr.length;
+            const totalPages = Math.ceil(total / size);
+            return {
+                content,
+                number: page,
+                size,
+                numberOfElements: content.length,
+                totalPages,
+                totalElements: total,
+                last: page === totalPages,
+                first: page === 1,
+                empty: total,
+            };
         }
     },
     CurrDate() {
@@ -290,7 +306,7 @@ export const utils = {
         return cloneDeep(obj);
     },
     New(obj) {
-        return obj;
+        return utils.Vue.prototype.$genInitFromSchema(obj);
     },
     /**
      * 将内容置空，array 置为 []; object 沿用 ClearObject 逻辑; 其他置为 undefined

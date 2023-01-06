@@ -1,4 +1,11 @@
 {
+	"Logout": {
+		"url": {
+			"method": "get",
+			"path": "/system/logout",
+			"query": {}
+		}
+    },
 	"getAppLoginTypes": {
 	    "url": {
 	        "method": "get",
@@ -23,7 +30,7 @@
 	"GetUser": {
 		"url": {
 			"method": "get",
-            "path": "/api/user/system/getUser",
+			"path": "/api/user/system/getUser",
 			"query": {}
 		}
 	},

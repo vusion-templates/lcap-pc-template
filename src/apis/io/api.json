@@ -1,17 +1,7 @@
 {
-    "downloadFile": {
-        "url": {
-            "path": "upload/downloadFile",
-            "method": "post",
-            "timeout": 180000
-        },
-		"config": {
-			"download": true
-		}
-    },
     "downloadFiles": {
         "url": {
-            "path": "upload/downloadFiles",
+            "path": "/upload/download_files",
             "method": "post",
             "timeout": 180000
         },
