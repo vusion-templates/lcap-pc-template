@@ -549,7 +549,7 @@ export const utils = {
      * List<T> 转换为 { list: List<T>, total: Integer }
      * @param {List<T>} list 集合
      * @param {number} total 总数
-     * @returns {PageOf<T>}
+     * @returns {list: List<T>, total: Integer}
      */
     CreateListPage(list, total) {
         return { list, total };
