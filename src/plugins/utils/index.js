@@ -161,7 +161,7 @@ export const utils = {
     },
     ListProduct(arr) {
         if (Array.isArray(arr)) {
-            return arr.reduce((prev, cur) => prev * cur, 0);
+            return arr.reduce((prev, cur) => prev * cur, 1);
         } else {
             return null;
         }
@@ -268,14 +268,14 @@ export const utils = {
         if (arr.length === 0) {
             return arr;
         }
-        const res = new Map();
+        const res = Object.create(null);
         arr.forEach((e) => {
             const val = getVal(e);
-            if (res.has(val)) {
+            if (res[val]) {
                 // res.get(val) 是一个 array
-                res.get(val).push(e);
+                res[val].push(e);
             } else {
-                res.set(val, [e]);
+                res[val] = [e];
             }
         });
         return res;
@@ -354,10 +354,10 @@ export const utils = {
         if (typeof arr !== 'object' || typeof toKey !== 'function' || typeof toValue !== 'function') {
             return null;
         }
-        const res = new Map();
+        const res = Object.create(null);
         arr.forEach((e) => {
             if (toKey(e)) {
-                res.set(toKey(e), toValue(e));
+                res[toKey(e)] = toValue(e);
             }
         });
         return res;
