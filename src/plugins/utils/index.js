@@ -249,6 +249,21 @@ export const utils = {
             return arr.slice(start, end);
         }
     },
+    ListDistinct(arr) {
+        if (Array.isArray(arr)) {
+            const map = new Map();
+            let i = 0;
+            while (i < arr.length) {
+                if (map.get(arr[i])) {
+                    arr.splice(i, 1);
+                    i--;
+                } else {
+                    map.set(arr[i], true);
+                }
+                i++;
+            }
+        }
+    },
     // 不修改原 list，返回新 list
     ListDistinctBy(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
