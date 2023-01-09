@@ -124,65 +124,75 @@ export const utils = {
             return arr.splice(index, 1)[0];
         }
     },
-    MapGet(map, key) {
-        if (isObject(map)) {
-            return map[key];
+    ListHead(arr) {
+        if (!Array.isArray(arr) || arr.length === 0) {
+            return null;
+        } else {
+            return arr[0];
         }
     },
-    MapPut(map, key, value) {
-        if (isObject(map)) {
-            Vue.prototype.$set(map, key, value);
+    ListLast(arr) {
+        if (!Array.isArray(arr) || arr.length === 0) {
+            return null;
+        } else {
+            return arr[arr.length - 1];
         }
     },
-    MapRemove(map, key) {
-        if (isObject(map)) {
-            delete map[key];
+    ListFlatten(arr) {
+        if (Array.isArray(arr) && arr.every((elem) => Array.isArray(elem))) {
+            return arr.flat();
+        } else {
+            return null;
         }
     },
-    MapContains(map, key) {
-        if (isObject(map)) {
-            return key in map;
+    ListTransform(arr, trans) {
+        if (Array.isArray(arr)) {
+            return arr.map((elem) => trans(elem));
+        } else {
+            return null;
         }
-        return false;
     },
-    MapKeys(map) {
-        if (isObject(map)) {
-            return Object.keys(map);
+    ListSum(arr) {
+        if (Array.isArray(arr)) {
+            return arr.reduce((prev, cur) => prev + cur, 0);
+        } else {
+            return null;
         }
-        return 0;
     },
-    MapValues(map) {
-        if (isObject(map)) {
-            if ('values' in Object) {
-                return Object.values(map);
-            } else {
-                const res = [];
-                for (const key in map) {
-                    if (Object.hasOwnProperty.call(map, key)) {
-                        res.push(map[key]);
-                    }
-                }
-                return res;
-            }
+    ListProduct(arr) {
+        if (Array.isArray(arr)) {
+            return arr.reduce((prev, cur) => prev * cur, 1);
+        } else {
+            return null;
         }
-        return [];
     },
-    MapFilter(map, filterByKey, filterByVal) {
-        if (isObject(map) && typeof filterByKey === 'function' && typeof filterByVal === 'function') {
-            const res = {};
-            for (const key in map) {
-                if (Object.hasOwnProperty.call(map, key)) {
-                    if (filterByKey.call(this, key) && filterByVal.call(this, map[key])) {
-                        res[key] = map[key];
-                    }
-                }
-            }
-            if (!Object.keys(res).length) {
-                return null;
-            }
-            return res;
+    ListAverage(arr) {
+        if (!Array.isArray(arr) || arr.length === 0) {
+            return null;
+        } else {
+            return this.ListSum(arr) / arr.length;
         }
-        return null;
+    },
+    ListMax(arr) {
+        if (!Array.isArray(arr) || arr.length === 0) {
+            return null;
+        } else {
+            return arr.reduce((prev, cur) => prev >= cur ? prev : cur, arr[0]);
+        }
+    },
+    ListMin(arr) {
+        if (!Array.isArray(arr) || arr.length === 0) {
+            return null;
+        } else {
+            return arr.reduce((prev, cur) => prev <= cur ? prev : cur, arr[0]);
+        }
+    },
+    ListLength(arr) {
+        if (Array.isArray(arr)) {
+            return arr.length;
+        } else {
+            return null;
+        }
     },
     ListReverse(arr) {
         if (Array.isArray(arr)) {
@@ -214,19 +224,18 @@ export const utils = {
             }
         }
     },
-    ListFind(arr, callback) {
+    ListFind(arr, by) {
         if (Array.isArray(arr)) {
-            if (typeof callback === 'function') {
-                return arr.find(callback);
+            if (typeof by === 'function') {
+                return arr.find(by);
             }
         }
     },
-    ListFindAll(arr, callback) {
-        if (Array.isArray(arr)) {
-            if (typeof callback === 'function') {
-                return arr.filter(callback);
-            }
+    ListFilter(arr, by) {
+        if (!Array.isArray(arr) || typeof by !== 'function') {
+            return null;
         }
+        return arr.filter(by);
     },
     ListFindIndex(arr, callback) {
         if (Array.isArray(arr)) {
@@ -282,6 +291,114 @@ export const utils = {
         } else {
             return { list: [], total: 0 };
         }
+    },
+    // 不修改原 list，返回新 list
+    ListDistinctBy(arr, getVal) {
+        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
+        if (!arr || typeof getVal !== 'function') {
+            return null;
+        }
+        if (arr.length === 0) {
+            return arr;
+        }
+        return [...new Map(arr.map((x) => [getVal(x), x])).values()];
+    },
+    ListGroupBy(arr, getVal) {
+        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
+        if (!arr || typeof getVal !== 'function') {
+            return null;
+        }
+        if (arr.length === 0) {
+            return arr;
+        }
+        const res = Object.create(null);
+        arr.forEach((e) => {
+            const val = getVal(e);
+            if (res[val]) {
+                // res.get(val) 是一个 array
+                res[val].push(e);
+            } else {
+                res[val] = [e];
+            }
+        });
+        return res;
+    },
+    MapGet(map, key) {
+        if (isObject(map)) {
+            return map[key];
+        }
+    },
+    MapPut(map, key, value) {
+        if (isObject(map)) {
+            Vue.prototype.$set(map, key, value);
+        }
+    },
+    MapRemove(map, key) {
+        if (isObject(map)) {
+            delete map[key];
+        }
+    },
+    MapContains(map, key) {
+        if (isObject(map)) {
+            return key in map;
+        }
+        return false;
+    },
+    MapKeys(map) {
+        if (isObject(map)) {
+            return Object.keys(map);
+        }
+        return 0;
+    },
+    MapValues(map) {
+        if (!isObject(map)) {
+            return [];
+        }
+        if ('values' in Object) {
+            return Object.values(map);
+        } else {
+            const res = [];
+            for (const key in map) {
+                if (Object.hasOwnProperty.call(map, key)) {
+                    res.push(map[key]);
+                }
+            }
+            return res;
+        }
+    },
+    MapFilter(map, by) {
+        if (!isObject(map) || typeof by !== 'function') {
+            return null;
+        }
+        const res = Object.create(null);
+        for (const [k, v] of Object.entries(map)) {
+            if (by(k, v)) {
+                res[k] = v;
+            }
+        }
+        return res;
+    },
+    MapTransform(map, toKey, toValue) {
+        if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
+            return null;
+        }
+        const res = Object.create(null);
+        for (const [k, v] of Object.entries(map)) {
+            res[toKey(k, v)] = toValue(k, v);
+        }
+        return res;
+    },
+    ListToMap(arr, toKey, toValue) {
+        if (typeof arr !== 'object' || typeof toKey !== 'function' || typeof toValue !== 'function') {
+            return null;
+        }
+        const res = Object.create(null);
+        arr.forEach((e) => {
+            if (toKey(e)) {
+                res[toKey(e)] = toValue(e);
+            }
+        });
+        return res;
     },
     CurrDate() {
         return new Date().toJSON().replace(/T.+?Z/, '');
