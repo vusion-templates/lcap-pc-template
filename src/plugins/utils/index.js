@@ -153,14 +153,14 @@ export const utils = {
         }
     },
     ListSum(arr) {
-        if (Array.isArray(arr)) {
+        if (Array.isArray(arr) && arr.length > 0) {
             return arr.reduce((prev, cur) => prev + cur, 0);
         } else {
             return null;
         }
     },
     ListProduct(arr) {
-        if (Array.isArray(arr)) {
+        if (Array.isArray(arr) && arr.length > 0) {
             return arr.reduce((prev, cur) => prev * cur, 1);
         } else {
             return null;
