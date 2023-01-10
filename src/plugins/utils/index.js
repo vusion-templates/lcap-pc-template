@@ -295,13 +295,16 @@ export const utils = {
     // 不修改原 list，返回新 list
     ListDistinctBy(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        if (!arr || typeof getVal !== 'function') {
+        if (!Array.isArray(arr) || typeof getVal !== 'function') {
             return null;
         }
         if (arr.length === 0) {
             return arr;
         }
-        return [...new Map(arr.map((x) => [getVal(x), x])).values()];
+        return [...new Map(
+            arr.map((x) => [getVal(x), x])
+                .reverse(),
+        ).values()];
     },
     ListGroupBy(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
@@ -389,15 +392,17 @@ export const utils = {
         return res;
     },
     ListToMap(arr, toKey, toValue) {
-        if (typeof arr !== 'object' || typeof toKey !== 'function' || typeof toValue !== 'function') {
+        if (!Array.isArray(arr) || typeof toKey !== 'function' || typeof toValue !== 'function') {
             return null;
         }
         const res = {};
-        arr.forEach((e) => {
+        for (let i = arr.length - 1; i >= 0; i--) {
+            const e = arr[i];
             if (toKey(e)) {
                 res[toKey(e)] = toValue(e);
             }
-        });
+        }
+
         return res;
     },
     CurrDate() {
