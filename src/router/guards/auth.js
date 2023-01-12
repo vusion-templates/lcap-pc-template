@@ -28,6 +28,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
     if (authPath) {
         if (!$auth.isInit()) {
             if (!userInfo.UserId) {
+                localStorage.setItem('beforeLogin', JSON.stringify(location));
                 next({ path: '/login' });
             } else {
                 try {
