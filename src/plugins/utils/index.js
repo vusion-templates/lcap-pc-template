@@ -187,13 +187,6 @@ export const utils = {
             return arr.reduce((prev, cur) => prev <= cur ? prev : cur, arr[0]);
         }
     },
-    ListLength(arr) {
-        if (Array.isArray(arr)) {
-            return arr.length;
-        } else {
-            return null;
-        }
-    },
     ListReverse(arr) {
         if (Array.isArray(arr)) {
             arr.reverse();
