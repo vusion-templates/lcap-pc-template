@@ -449,7 +449,7 @@ export const utils = {
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
-                    obj[key] = undefined;
+                    obj[key] = null;
             }
         } else {
             obj = undefined;
