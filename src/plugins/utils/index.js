@@ -99,7 +99,7 @@ export const utils = {
     },
     Add(arr, item) {
         if (Array.isArray(arr)) {
-            return arr.push(item);
+            arr.push(item);
         }
     },
     AddAll(arr, addList) {
