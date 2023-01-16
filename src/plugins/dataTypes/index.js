@@ -16,6 +16,8 @@ const aesKey = ';Z#^$;8+yhO!AhGo';
 export default {
     install(Vue, options = {}) {
         const genInitFromSchema = (schema = {}, defaultValue) => {
+            if (!schema)
+                schema = {};
             schema.defaultValue = defaultValue;
 
             // read from file
