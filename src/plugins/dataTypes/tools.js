@@ -10,6 +10,8 @@ function tryJSONParse(str) {
 
 const typeMap = new Map();
 
+const typeDefinitionMap = new Map();
+
 // 生成typeKey
 export function genTypeKey(typeAnnotation) {
     const {
@@ -45,7 +47,11 @@ function genConstructor(typeKey, definition) {
     if (typeMap[typeKey]) {
         return typeMap[typeKey];
     } else {
-        const { properties } = definition || {};
+        typeDefinitionMap[typeKey] = definition;
+        const { typeKind, typeNamespace, typeName, properties } = definition || {};
+        if (typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List') {
+            return;
+        }
         let fnStr = '';
         // if (definition) {
         //    fnStr += `this.__isPrimitive = ${isPrimitive} ?? false;\n`;
@@ -134,13 +140,12 @@ function judgeStrType(str) {
 
 // 判断 变量 是否属于 类型
 export function isInstanceOf(variable, typeAnnotation) {
-    const { typeKind, typeName } = typeAnnotation;
+    const { typeKind, typeNamespace, typeName, typeArguments } = typeAnnotation;
     const typeKey = genTypeKey(typeAnnotation);
     const typeConstructor = typeMap[typeKey];
-    if (typeConstructor && variable instanceof typeConstructor) {
-        return true;
-    } else if (typeKind === 'primitive') {
-        const varStr = Object.prototype.toString.call(variable);
+    const typeDefinition = typeDefinitionMap[typeKey];
+    const varStr = Object.prototype.toString.call(variable);
+    if (typeKind === 'primitive') { // 基础类型
         if (varStr === '[object String]') {
             const actualStrType = judgeStrType(variable);
             if (actualStrType) {
@@ -153,18 +158,75 @@ export function isInstanceOf(variable, typeAnnotation) {
         } else if (varStr === '[object Boolean]' && typeName === 'Boolean') {
             return true;
         }
+    } else if (typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List') { // 数组
+        // 期望的子类型
+        const firstTypeArg = typeArguments?.[0];
+        const {
+            typeKind: firstTypeTypeKind,
+            typeArguments: firstTypeTypeArgs,
+        } = firstTypeArg || {};
+        let expectedItemTypeAnnotations = [firstTypeArg];
+        // union类型满足一个即可
+        if (firstTypeTypeKind === 'union') {
+            expectedItemTypeAnnotations = firstTypeTypeArgs;
+        }
+        let expectedItemTypeAnnotationIndex = -1;
+        if (Array.isArray(expectedItemTypeAnnotations)) {
+            expectedItemTypeAnnotationIndex = expectedItemTypeAnnotations.findIndex((expectedItemTypeAnnotation) => {
+                if (varStr === '[object Array]' && expectedItemTypeAnnotation) {
+                    if (variable.length > 0) {
+                        return isInstanceOf(variable[0], expectedItemTypeAnnotation);
+                    } else {
+                        const { __itemInstance, __itemTypeAnnotation } = variable;
+                        if (!__itemInstance && __itemTypeAnnotation) {
+                            return __itemTypeAnnotation.typeKind === expectedItemTypeAnnotation.typeKind
+                                && __itemTypeAnnotation.typeNamespace === expectedItemTypeAnnotation.typeNamespace
+                                && __itemTypeAnnotation.typeName === expectedItemTypeAnnotation.typeName;
+                        } else {
+                            return isInstanceOf(__itemInstance, expectedItemTypeAnnotation);
+                        }
+                    }
+                }
+                return false;
+            });
+        }
+        return expectedItemTypeAnnotationIndex !== -1;
+    } else if (typeKind === 'reference' && typeNamespace === 'app.enums' && typeDefinition) { // 枚举
+        const { enumItems } = typeDefinition;
+        if (Array.isArray(enumItems)) {
+            if (varStr === '[object String]') {
+                // 当前值在枚举中存在
+                const enumItemIndex = enumItems.findIndex((enumItem) => variable === enumItem.value);
+                return enumItemIndex !== -1;
+            } else if (varStr === '[object Array]') {
+                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, typeAnnotation));
+                // 当前枚举数组与定义完全匹配
+                return enumItemIndex === -1;
+            }
+        }
+    } else if (typeConstructor && variable instanceof typeConstructor) {
+        return true;
     }
     return false;
 }
 
 // 初始化变量
 export const genInitData = (typeAnnotation) => {
-    const { typeKind, defaultValue } = typeAnnotation || {};
+    const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
     const parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
     const typeKey = genTypeKey(typeAnnotation);
     let TypeConstructor = typeMap[typeKey];
     if (typeKind !== 'primitive' && !TypeConstructor) {
         TypeConstructor = genConstructor(typeKey, typeAnnotation);
+    }
+    if (typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List') {
+        const initList = [];
+        if (Array.isArray(typeArguments) && typeArguments.length > 0) {
+            const itemTypeAnnotation = typeArguments[0];
+            initList.__itemTypeAnnotation = itemTypeAnnotation;
+            initList.__itemInstance = genInitData(itemTypeAnnotation);
+        }
+        return initList;
     }
     if (TypeConstructor) {
         const instance = new TypeConstructor(parsedValue);
