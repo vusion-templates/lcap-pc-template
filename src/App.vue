@@ -23,7 +23,7 @@ export default {
         },
     },
     async mounted() {
-        if (0 && this.isSharePage && this.isFreeSass) {
+        if (this.isSharePage && this.isFreeSass) {
             try {
                 await auth.CheckExtendToken({ config: {
                     noErrorTip: true,

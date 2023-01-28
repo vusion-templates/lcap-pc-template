@@ -29,6 +29,8 @@ export default {
         initApplicationConstructor(dataTypesMap);
 
         const genInitFromSchema = (schema = {}, defaultValue) => {
+            if (!schema)
+                schema = {};
             schema.defaultValue = defaultValue;
             return genInitData(schema);
         };
