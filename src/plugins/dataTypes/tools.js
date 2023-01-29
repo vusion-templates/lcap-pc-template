@@ -270,7 +270,8 @@ export const genInitData = (typeAnnotation) => {
     if (typeKind !== 'primitive' && !TypeConstructor) {
         TypeConstructor = genConstructor(typeKey, typeAnnotation);
     }
-    if (TypeConstructor) {
+    // union 不使用构造函数初始化
+    if (TypeConstructor && typeKind !== 'union') {
         const instance = new TypeConstructor(parsedValue);
         return instance;
     } else if (parsedValue) {
