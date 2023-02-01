@@ -78,7 +78,7 @@ function genConstructor(typeKey, definition) {
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
                     parsedValue = `'${parsedValue}'`;
                 }
-                fnStr += `this.${propertyName} = Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, (params && params.${propertyName}) || ${parsedValue});\n`;
+                fnStr += `this.${propertyName} = Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, (params.defaultValue && params.defaultValue.${propertyName}) || ${parsedValue}, params.level);\n`;
             });
         }
         const fn = Function('params', fnStr);
@@ -223,35 +223,55 @@ export function isInstanceOf(variable, typeAnnotation) {
 }
 
 // 初始化变量
-export const genInitData = (typeAnnotation) => {
+export const genInitData = (typeAnnotation, parentLevel) => {
+    let level = 1;
+    if (parentLevel !== undefined) {
+        level = parentLevel + 1;
+    }
     const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
     const parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+    if (level > 2 && !defaultValue) {
+        return;
+    }
     if (typeKind === 'generic' && typeNamespace === 'nasl.collection') { // 范型
         let initVal = (typeName === 'List' ? [] : {});
         if (Array.isArray(typeArguments) && typeArguments.length > 0) {
             const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
             initVal.__valueTypeAnnotation = valueTypeAnnotation;
-            initVal.__valueInstance = genInitData(valueTypeAnnotation);
+            initVal.__valueInstance = genInitData(valueTypeAnnotation, level);
         }
         if (parsedValue) {
+            const valueTypeAnnotation = initVal.__valueTypeAnnotation || {};
             if (typeName === 'List' && Array.isArray(parsedValue)) {
-                initVal = parsedValue.map((item) => genInitData(initVal.__valueTypeAnnotation, item));
+                initVal = parsedValue.map((item) => genInitData({
+                    ...valueTypeAnnotation,
+                    defaultValue: item,
+                }, level));
             } else {
-                initVal = genInitData(initVal.__valueTypeAnnotation, initVal);
+                initVal = genInitData({
+                    ...valueTypeAnnotation,
+                    defaultValue: parsedValue,
+                }, level);
             }
         }
         return initVal;
     }
     const typeKey = genTypeKey(typeAnnotation);
-    let TypeConstructor = typeMap[typeKey];
-    if (typeKind !== 'primitive' && !TypeConstructor) {
-        TypeConstructor = genConstructor(typeKey, typeAnnotation);
+    if (typeKey) {
+        let TypeConstructor = typeMap[typeKey] || typeMap[`app.${typeKey}`];
+        if (typeKind !== 'primitive' && !TypeConstructor) {
+            TypeConstructor = genConstructor(typeKey, typeAnnotation);
+        }
+        // union 不使用构造函数初始化
+        if (TypeConstructor && typeKind !== 'union' && (typeKind !== 'reference' || typeNamespace !== 'app.enums')) {
+            const instance = new TypeConstructor({
+                defaultValue: parsedValue,
+                level,
+            });
+            return instance;
+        }
     }
-    // union 不使用构造函数初始化
-    if (TypeConstructor && typeKind !== 'union') {
-        const instance = new TypeConstructor(parsedValue);
-        return instance;
-    } else if (parsedValue) {
+    if (parsedValue) {
         return parsedValue;
     }
 };

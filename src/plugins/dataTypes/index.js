@@ -28,11 +28,11 @@ export default {
 
         initApplicationConstructor(dataTypesMap);
 
-        const genInitFromSchema = (schema = {}, defaultValue) => {
+        const genInitFromSchema = (schema = {}, defaultValue, level) => {
             if (!schema)
                 schema = {};
             schema.defaultValue = defaultValue;
-            return genInitData(schema);
+            return genInitData(schema, level);
         };
 
         const frontendVariables = {};
