@@ -16,14 +16,24 @@ const typeDefinitionMap = new Map();
 export function genTypeKey(typeAnnotation) {
     const {
         typeKind, typeNamespace, typeName,
-        typeArguments,
+        typeArguments, properties,
     } = typeAnnotation || {};
     const typeKeyArr = [];
-    if (typeKind === 'union') {
+    if (typeKind === 'union') { // 联合类型
         if (Array.isArray(typeArguments)) {
             const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg));
             typeKeyArr.push(childTypeArgs.join(' | '));
         }
+    } else if (typeKind === 'anonymousStructure') { // 匿名数据结构
+        typeKeyArr.push('{');
+        if (Array.isArray(properties)) {
+            const childTypeArgs = properties.map((typeArg) => {
+                const { name: typeArgName, typeAnnotation: typeArgTypeAnnotation } = typeArg || {};
+                return `${typeArgName}: ${genTypeKey(typeArgTypeAnnotation)}`;
+            });
+            typeKeyArr.push(childTypeArgs.join(';'));
+        }
+        typeKeyArr.push('}');
     } else {
         const typeArr = [];
         typeNamespace && typeArr.push(typeNamespace);
@@ -57,10 +67,6 @@ function genConstructor(typeKey, definition) {
             return;
         }
         let fnStr = '';
-        // if (definition) {
-        //    fnStr += `this.__isPrimitive = ${isPrimitive} ?? false;\n`;
-        //    fnStr += `this.__typeKey = '${typeKey}';\n`;
-        // }
         if (Array.isArray(properties)) {
             properties.forEach((property) => {
                 const {
@@ -72,11 +78,7 @@ function genConstructor(typeKey, definition) {
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
                     parsedValue = `'${parsedValue}'`;
                 }
-                // if (isPrimitive) {
-                //    fnStr += `this.${propertyName} = params && params.${propertyName};\n`;
-                // } else {
-                fnStr += `this.${propertyName} = (params && params.${propertyName}) ?? Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, ${parsedValue});\n`;
-                // }
+                fnStr += `this.${propertyName} = Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, (params && params.${propertyName}) || ${parsedValue});\n`;
             });
         }
         const fn = Function('params', fnStr);
@@ -84,38 +86,6 @@ function genConstructor(typeKey, definition) {
         return fn;
     }
 }
-
-// 基础类型的class
-// [
-//    'Boolean',
-//    'Integer',
-//    'Long',
-//    'Double',
-//    'Decimal',
-//    'String',
-//    'Text',
-//    'Binary',
-//    'Date',
-//    'Time',
-//    'DateTime',
-//    'Email',
-// ].forEach((typeName) => {
-//    const typeAnnotation = {
-//        typeKind: 'primitive',
-//        typeNamespace: 'nasl.core',
-//        typeName,
-//    };
-//    const typeKey = genTypeKey(typeAnnotation);
-//    genConstructor(typeKey, {
-//        isPrimitive: true,
-//        name: typeName,
-//        properties: [
-//            {
-//                name: 'value',
-//            },
-//        ],
-//    });
-// });
 
 // 初始化整个应用的构造器
 export function initApplicationConstructor(dataTypesMap) {
@@ -257,11 +227,18 @@ export const genInitData = (typeAnnotation) => {
     const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
     const parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
     if (typeKind === 'generic' && typeNamespace === 'nasl.collection') { // 范型
-        const initVal = parsedValue || (typeName === 'List' ? [] : {});
+        let initVal = (typeName === 'List' ? [] : {});
         if (Array.isArray(typeArguments) && typeArguments.length > 0) {
             const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
             initVal.__valueTypeAnnotation = valueTypeAnnotation;
             initVal.__valueInstance = genInitData(valueTypeAnnotation);
+        }
+        if (parsedValue) {
+            if (typeName === 'List' && Array.isArray(parsedValue)) {
+                initVal = parsedValue.map((item) => genInitData(initVal.__valueTypeAnnotation, item));
+            } else {
+                initVal = genInitData(initVal.__valueTypeAnnotation, initVal);
+            }
         }
         return initVal;
     }
