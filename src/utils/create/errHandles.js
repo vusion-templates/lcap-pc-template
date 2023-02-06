@@ -29,7 +29,7 @@ export default {
                 instance.show('登录失效', '请重新登录');
             }
             localStorage.setItem('beforeLogin', JSON.stringify(location));
-            location.href = '/login';
+            location.href = window.ICESTARK?.loginUrl || '/login';
         }
     },
     remoteError({ config }, err) {
