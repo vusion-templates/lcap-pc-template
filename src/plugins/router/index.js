@@ -25,7 +25,7 @@ export default {
                         document.getElementById(hash).scrollIntoView();
                     }
                 }
-                url = formatMicroFrontUrl(url);
+
                 this.$router.push(url);
             }
         };
