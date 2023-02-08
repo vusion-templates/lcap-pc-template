@@ -85,7 +85,7 @@ function genConstructor(typeKey, definition) {
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
                     parsedValue = `'${parsedValue}'`;
                 }
-                fnStr += `this.${propertyName} = Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, (defaultValue && defaultValue.${propertyName}) || ${parsedValue}, level);\n`;
+                fnStr += `this.${propertyName} = Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, (defaultValue && defaultValue.${propertyName}) ?? ${parsedValue}, level);\n`;
             });
         }
         const fn = Function('params', fnStr);
