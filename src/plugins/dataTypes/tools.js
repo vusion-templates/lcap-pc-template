@@ -27,7 +27,7 @@ export function genTypeKey(typeAnnotation) {
     } else if (typeKind === 'anonymousStructure') { // 匿名数据结构
         typeKeyArr.push('{');
         if (Array.isArray(properties)) {
-            const childTypeArgs = properties.map((typeArg) => {
+            const childTypeArgs = properties.sort(({ name: name1 }, { name: name2 }) => name1 > name2 ? 1 : -1).map((typeArg) => {
                 const { name: typeArgName, typeAnnotation: typeArgTypeAnnotation } = typeArg || {};
                 return `${typeArgName}: ${genTypeKey(typeArgTypeAnnotation)}`;
             });
