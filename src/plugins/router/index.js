@@ -1,7 +1,7 @@
 import encodeUrl from '@/utils/encodeUrl';
 
 import processService from './processService';
-import { formatMicroFrontUrl } from './microFrontUrl';
+import { formatMicroFrontUrl, formatMicroFrontRouterPath } from './microFrontUrl';
 
 export default {
     install(Vue, options = {}) {
@@ -11,6 +11,7 @@ export default {
         Vue.prototype.$process = processService;
 
         Vue.prototype.$formatMicroFrontUrl = formatMicroFrontUrl;
+        Vue.prototype.$formatMicroFrontRouterPath = formatMicroFrontRouterPath;
 
         Vue.prototype.$destination = function (url) {
             // 修复访问路径为默认首页 / 时跳转可能失效的问题
