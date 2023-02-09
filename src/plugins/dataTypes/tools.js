@@ -312,7 +312,11 @@ export const genInitData = (typeAnnotation, parentLevel) => {
     const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
     let parsedValue = defaultValue;
     if (!(typeKind === 'primitive' && typeNamespace === 'nasl.core' && ['String', 'Text', 'Email'].includes(typeName))) {
-        parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+        if (defaultValue === '') {
+            parsedValue = undefined;
+        } else {
+            parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+        }
     }
     if (level > 2 && parsedValue === undefined) {
         return;
