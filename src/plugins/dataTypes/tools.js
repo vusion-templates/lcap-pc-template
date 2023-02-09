@@ -310,8 +310,11 @@ export const genInitData = (typeAnnotation, parentLevel) => {
         level = parentLevel + 1;
     }
     const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
-    const parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
-    if (level > 2 && !defaultValue) {
+    let parsedValue = defaultValue;
+    if (!(typeKind === 'primitive' && typeNamespace === 'nasl.core' && ['String', 'Text', 'Email'].includes(typeName))) {
+        parsedValue = tryJSONParse(defaultValue);
+    }
+    if (level > 2 && parsedValue === undefined) {
         return;
     }
     const isTypeMatched = parsedValue === undefined || isTypeMatch(typeAnnotation, parsedValue);
