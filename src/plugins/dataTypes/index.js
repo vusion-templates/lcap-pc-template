@@ -35,6 +35,12 @@ export default {
             return genInitData(schema, level);
         };
 
+        /**
+         * read datatypes from template, then parse schema
+         * @param {*} schema 是前端用的 refSchema
+         */
+        Vue.prototype.$genInitFromSchema = genInitFromSchema;
+
         const frontendVariables = {};
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
@@ -295,12 +301,6 @@ export default {
         });
 
         Vue.prototype.$global = $global;
-
-        /**
-         * read datatypes from template, then parse schema
-         * @param {*} schema 是前端用的 refSchema
-         */
-        Vue.prototype.$genInitFromSchema = genInitFromSchema;
 
         Vue.prototype.$isInstanceOf = isInstanceOf;
 
