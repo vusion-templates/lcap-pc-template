@@ -72,7 +72,15 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         },
         ...App,
     });
-    app.$mount('#app');
+
+    if (window.ICESTARK?.root) {
+        const container = window.ICESTARK.root;
+        container.innerHTML = '';
+        app.$mount();
+        container.appendChild(app.$el);
+    } else
+        app.$mount('#app');
+
     return app;
 };
 
