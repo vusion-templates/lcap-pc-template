@@ -312,7 +312,10 @@ export const genInitData = (typeAnnotation, parentLevel) => {
     const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
     let parsedValue = defaultValue;
     if (!(typeKind === 'primitive' && typeNamespace === 'nasl.core' && ['String', 'Text', 'Email'].includes(typeName))) {
-        if (defaultValue === '') {
+        // 一些特殊情况，特殊处理成undefined
+        // 1.defaultValue在nasl节点上错误得赋值给了空制符串
+        // 2.设置成null，才能同步给后端清楚该值，但是null对checkbox组件是一种特殊状态
+        if (['', null].includes(defaultValue)) {
             parsedValue = undefined;
         } else {
             parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
