@@ -58,15 +58,41 @@ function genConstructor(typeKey, definition) {
         return typeMap[typeKey];
     } else {
         typeDefinitionMap[typeKey] = definition;
-        const { typeKind, typeNamespace, typeName, properties } = definition || {};
+        const { typeKind, typeNamespace, typeName, typeArguments, properties } = definition || {};
+        let propList = properties;
         if (
             typeKind === 'generic'
-            && typeNamespace === 'nasl.collection'
-            && ['List', 'Map'].includes(typeName)
         ) {
-            return;
+            if (
+                typeNamespace === 'nasl.collection'
+                && ['List', 'Map'].includes(typeName)
+            ) {
+                return;
+            }
+            const typeArr = [];
+            typeNamespace && typeArr.push(typeNamespace);
+            typeName && typeArr.push(typeName);
+            const genericTypeKey = typeArr.join('.');
+            // 范型定义
+            const genericDefinition = typeMap[genericTypeKey];
+            if (genericDefinition) {
+                const { typeParams, properties } = genericDefinition || {};
+                // 用实参替换形参
+                propList = properties.map((property) => {
+                    const actualProp = {
+                        ...property,
+                    };
+                    const { typeAnnotation } = property || {};
+                    // 类型形参
+                    const index = typeParams.findIndex((typeParam) => typeParam?.name === typeAnnotation?.typeName);
+                    if (index !== -1) {
+                        actualProp.typeAnnotation = typeArguments[index];
+                    }
+                    return actualProp;
+                });
+            }
         }
-        let fnStr = `
+        let code = `
             const level = params.level;
             const defaultValue = params.defaultValue;
             // 默认值是个对象
@@ -74,8 +100,8 @@ function genConstructor(typeKey, definition) {
                 Object.assign(this, defaultValue);
             }
         `;
-        if (Array.isArray(properties)) {
-            properties.forEach((property) => {
+        if (Array.isArray(propList)) {
+            propList.forEach((property) => {
                 const {
                     name: propertyName,
                     typeAnnotation,
@@ -85,10 +111,20 @@ function genConstructor(typeKey, definition) {
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
                     parsedValue = `'${parsedValue}'`;
                 }
-                fnStr += `this.${propertyName} = Vue.prototype.$genInitFromSchema(${JSON.stringify(typeAnnotation)}, (defaultValue && defaultValue.${propertyName}) ?? ${parsedValue}, level);\n`;
+                const needGenInitFromSchema = typeAnnotation && !['primitive', 'union'].includes(typeAnnotation.typeKind);
+                const sortedTypeKey = genTypeKey(typeAnnotation);
+                code += `this.${propertyName} = `;
+                if (needGenInitFromSchema) {
+                    code += `Vue.prototype.$genInitFromSchema('${sortedTypeKey}',`;
+                }
+                code += `(defaultValue && defaultValue.${propertyName}) ?? ${parsedValue}`;
+                if (needGenInitFromSchema) {
+                    code += `, level)`;
+                }
+                code += `;\n`;
             });
         }
-        const fn = Function('params', fnStr);
+        const fn = Function('params', code);
         typeMap[typeKey] = fn;
         return fn;
     }
@@ -106,10 +142,10 @@ export function initApplicationConstructor(dataTypesMap) {
 // 判断字符串的具体类型
 function judgeStrType(str) {
     const regMap = {
-        Date: /^\d{1,4}(\/|-)\d{1,2}(\/|-)\d{1,2}$/,
-        Time: /^(\d{1,2})(:\d{1,2})?:(\d{1,2})$/,
-        DateTimeReg: /^\d{1,4}(\/|-)\d{1,2}(\/|-)\d{1,2}\s(\d{1,2})(:\d{1,2})?:(\d{1,2})$/,
-        Email: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
+        'nasl.core.Date': /^\d{1,4}(\/|-)\d{1,2}(\/|-)\d{1,2}$/,
+        'nasl.core.Time': /^(\d{1,2})(:\d{1,2})?:(\d{1,2})$/,
+        'nasl.core.DateTimeReg': /^\d{1,4}(\/|-)\d{1,2}(\/|-)\d{1,2}\s(\d{1,2})(:\d{1,2})?:(\d{1,2})$/,
+        'nasl.core.Email': /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
     };
     for (const key in regMap) {
         const reg = regMap[key];
@@ -120,26 +156,36 @@ function judgeStrType(str) {
 }
 
 // 判断 变量 是否属于 类型
-export function isInstanceOf(variable, typeAnnotation) {
-    const { typeKind, typeNamespace, typeName, typeArguments } = typeAnnotation;
-    const typeKey = genTypeKey(typeAnnotation);
+export function isInstanceOf(variable, typeKey) {
     const typeConstructor = typeMap[typeKey];
     const typeDefinition = typeDefinitionMap[typeKey];
     const varStr = Object.prototype.toString.call(variable);
-    if (typeKind === 'primitive') { // 基础类型
+    const { typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
+    const isPrimitive = isDefPrimitive(typeKey);
+    if (isPrimitive) { // 基础类型
         if (varStr === '[object String]') {
             const actualStrType = judgeStrType(variable);
             if (actualStrType) {
-                return actualStrType === typeName;
-            } else if (['String', 'Text', 'Binary'].includes(typeName)) {
+                return actualStrType === typeKey;
+            } else if (
+                [
+                    'nasl.core.String', 'nasl.core.Text', 'nasl.core.Binary',
+                ].includes(typeKey)
+            ) {
                 return true;
             }
-        } else if (varStr === '[object Number]' && ['Integer', 'Long', 'Double', 'Decimal'].includes(typeName)) {
+        } else if (
+            varStr === '[object Number]'
+            && [
+                'nasl.core.Integer', 'nasl.core.Long', 'nasl.core.Double',
+                'nasl.core.Decimal',
+            ].includes(typeKey)
+        ) {
             return true;
-        } else if (varStr === '[object Boolean]' && typeName === 'Boolean') {
+        } else if (varStr === '[object Boolean]' && typeKey === 'nasl.core.Boolean') {
             return true;
         }
-    } else if (typeKind === 'generic' && typeNamespace === 'nasl.collection') { // 范型
+    } else if (typeKind === 'generic' && typeNamespace === 'nasl.collection' && ['List', 'Map'].includes(typeName)) { // 范型
         let keyChecked = true;
         // 期望的值的类型
         const valueTypeArg = typeName === 'List' ? typeArguments?.[0] : typeArguments?.[1];
@@ -230,26 +276,20 @@ export function isInstanceOf(variable, typeAnnotation) {
 }
 
 // 类型定义是否属于基础类型
-const isDefPrimitive = (typeAnnotation) => {
-    const { typeKind, typeNamespace, typeName } = typeAnnotation || {};
-    if (typeKind === 'primitive' && typeNamespace === 'nasl.core') {
-        return [
-            'Boolean',
-            'Integer',
-            'Long',
-            'Double',
-            'Decimal',
-            'String',
-            'Text',
-            'Binary',
-            'Date',
-            'Time',
-            'DateTime',
-            'Email',
-        ].includes(typeName);
-    }
-    return false;
-};
+const isDefPrimitive = (typeKey) => [
+    'nasl.core.Boolean',
+    'nasl.core.Integer',
+    'nasl.core.Long',
+    'nasl.core.Double',
+    'nasl.core.Decimal',
+    'nasl.core.String',
+    'nasl.core.Text',
+    'nasl.core.Binary',
+    'nasl.core.Date',
+    'nasl.core.Time',
+    'nasl.core.DateTime',
+    'nasl.core.Email',
+].includes(typeKey);
 
 // 值是否属于基础类型
 // 数字（number）、字符串（string）、布尔值（boolean）、undefined、null、对象（Object）
@@ -263,36 +303,37 @@ const isValPrimitive = (value) => {
  * @param {*} typeAnnotation 期望类型
  * @param {*} value 值
  */
-const isTypeMatch = (typeAnnotation, value) => {
-    const isPrimitive = isDefPrimitive(typeAnnotation); // 类型字符串
+const isTypeMatch = (typeKey, value) => {
+    const isPrimitive = isDefPrimitive(typeKey); // 类型字符串
+    const typeAnnotation = typeDefinitionMap[typeKey];
     const isValuePrimitive = isValPrimitive(value); // 类型字符串
     let isMatch = isPrimitive === isValuePrimitive;
     const typeStr = Object.prototype.toString.call(value);
     // 大类型匹配的基础上继续深入判断
     if (isMatch) {
-        const { typeKind, typeNamespace, typeName } = typeAnnotation || {};
         if (isPrimitive) {
             if (
-                typeName === 'Boolean' && typeStr !== '[object Boolean]'
+                typeKey === 'Boolean' && typeStr !== '[object Boolean]'
                 || [
-                    'Integer',
-                    'Long',
-                    'Double',
-                    'Decimal',
-                ].includes(typeName) && typeStr !== '[object Number]'
+                    'nasl.core.Integer',
+                    'nasl.core.Long',
+                    'nasl.core.Double',
+                    'nasl.core.Decimal',
+                ].includes(typeKey) && typeStr !== '[object Number]'
                 || [
-                    'String',
-                    'Text',
-                    'Binary',
-                    'Date',
-                    'Time',
-                    'DateTime',
-                    'Email',
-                ].includes(typeName) && typeStr !== '[object String]'
+                    'nasl.core.String',
+                    'nasl.core.Text',
+                    'nasl.core.Binary',
+                    'nasl.core.Date',
+                    'nasl.core.Time',
+                    'nasl.core.DateTime',
+                    'nasl.core.Email',
+                ].includes(typeKey) && typeStr !== '[object String]'
             ) {
                 isMatch = false;
             }
         } else {
+            const { typeKind, typeNamespace, typeName } = typeAnnotation || {};
             const isArray = typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List';
             const isValueArray = typeStr === '[object Array]';
             if (isArray !== isValueArray) {
@@ -303,15 +344,25 @@ const isTypeMatch = (typeAnnotation, value) => {
     return isMatch;
 };
 
-// 初始化变量
-export const genInitData = (typeAnnotation, parentLevel) => {
+/**
+ * 初始化变量
+ * 基础类型不再进初始化方法
+ * @param {*} typeKey
+ * @param {*} defaultValue
+ * @param {*} parentLevel
+ * @returns
+ */
+export const genInitData = (typeKey, defaultValue, parentLevel) => {
     let level = 1;
     if (parentLevel !== undefined) {
         level = parentLevel + 1;
     }
-    const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
     let parsedValue = defaultValue;
-    if (!(typeKind === 'primitive' && typeNamespace === 'nasl.core' && ['String', 'Text', 'Email'].includes(typeName))) {
+    if (!(
+        [
+            'nasl.core.String', 'nasl.core.Text', 'nasl.core.Email',
+        ].includes(typeKey)
+    )) {
         if (defaultValue === '') {
             parsedValue = undefined;
         } else {
@@ -321,39 +372,34 @@ export const genInitData = (typeAnnotation, parentLevel) => {
     if (level > 2 && parsedValue === undefined) {
         return;
     }
-    const isTypeMatched = parsedValue === undefined || isTypeMatch(typeAnnotation, parsedValue);
+    const isTypeMatched = parsedValue === undefined || isTypeMatch(typeKey, parsedValue);
     if (isTypeMatched) {
+        const typeDefinition = typeDefinitionMap[typeKey];
+        const { typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
         if (typeKind === 'generic' && typeNamespace === 'nasl.collection') { // 范型
             let initVal = (typeName === 'List' ? [] : {});
             if (Array.isArray(typeArguments) && typeArguments.length > 0) {
                 const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
+                const sortedTypeKey = genTypeKey(valueTypeAnnotation);
                 initVal.__valueTypeAnnotation = valueTypeAnnotation;
-                initVal.__valueInstance = genInitData(valueTypeAnnotation, level);
+                initVal.__valueInstance = genInitData(sortedTypeKey, undefined, level);
             }
             if (parsedValue) {
                 const valueTypeAnnotation = initVal.__valueTypeAnnotation || {};
+                const sortedTypeKey = genTypeKey(valueTypeAnnotation);
                 if (typeName === 'List' && Array.isArray(parsedValue)) {
-                    initVal = parsedValue.map((item) => genInitData({
-                        ...valueTypeAnnotation,
-                        defaultValue: item,
-                    }, level));
+                    initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
                 } else {
-                    initVal = genInitData({
-                        ...valueTypeAnnotation,
-                        defaultValue: parsedValue,
-                    }, level);
+                    initVal = genInitData(sortedTypeKey, parsedValue, level);
                 }
             }
             return initVal;
         }
-        const typeKey = genTypeKey(typeAnnotation);
         if (typeKey) {
-            let TypeConstructor = typeMap[typeKey] || typeMap[`app.${typeKey}`];
-            if (typeKind !== 'primitive' && !TypeConstructor) {
-                TypeConstructor = genConstructor(typeKey, typeAnnotation);
-            }
+            const TypeConstructor = typeMap[typeKey];
             // union 不使用构造函数初始化
-            if (TypeConstructor && typeKind !== 'union' && (typeKind !== 'reference' || typeNamespace !== 'app.enums')) {
+            // && typeKind !== 'union' && (typeKind !== 'reference' || typeNamespace !== 'app.enums')
+            if (TypeConstructor) {
                 const instance = new TypeConstructor({
                     defaultValue: parsedValue,
                     level,
