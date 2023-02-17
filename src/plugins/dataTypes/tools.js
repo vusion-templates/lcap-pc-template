@@ -77,19 +77,21 @@ function genConstructor(typeKey, definition) {
             const genericDefinition = typeMap[genericTypeKey];
             if (genericDefinition) {
                 const { typeParams, properties } = genericDefinition || {};
-                // 用实参替换形参
-                propList = properties.map((property) => {
-                    const actualProp = {
-                        ...property,
-                    };
-                    const { typeAnnotation } = property || {};
-                    // 类型形参
-                    const index = typeParams.findIndex((typeParam) => typeParam?.name === typeAnnotation?.typeName);
-                    if (index !== -1) {
-                        actualProp.typeAnnotation = typeArguments[index];
-                    }
-                    return actualProp;
-                });
+                if (Array.isArray(properties)) {
+                    // 用实参替换形参
+                    propList = properties.map((property) => {
+                        const actualProp = {
+                            ...property,
+                        };
+                        const { typeAnnotation } = property || {};
+                        // 类型形参
+                        const index = typeParams.findIndex((typeParam) => typeParam?.name === typeAnnotation?.typeName);
+                        if (index !== -1) {
+                            actualProp.typeAnnotation = typeArguments[index];
+                        }
+                        return actualProp;
+                    });
+                }
             }
         }
         let code = `
@@ -222,7 +224,7 @@ export function isInstanceOf(variable, typeKey) {
                     if (expectedItemTypeAnnotation) {
                         if (typeName === 'List' && Array.isArray(variable) && variable.length > 0) {
                             // 数组中不通过的项
-                            const failedIndex = variable.findIndex((varItem) => !isInstanceOf(varItem, expectedItemTypeAnnotation));
+                            const failedIndex = variable.findIndex((varItem) => !isInstanceOf(varItem, genTypeKey(expectedItemTypeAnnotation)));
                             // 当前数组与定义完全匹配
                             return failedIndex === -1;
                         } else if (typeName === 'Map' && variable) {
@@ -235,7 +237,7 @@ export function isInstanceOf(variable, typeKey) {
                                     continue;
                                 }
                                 const varItem = variable[key];
-                                if (!isInstanceOf(varItem, expectedItemTypeAnnotation)) {
+                                if (!isInstanceOf(varItem, genTypeKey(expectedItemTypeAnnotation))) {
                                     checked = false;
                                 }
                             }
@@ -247,7 +249,7 @@ export function isInstanceOf(variable, typeKey) {
                                     && __valueTypeAnnotation.typeNamespace === expectedItemTypeAnnotation.typeNamespace
                                     && __valueTypeAnnotation.typeName === expectedItemTypeAnnotation.typeName;
                             } else {
-                                return isInstanceOf(__valueInstance, expectedItemTypeAnnotation);
+                                return isInstanceOf(__valueInstance, genTypeKey(expectedItemTypeAnnotation));
                             }
                         }
                     }
@@ -264,7 +266,7 @@ export function isInstanceOf(variable, typeKey) {
                 const enumItemIndex = enumItems.findIndex((enumItem) => variable === enumItem.value);
                 return enumItemIndex !== -1;
             } else if (varStr === '[object Array]') {
-                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, typeAnnotation));
+                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, genTypeKey(typeDefinition)));
                 // 当前枚举数组与定义完全匹配
                 return enumItemIndex === -1;
             }
