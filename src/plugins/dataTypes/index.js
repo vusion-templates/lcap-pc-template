@@ -28,10 +28,18 @@ export default {
 
         initApplicationConstructor(dataTypesMap);
 
-        const genInitFromSchema = (schema = {}, defaultValue) => {
+        const genInitFromSchema = (schema = {}, defaultValue, level) => {
+            if (!schema)
+                schema = {};
             schema.defaultValue = defaultValue;
-            return genInitData(schema);
+            return genInitData(schema, level);
         };
+
+        /**
+         * read datatypes from template, then parse schema
+         * @param {*} schema 是前端用的 refSchema
+         */
+        Vue.prototype.$genInitFromSchema = genInitFromSchema;
 
         const frontendVariables = {};
         if (Array.isArray(options && options.frontendVariables)) {
@@ -228,7 +236,12 @@ export default {
                 return d * 1000;
             },
             logout() {
-                Vue.prototype.$confirm('确定退出登录吗？', '提示')
+                Vue.prototype.$confirm({
+                    content: '确定退出登录吗？',
+                    title: '提示',
+                    okButton: '确定',
+                    cancelButton: '取消',
+                })
                     .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
                         cookie.erase('authorization');
@@ -288,12 +301,6 @@ export default {
         });
 
         Vue.prototype.$global = $global;
-
-        /**
-         * read datatypes from template, then parse schema
-         * @param {*} schema 是前端用的 refSchema
-         */
-        Vue.prototype.$genInitFromSchema = genInitFromSchema;
 
         Vue.prototype.$isInstanceOf = isInstanceOf;
 

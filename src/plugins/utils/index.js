@@ -153,14 +153,14 @@ export const utils = {
         }
     },
     ListSum(arr) {
-        if (Array.isArray(arr)) {
+        if (Array.isArray(arr) && arr.length > 0) {
             return arr.reduce((prev, cur) => prev + cur, 0);
         } else {
             return null;
         }
     },
     ListProduct(arr) {
-        if (Array.isArray(arr)) {
+        if (Array.isArray(arr) && arr.length > 0) {
             return arr.reduce((prev, cur) => prev * cur, 1);
         } else {
             return null;
@@ -185,13 +185,6 @@ export const utils = {
             return null;
         } else {
             return arr.reduce((prev, cur) => prev <= cur ? prev : cur, arr[0]);
-        }
-    },
-    ListLength(arr) {
-        if (Array.isArray(arr)) {
-            return arr.length;
-        } else {
-            return null;
         }
     },
     ListReverse(arr) {
@@ -264,37 +257,7 @@ export const utils = {
             }
         }
     },
-    // 不修改原 list，返回新 list
-    ListDistinctBy(arr, getVal) {
-        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        if (!arr || typeof getVal !== 'function') {
-            return null;
-        }
-        if (arr.length === 0) {
-            return arr;
-        }
-        return [...new Map(arr.map((x) => [getVal(x), x])).values()];
-    },
-    ListGroupBy(arr, getVal) {
-        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        if (!arr || typeof getVal !== 'function') {
-            return null;
-        }
-        if (arr.length === 0) {
-            return arr;
-        }
-        const res = Object.create(null);
-        arr.forEach((e) => {
-            const val = getVal(e);
-            if (res[val]) {
-                // res.get(val) 是一个 array
-                res[val].push(e);
-            } else {
-                res[val] = [e];
-            }
-        });
-        return res;
-    },
+    // 随着 PageOf 失效，可删除
     ListSliceToPageOf(arr, page, size) {
         if (Array.isArray(arr) && page) {
             const content = arr.slice((page - 1) * size, size);
@@ -312,6 +275,56 @@ export const utils = {
                 empty: total,
             };
         }
+    },
+    SliceToListPage(arr, page, size) {
+        if (Array.isArray(arr) && page) {
+            const list = arr.slice((page - 1) * size, size);
+            const total = arr.length;
+            return { list, total };
+        } else {
+            return { list: [], total: 0 };
+        }
+    },
+    // 不修改原 list，返回新 list
+    ListDistinctBy(arr, getVal) {
+        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
+        if (!Array.isArray(arr) || typeof getVal !== 'function') {
+            return null;
+        }
+        if (arr.length === 0) {
+            return arr;
+        }
+
+        const res = [];
+        const vis = new Set();
+        for (const item of arr) {
+            const hash = getVal(item);
+            if (!vis.has(hash)) {
+                vis.add(hash);
+                res.push(item);
+            }
+        }
+        return res;
+    },
+    ListGroupBy(arr, getVal) {
+        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
+        if (!arr || typeof getVal !== 'function') {
+            return null;
+        }
+        if (arr.length === 0) {
+            return arr;
+        }
+        const res = {};
+        arr.forEach((e) => {
+            const val = getVal(e);
+            if (res[val]) {
+                // res.get(val) 是一个 array
+                res[val].push(e);
+            } else {
+                res[val] = [e];
+            }
+        });
+        return res;
     },
     MapGet(map, key) {
         if (isObject(map)) {
@@ -360,7 +373,7 @@ export const utils = {
         if (!isObject(map) || typeof by !== 'function') {
             return null;
         }
-        const res = Object.create(null);
+        const res = {};
         for (const [k, v] of Object.entries(map)) {
             if (by(k, v)) {
                 res[k] = v;
@@ -372,22 +385,24 @@ export const utils = {
         if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
             return null;
         }
-        const res = Object.create(null);
+        const res = {};
         for (const [k, v] of Object.entries(map)) {
             res[toKey(k, v)] = toValue(k, v);
         }
         return res;
     },
     ListToMap(arr, toKey, toValue) {
-        if (typeof arr !== 'object' || typeof toKey !== 'function' || typeof toValue !== 'function') {
+        if (!Array.isArray(arr) || typeof toKey !== 'function' || typeof toValue !== 'function') {
             return null;
         }
-        const res = Object.create(null);
-        arr.forEach((e) => {
+        const res = {};
+        for (let i = arr.length - 1; i >= 0; i--) {
+            const e = arr[i];
             if (toKey(e)) {
                 res[toKey(e)] = toValue(e);
             }
-        });
+        }
+
         return res;
     },
     CurrDate() {
@@ -434,7 +449,7 @@ export const utils = {
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
-                    obj[key] = undefined;
+                    obj[key] = null;
             }
         } else {
             obj = undefined;
@@ -629,6 +644,7 @@ export const utils = {
         }
         return str.substr(start, length);
     },
+    // 随着 PageOf 失效，可删除
     /**
      * List<T> 转换为 PageOf<T>
      * @param {List<T>} list 集合
@@ -650,6 +666,15 @@ export const utils = {
             first: page === 1,
             empty: total,
         };
+    },
+    /**
+     * List<T> 转换为 { list: List<T>, total: Integer }
+     * @param {List<T>} list 集合
+     * @param {number} total 总数
+     * @returns {list: List<T>, total: Integer}
+     */
+    CreateListPage(list, total) {
+        return { list, total };
     },
 };
 

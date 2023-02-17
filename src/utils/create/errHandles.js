@@ -28,7 +28,11 @@ export default {
             if (!config.noErrorTip) {
                 instance.show('登录失效', '请重新登录');
             }
-            location.href = '/login';
+            localStorage.setItem('beforeLogin', JSON.stringify(location));
+            if (window.ICESTARK?.loginFn)
+                window.ICESTARK.loginFn();
+            else
+                location.href = '/login';
         }
     },
     remoteError({ config }, err) {
