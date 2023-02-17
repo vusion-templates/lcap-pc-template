@@ -32,7 +32,7 @@ function toValue(date, converter) {
 
 export const utils = {
     Vue: undefined,
-    EnumValueToText(enumTypeAnnotation, value) {
+    EnumValueToText(value, enumTypeAnnotation) {
         console.log(enumTypeAnnotation, value);
         const { typeName, typeNamespace } = enumTypeAnnotation || {};
         if (typeName) {
@@ -44,7 +44,7 @@ export const utils = {
         }
         return '';
     },
-    StringToEnumValue(enumTypeAnnotation, value) {
+    StringToEnumValue(value, enumTypeAnnotation) {
         return value;
     },
     EnumToList(enumTypeAnnotation) {
