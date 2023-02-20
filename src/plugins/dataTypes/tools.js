@@ -21,12 +21,14 @@ export function genTypeKey(typeAnnotation) {
     const typeKeyArr = [];
     if (typeKind === 'union') { // 联合类型
         if (Array.isArray(typeArguments)) {
-            const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg));
+            // 按返回的每个具体项排序
+            const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg)).sort((name1, name2) => name1 > name2 ? 1 : -1);
             typeKeyArr.push(childTypeArgs.join(' | '));
         }
     } else if (typeKind === 'anonymousStructure') { // 匿名数据结构
         typeKeyArr.push('{');
         if (Array.isArray(properties)) {
+            // 按匿名数据结构的key排序
             const childTypeArgs = properties.sort(({ name: name1 }, { name: name2 }) => name1 > name2 ? 1 : -1).map((typeArg) => {
                 const { name: typeArgName, typeAnnotation: typeArgTypeAnnotation } = typeArg || {};
                 return `${typeArgName}: ${genTypeKey(typeArgTypeAnnotation)}`;
@@ -43,6 +45,7 @@ export function genTypeKey(typeAnnotation) {
         if (typeKind === 'generic') {
             typeKeyArr.push('<');
             if (Array.isArray(typeArguments)) {
+                // 必须按typeArguments定义的顺序，否则实参位置不对
                 const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg));
                 typeKeyArr.push(childTypeArgs.join(', '));
             }
@@ -81,7 +84,26 @@ function genConstructor(typeKey, definition) {
                     typeAnnotation,
                     defaultValue,
                 } = property || {};
-                let parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+                const defaultValueType = Object.prototype.toString.call(defaultValue);
+                let parsedValue = defaultValue;
+                const { typeKind, typeNamespace, typeName } = typeAnnotation || {};
+                if (
+                    defaultValueType === '[object String]'
+                    && (
+                        !(typeKind === 'primitive' && typeNamespace === 'nasl.core' && ['String', 'Text', 'Email'].includes(typeName))
+                        && !(typeKind === 'reference' && typeNamespace === 'app.enums')
+                        && !['union'].includes(typeKind)
+                    )
+                ) {
+                    // 一些特殊情况，特殊处理成undefined
+                    // 1.defaultValue在nasl节点上错误得赋值给了空制符串
+                    // 2.设置成null，才能同步给后端清楚该值，但是null对checkbox组件是一种特殊状态
+                    if (['', null].includes(defaultValue)) {
+                        parsedValue = undefined;
+                    } else {
+                        parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+                    }
+                }
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
                     parsedValue = `'${parsedValue}'`;
                 }
@@ -126,7 +148,26 @@ export function isInstanceOf(variable, typeAnnotation) {
     const typeConstructor = typeMap[typeKey];
     const typeDefinition = typeDefinitionMap[typeKey];
     const varStr = Object.prototype.toString.call(variable);
-    if (typeKind === 'primitive') { // 基础类型
+    if (typeKind === 'union') {
+        let matchedIndex = false;
+        if (Array.isArray(typeArguments)) {
+            matchedIndex = typeArguments.findIndex((typeArg) => isInstanceOf(variable, typeArg));
+        }
+        return matchedIndex !== -1;
+    } else if (typeKind === 'reference' && typeNamespace === 'app.enums' && typeDefinition) { // 枚举
+        const { enumItems } = typeDefinition;
+        if (Array.isArray(enumItems)) {
+            if (varStr === '[object String]') {
+                // 当前值在枚举中存在
+                const enumItemIndex = enumItems.findIndex((enumItem) => variable === enumItem.value);
+                return enumItemIndex !== -1;
+            } else if (varStr === '[object Array]') {
+                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, typeAnnotation));
+                // 当前枚举数组与定义完全匹配
+                return enumItemIndex === -1;
+            }
+        }
+    } else if (typeKind === 'primitive') { // 基础类型
         if (varStr === '[object String]') {
             const actualStrType = judgeStrType(variable);
             if (actualStrType) {
@@ -148,12 +189,6 @@ export function isInstanceOf(variable, typeAnnotation) {
             // 期望的key类型
             const keyTypeArg = typeArguments?.[0];
             for (const key in variable) {
-                if ([
-                    '__valueInstance',
-                    '__valueTypeAnnotation',
-                ].includes(key)) {
-                    continue;
-                }
                 if (!isInstanceOf(key, keyTypeArg)) {
                     keyChecked = false;
                 }
@@ -161,72 +196,26 @@ export function isInstanceOf(variable, typeAnnotation) {
         }
         // key校验通过，再校验value是否符合
         if (keyChecked) {
-            const {
-                typeKind: valueTypeArgKind,
-                typeArguments: valueTypeArgTypeArgs,
-            } = valueTypeArg || {};
-            let expectedItemTypeAnnotations = [valueTypeArg];
-            // union类型满足一个即可
-            if (valueTypeArgKind === 'union') {
-                expectedItemTypeAnnotations = valueTypeArgTypeArgs;
-            }
-            let expectedItemTypeAnnotationIndex = -1;
-            if (Array.isArray(expectedItemTypeAnnotations)) {
-                expectedItemTypeAnnotationIndex = expectedItemTypeAnnotations.findIndex((expectedItemTypeAnnotation) => {
-                    if (expectedItemTypeAnnotation) {
-                        if (typeName === 'List' && Array.isArray(variable) && variable.length > 0) {
-                            // 数组中不通过的项
-                            const failedIndex = variable.findIndex((varItem) => !isInstanceOf(varItem, expectedItemTypeAnnotation));
-                            // 当前数组与定义完全匹配
-                            return failedIndex === -1;
-                        } else if (typeName === 'Map' && variable) {
-                            let checked = true;
-                            for (const key in variable) {
-                                if ([
-                                    '__valueInstance',
-                                    '__valueTypeAnnotation',
-                                ].includes(key)) {
-                                    continue;
-                                }
-                                const varItem = variable[key];
-                                if (!isInstanceOf(varItem, expectedItemTypeAnnotation)) {
-                                    checked = false;
-                                }
-                            }
-                            return checked;
-                        } else {
-                            const { __valueInstance, __valueTypeAnnotation } = variable;
-                            if (!__valueInstance && __valueTypeAnnotation) {
-                                return __valueTypeAnnotation.typeKind === expectedItemTypeAnnotation.typeKind
-                                    && __valueTypeAnnotation.typeNamespace === expectedItemTypeAnnotation.typeNamespace
-                                    && __valueTypeAnnotation.typeName === expectedItemTypeAnnotation.typeName;
-                            } else {
-                                return isInstanceOf(__valueInstance, expectedItemTypeAnnotation);
-                            }
-                        }
+            if (typeName === 'List' && Array.isArray(variable)) {
+                // 数组中不通过的项
+                const failedIndex = variable.findIndex((varItem) => !isInstanceOf(varItem, valueTypeArg));
+                // 当前数组与定义完全匹配
+                return variable.length === 0 || failedIndex === -1;
+            } else if (typeName === 'Map' && variable) {
+                let checked = true;
+                for (const key in variable) {
+                    const varItem = variable[key];
+                    if (!isInstanceOf(varItem, valueTypeArg)) {
+                        checked = false;
                     }
-                    return false;
-                });
+                }
+                return checked;
             }
-            return expectedItemTypeAnnotationIndex !== -1;
+        } else if (typeConstructor && variable instanceof typeConstructor) {
+            return true;
         }
-    } else if (typeKind === 'reference' && typeNamespace === 'app.enums' && typeDefinition) { // 枚举
-        const { enumItems } = typeDefinition;
-        if (Array.isArray(enumItems)) {
-            if (varStr === '[object String]') {
-                // 当前值在枚举中存在
-                const enumItemIndex = enumItems.findIndex((enumItem) => variable === enumItem.value);
-                return enumItemIndex !== -1;
-            } else if (varStr === '[object Array]') {
-                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, typeAnnotation));
-                // 当前枚举数组与定义完全匹配
-                return enumItemIndex === -1;
-            }
-        }
-    } else if (typeConstructor && variable instanceof typeConstructor) {
-        return true;
+        return false;
     }
-    return false;
 }
 
 // 类型定义是否属于基础类型
@@ -309,10 +298,21 @@ export const genInitData = (typeAnnotation, parentLevel) => {
     if (parentLevel !== undefined) {
         level = parentLevel + 1;
     }
+    const defaultValueType = Object.prototype.toString.call(defaultValue);
     const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
     let parsedValue = defaultValue;
-    if (!(typeKind === 'primitive' && typeNamespace === 'nasl.core' && ['String', 'Text', 'Email'].includes(typeName))) {
-        if (defaultValue === '') {
+    if (
+        defaultValueType === '[object String]'
+        && (
+            !(typeKind === 'primitive' && typeNamespace === 'nasl.core' && ['String', 'Text', 'Email'].includes(typeName))
+            && !(typeKind === 'reference' && typeNamespace === 'app.enums')
+            && !['union'].includes(typeKind)
+        )
+    ) {
+        // 一些特殊情况，特殊处理成undefined
+        // 1.defaultValue在nasl节点上错误得赋值给了空制符串
+        // 2.设置成null，才能同步给后端清楚该值，但是null对checkbox组件是一种特殊状态
+        if (['', null].includes(defaultValue)) {
             parsedValue = undefined;
         } else {
             parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
@@ -327,21 +327,18 @@ export const genInitData = (typeAnnotation, parentLevel) => {
             let initVal = (typeName === 'List' ? [] : {});
             if (Array.isArray(typeArguments) && typeArguments.length > 0) {
                 const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
-                initVal.__valueTypeAnnotation = valueTypeAnnotation;
-                initVal.__valueInstance = genInitData(valueTypeAnnotation, level);
-            }
-            if (parsedValue) {
-                const valueTypeAnnotation = initVal.__valueTypeAnnotation || {};
-                if (typeName === 'List' && Array.isArray(parsedValue)) {
-                    initVal = parsedValue.map((item) => genInitData({
-                        ...valueTypeAnnotation,
-                        defaultValue: item,
-                    }, level));
-                } else {
-                    initVal = genInitData({
-                        ...valueTypeAnnotation,
-                        defaultValue: parsedValue,
-                    }, level);
+                if (parsedValue) {
+                    if (typeName === 'List' && Array.isArray(parsedValue)) {
+                        initVal = parsedValue.map((item) => genInitData({
+                            ...valueTypeAnnotation,
+                            defaultValue: item,
+                        }, level));
+                    } else {
+                        initVal = genInitData({
+                            ...valueTypeAnnotation,
+                            defaultValue: parsedValue,
+                        }, level);
+                    }
                 }
             }
             return initVal;
