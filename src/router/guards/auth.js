@@ -29,7 +29,11 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
         if (!$auth.isInit()) {
             if (!userInfo.UserId) {
                 localStorage.setItem('beforeLogin', JSON.stringify(location));
-                next({ path: '/login' });
+                if (window.ICESTARK?.loginFn) {
+                    window.ICESTARK.loginFn();
+                    return;
+                } else
+                    next({ path: '/login' });
             } else {
                 try {
                     const resources = await $auth.getUserResources(appConfig.domainName);

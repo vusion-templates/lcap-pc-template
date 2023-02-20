@@ -1,4 +1,3 @@
-import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
 import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
 import cookie from '@/utils/cookie';
@@ -7,26 +6,41 @@ import configuration from '@/apis/configuration';
 import lowauth from '@/apis/lowauth';
 import io from '@/apis/io';
 import authService from '../auth/authService';
-import { genInitData } from './tools';
+import { initApplicationConstructor, genInitData, isInstanceOf } from './tools';
 import { porcessPorts } from '../router/processService';
 
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 
+// // 获取真实值
+// function getActualValue(value) {
+//    let actualValue = value;
+//    const { __isPrimitive, value: primitiveVal } = value || {};
+//    if (__isPrimitive) {
+//        actualValue = primitiveVal;
+//    }
+//    return actualValue;
+// }
+
 export default {
     install(Vue, options = {}) {
-        const genInitFromSchema = (schema = {}, defaultValue) => {
+        const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
+
+        initApplicationConstructor(dataTypesMap);
+
+        const genInitFromSchema = (schema = {}, defaultValue, level) => {
             if (!schema)
                 schema = {};
             schema.defaultValue = defaultValue;
-
-            // read from file
-            const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
-            const expressDataTypeObject = genInitData(schema, dataTypesMap);
-            const expression = generate(expressDataTypeObject).code;
-            // eslint-disable-next-line no-new-func
-            return Function('return ' + expression)();
+            return genInitData(schema, level);
         };
+
+        /**
+         * read datatypes from template, then parse schema
+         * @param {*} schema 是前端用的 refSchema
+         */
+        Vue.prototype.$genInitFromSchema = genInitFromSchema;
+
         const frontendVariables = {};
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
@@ -34,7 +48,6 @@ export default {
                 frontendVariables[name] = genInitFromSchema(typeAnnotation, defaultValue);
             });
         }
-
         const $global = {
             // 用户信息
             userInfo: {},
@@ -91,6 +104,57 @@ export default {
                 const yy = new Decimal(y + '');
                 return xx.div(yy).toNumber();
             },
+            // 相等
+            isEqual(x, y) {
+                return x == y;
+            },
+            // // 不相等
+            // isNotEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX != actualY;
+            // },
+            // // 大于
+            // isGreater(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX > actualY;
+            // },
+            // // 大于等于
+            // isGreaterOrEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX >= actualY;
+            // },
+            // // 小于
+            // isLess(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX < actualY;
+            // },
+            // // 小于等于
+            // isLessOrEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX <= actualY;
+            // },
+            // // 与
+            // isAnd(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX && actualY;
+            // },
+            // // 或
+            // isOr(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX || actualY;
+            // },
+            // // 非
+            // isNot(val) {
+            //    const actualVal = getActualValue(val);
+            //    return !actualVal;
+            // },
             requestFullscreen() {
                 return document.body.requestFullscreen();
             },
@@ -238,11 +302,7 @@ export default {
 
         Vue.prototype.$global = $global;
 
-        /**
-         * read datatypes from template, then parse schema
-         * @param {*} schema 是前端用的 refSchema
-         */
-        Vue.prototype.$genInitFromSchema = genInitFromSchema;
+        Vue.prototype.$isInstanceOf = isInstanceOf;
 
         const enumsMap = options.enumsMap || {};
         function createEnum(items) {

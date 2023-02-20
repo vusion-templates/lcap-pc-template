@@ -1,6 +1,7 @@
 import encodeUrl from '@/utils/encodeUrl';
 
 import processService from './processService';
+import { formatMicroFrontUrl, formatMicroFrontRouterPath } from './microFrontUrl';
 
 function downloadClick(realUrl, target) {
     const a = document.createElement('a');
@@ -20,6 +21,9 @@ export default {
          */
         Vue.prototype.$process = processService;
 
+        Vue.prototype.$formatMicroFrontUrl = formatMicroFrontUrl;
+        Vue.prototype.$formatMicroFrontRouterPath = formatMicroFrontRouterPath;
+
         Vue.prototype.$destination = function (url, target = '_self') {
             if (target === '_self') {
                 // 修复访问路径为默认首页 / 时跳转可能失效的问题
@@ -33,7 +37,9 @@ export default {
                         if (document.getElementById(hash)) {
                             document.getElementById(hash).scrollIntoView();
                         }
+                        this.$router.push(url);
                     }
+
                     this.$router.push(url);
                 }
             } else {
