@@ -12,7 +12,7 @@ const typeDefinitionMap = new Map();
 const typeMap = new Map();
 
 // 生成typeKey
-export function genTypeKey(typeAnnotation) {
+export function genSortedTypeKey(typeAnnotation) {
     const {
         typeKind, typeNamespace, typeName,
         typeArguments, properties,
@@ -20,16 +20,18 @@ export function genTypeKey(typeAnnotation) {
     const typeKeyArr = [];
     if (typeKind === 'union') { // 联合类型
         if (Array.isArray(typeArguments)) {
-            const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg)).sort((name1, name2) => name1 > name2 ? 1 : -1);
+            // 按返回的每个具体项排序
+            const childTypeArgs = typeArguments.map((typeArg) => genSortedTypeKey(typeArg)).sort((name1, name2) => name1 > name2 ? 1 : -1);
             typeKeyArr.push(childTypeArgs.join(' | '));
         }
     } else if (typeKind === 'anonymousStructure') { // 匿名数据结构
         typeKeyArr.push('{');
         if (Array.isArray(properties)) {
-            const childTypeArgs = properties.map((typeArg) => {
+            // 按匿名数据结构的key排序
+            const childTypeArgs = properties.sort(({ name: name1 }, { name: name2 }) => name1 > name2 ? 1 : -1).map((typeArg) => {
                 const { name: typeArgName, typeAnnotation: typeArgTypeAnnotation } = typeArg || {};
-                return `${typeArgName}: ${genTypeKey(typeArgTypeAnnotation)}`;
-            }).sort((name1, name2) => name1 > name2 ? 1 : -1);
+                return `${typeArgName}: ${genSortedTypeKey(typeArgTypeAnnotation)}`;
+            });
             typeKeyArr.push(childTypeArgs.join(';'));
         }
         typeKeyArr.push('}');
@@ -42,9 +44,8 @@ export function genTypeKey(typeAnnotation) {
         if (typeKind === 'generic') {
             typeKeyArr.push('<');
             if (Array.isArray(typeArguments)) {
-                const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg)).sort((
-                    name1, name2,
-                ) => name1 > name2 ? 1 : -1);
+                // 必须按typeArguments定义的顺序，否则实参位置不对
+                const childTypeArgs = typeArguments.map((typeArg) => genSortedTypeKey(typeArg));
                 typeKeyArr.push(childTypeArgs.join(', '));
             }
             typeKeyArr.push('>');
@@ -116,7 +117,7 @@ function genConstructor(typeKey, definition) {
                     parsedValue = `'${parsedValue}'`;
                 }
                 const needGenInitFromSchema = typeAnnotation && !['primitive', 'union'].includes(typeAnnotation.typeKind);
-                const sortedTypeKey = genTypeKey(typeAnnotation);
+                const sortedTypeKey = genSortedTypeKey(typeAnnotation);
                 code += `this.${propertyName} = `;
                 if (needGenInitFromSchema) {
                     code += `Vue.prototype.$genInitFromSchema('${sortedTypeKey}',`;
@@ -169,7 +170,7 @@ export function isInstanceOf(variable, typeKey) {
     if (typeKind === 'union') {
         let matchedIndex = false;
         if (Array.isArray(typeArguments)) {
-            matchedIndex = typeArguments.findIndex((typeArg) => isInstanceOf(variable, genTypeKey(typeArg)));
+            matchedIndex = typeArguments.findIndex((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
         }
         return matchedIndex !== -1;
     } else if (concept === 'Enum') { // 枚举
@@ -180,7 +181,7 @@ export function isInstanceOf(variable, typeKey) {
                 const enumItemIndex = enumItems.findIndex((enumItem) => variable === enumItem.value);
                 return enumItemIndex !== -1;
             } else if (varStr === '[object Array]') {
-                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, genTypeKey(typeDefinition)));
+                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, genSortedTypeKey(typeDefinition)));
                 // 当前枚举数组与定义完全匹配
                 return enumItemIndex === -1;
             }
@@ -221,7 +222,7 @@ export function isInstanceOf(variable, typeKey) {
             // 期望的key类型
             const keyTypeArg = typeArguments?.[0];
             for (const key in variable) {
-                if (!isInstanceOf(key, genTypeKey(keyTypeArg))) {
+                if (!isInstanceOf(key, genSortedTypeKey(keyTypeArg))) {
                     keyChecked = false;
                 }
             }
@@ -229,14 +230,14 @@ export function isInstanceOf(variable, typeKey) {
         // key校验通过，再校验value是否符合
         if (keyChecked) {
             if (typeName === 'List' && Array.isArray(variable)) {
-                const failedIndex = variable.findIndex((varItem) => !isInstanceOf(varItem, genTypeKey(valueTypeArg)));
+                const failedIndex = variable.findIndex((varItem) => !isInstanceOf(varItem, genSortedTypeKey(valueTypeArg)));
                 // 当前数组为空或者与定义完全匹配
                 return variable.length === 0 || failedIndex === -1;
             } else if (typeName === 'Map' && variable) {
                 let checked = true;
                 for (const key in variable) {
                     const varItem = variable[key];
-                    if (!isInstanceOf(varItem, genTypeKey(valueTypeArg))) {
+                    if (!isInstanceOf(varItem, genSortedTypeKey(valueTypeArg))) {
                         checked = false;
                     }
                 }
@@ -371,7 +372,7 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
             if (parsedValue) {
                 if (Array.isArray(typeArguments) && typeArguments.length > 0) {
                     const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
-                    const sortedTypeKey = genTypeKey(valueTypeAnnotation);
+                    const sortedTypeKey = genSortedTypeKey(valueTypeAnnotation);
                     if (typeName === 'List' && Array.isArray(parsedValue)) {
                         initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
                     }
