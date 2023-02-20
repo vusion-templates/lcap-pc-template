@@ -20,24 +20,16 @@ export function genTypeKey(typeAnnotation) {
     const typeKeyArr = [];
     if (typeKind === 'union') { // 联合类型
         if (Array.isArray(typeArguments)) {
-            const childTypeArgs = typeArguments.sort(({
-                name: name1,
-            }, {
-                name: name2,
-            }) => name1 > name2 ? 1 : -1).map((typeArg) => genTypeKey(typeArg));
+            const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg)).sort((name1, name2) => name1 > name2 ? 1 : -1);
             typeKeyArr.push(childTypeArgs.join(' | '));
         }
     } else if (typeKind === 'anonymousStructure') { // 匿名数据结构
         typeKeyArr.push('{');
         if (Array.isArray(properties)) {
-            const childTypeArgs = properties.sort(({
-                name: name1,
-            }, {
-                name: name2,
-            }) => name1 > name2 ? 1 : -1).map((typeArg) => {
+            const childTypeArgs = properties.map((typeArg) => {
                 const { name: typeArgName, typeAnnotation: typeArgTypeAnnotation } = typeArg || {};
                 return `${typeArgName}: ${genTypeKey(typeArgTypeAnnotation)}`;
-            });
+            }).sort((name1, name2) => name1 > name2 ? 1 : -1);
             typeKeyArr.push(childTypeArgs.join(';'));
         }
         typeKeyArr.push('}');
@@ -50,11 +42,9 @@ export function genTypeKey(typeAnnotation) {
         if (typeKind === 'generic') {
             typeKeyArr.push('<');
             if (Array.isArray(typeArguments)) {
-                const childTypeArgs = typeArguments.sort(({
-                    name: name1,
-                }, {
-                    name: name2,
-                }) => name1 > name2 ? 1 : -1).map((typeArg) => genTypeKey(typeArg));
+                const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg)).sort((
+                    name1, name2,
+                ) => name1 > name2 ? 1 : -1);
                 typeKeyArr.push(childTypeArgs.join(', '));
             }
             typeKeyArr.push('>');
@@ -176,7 +166,13 @@ export function isInstanceOf(variable, typeKey) {
     const varStr = Object.prototype.toString.call(variable);
     const { concept, typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
     const isPrimitive = isDefPrimitive(typeKey);
-    if (concept === 'Enum') { // 枚举
+    if (typeKind === 'union') {
+        let matchedIndex = false;
+        if (Array.isArray(typeArguments)) {
+            matchedIndex = typeArguments.findIndex((typeArg) => isInstanceOf(variable, genTypeKey(typeArg)));
+        }
+        return matchedIndex !== -1;
+    } else if (concept === 'Enum') { // 枚举
         const { enumItems } = typeDefinition;
         if (Array.isArray(enumItems)) {
             if (varStr === '[object String]') {
@@ -225,12 +221,6 @@ export function isInstanceOf(variable, typeKey) {
             // 期望的key类型
             const keyTypeArg = typeArguments?.[0];
             for (const key in variable) {
-                if ([
-                    '__valueInstance',
-                    '__valueTypeAnnotation',
-                ].includes(key)) {
-                    continue;
-                }
                 if (!isInstanceOf(key, genTypeKey(keyTypeArg))) {
                     keyChecked = false;
                 }
@@ -238,54 +228,20 @@ export function isInstanceOf(variable, typeKey) {
         }
         // key校验通过，再校验value是否符合
         if (keyChecked) {
-            const {
-                typeKind: valueTypeArgKind,
-                typeArguments: valueTypeArgTypeArgs,
-            } = valueTypeArg || {};
-            let expectedItemTypeAnnotations = [valueTypeArg];
-            // union类型满足一个即可
-            if (valueTypeArgKind === 'union') {
-                expectedItemTypeAnnotations = valueTypeArgTypeArgs;
-            }
-            let expectedItemTypeAnnotationIndex = -1;
-            if (Array.isArray(expectedItemTypeAnnotations)) {
-                expectedItemTypeAnnotationIndex = expectedItemTypeAnnotations.findIndex((expectedItemTypeAnnotation) => {
-                    if (expectedItemTypeAnnotation) {
-                        if (typeName === 'List' && Array.isArray(variable) && variable.length > 0) {
-                            // 数组中不通过的项
-                            const failedIndex = variable.findIndex((varItem) => !isInstanceOf(varItem, genTypeKey(expectedItemTypeAnnotation)));
-                            // 当前数组与定义完全匹配
-                            return failedIndex === -1;
-                        } else if (typeName === 'Map' && variable) {
-                            let checked = true;
-                            for (const key in variable) {
-                                if ([
-                                    '__valueInstance',
-                                    '__valueTypeAnnotation',
-                                ].includes(key)) {
-                                    continue;
-                                }
-                                const varItem = variable[key];
-                                if (!isInstanceOf(varItem, genTypeKey(expectedItemTypeAnnotation))) {
-                                    checked = false;
-                                }
-                            }
-                            return checked;
-                        } else {
-                            const { __valueInstance, __valueTypeAnnotation } = variable || {};
-                            if (!__valueInstance && __valueTypeAnnotation) {
-                                return __valueTypeAnnotation.typeKind === expectedItemTypeAnnotation.typeKind
-                                    && __valueTypeAnnotation.typeNamespace === expectedItemTypeAnnotation.typeNamespace
-                                    && __valueTypeAnnotation.typeName === expectedItemTypeAnnotation.typeName;
-                            } else {
-                                return isInstanceOf(__valueInstance, genTypeKey(expectedItemTypeAnnotation));
-                            }
-                        }
+            if (typeName === 'List' && Array.isArray(variable)) {
+                const failedIndex = variable.findIndex((varItem) => !isInstanceOf(varItem, genTypeKey(valueTypeArg)));
+                // 当前数组为空或者与定义完全匹配
+                return variable.length === 0 || failedIndex === -1;
+            } else if (typeName === 'Map' && variable) {
+                let checked = true;
+                for (const key in variable) {
+                    const varItem = variable[key];
+                    if (!isInstanceOf(varItem, genTypeKey(valueTypeArg))) {
+                        checked = false;
                     }
-                    return false;
-                });
+                }
+                return checked;
             }
-            return expectedItemTypeAnnotationIndex !== -1;
         }
     } else if (
         typeConstructor
@@ -390,6 +346,7 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
                 'nasl.core.String', 'nasl.core.Text', 'nasl.core.Email',
             ].includes(typeKey)
             && concept !== 'Enum'
+            && !['union'].includes(typeKind)
         )
     ) {
         // 一些特殊情况，特殊处理成undefined
@@ -411,19 +368,13 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
             && ['List', 'Map'].includes(typeName)
         ) { // 特殊范型List/Map
             let initVal = (typeName === 'List' ? [] : {});
-            if (Array.isArray(typeArguments) && typeArguments.length > 0) {
-                const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
-                const sortedTypeKey = genTypeKey(valueTypeAnnotation);
-                initVal.__valueTypeAnnotation = valueTypeAnnotation;
-                initVal.__valueInstance = genInitData(sortedTypeKey, undefined, level);
-            }
             if (parsedValue) {
-                const valueTypeAnnotation = initVal.__valueTypeAnnotation || {};
-                const sortedTypeKey = genTypeKey(valueTypeAnnotation);
-                if (typeName === 'List' && Array.isArray(parsedValue)) {
-                    initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
-                } else {
-                    initVal = genInitData(sortedTypeKey, parsedValue, level);
+                if (Array.isArray(typeArguments) && typeArguments.length > 0) {
+                    const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
+                    const sortedTypeKey = genTypeKey(valueTypeAnnotation);
+                    if (typeName === 'List' && Array.isArray(parsedValue)) {
+                        initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
+                    }
                 }
             }
             return initVal;
