@@ -112,7 +112,29 @@ function genConstructor(typeKey, definition) {
                     typeAnnotation,
                     defaultValue,
                 } = property || {};
-                let parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+                const defaultValueType = Object.prototype.toString.call(defaultValue);
+                const { concept, typeKind } = typeAnnotation || {};
+                const typeKey = genSortedTypeKey(typeAnnotation);
+                // 设置成null，才能同步给后端清除该值，但是null对checkbox组件是一种特殊状态
+                let parsedValue = defaultValue ?? undefined;
+                if (
+                    defaultValueType === '[object String]'
+                    && (
+                        ![
+                            'nasl.core.String', 'nasl.core.Text', 'nasl.core.Email',
+                        ].includes(typeKey)
+                        && concept !== 'Enum'
+                        && !['union'].includes(typeKind)
+                    )
+                ) {
+                    // 一些特殊情况，特殊处理成undefined
+                    // 1.defaultValue在nasl节点上错误得赋值给了空制符串
+                    if ([''].includes(defaultValue)) {
+                        parsedValue = undefined;
+                    } else {
+                        parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+                    }
+                }
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
                     parsedValue = `'${parsedValue}'`;
                 }
