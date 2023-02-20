@@ -278,7 +278,7 @@ export default {
                     query.group = `${configKeys[0]}.${configKeys[1]}.${groupName}`;
                 }
                 const res = await configuration.getCustomConfig({
-                    path: { finalConfigKey },
+                    path: { configKey: finalConfigKey },
                     query,
                 });
                 return res;
