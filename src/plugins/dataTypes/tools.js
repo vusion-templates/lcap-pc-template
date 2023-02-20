@@ -8,9 +8,8 @@ function tryJSONParse(str) {
     return result;
 }
 
-const typeMap = new Map();
-
 const typeDefinitionMap = new Map();
+const typeMap = new Map();
 
 // 生成typeKey
 export function genTypeKey(typeAnnotation) {
@@ -21,13 +20,21 @@ export function genTypeKey(typeAnnotation) {
     const typeKeyArr = [];
     if (typeKind === 'union') { // 联合类型
         if (Array.isArray(typeArguments)) {
-            const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg));
+            const childTypeArgs = typeArguments.sort(({
+                name: name1,
+            }, {
+                name: name2,
+            }) => name1 > name2 ? 1 : -1).map((typeArg) => genTypeKey(typeArg));
             typeKeyArr.push(childTypeArgs.join(' | '));
         }
     } else if (typeKind === 'anonymousStructure') { // 匿名数据结构
         typeKeyArr.push('{');
         if (Array.isArray(properties)) {
-            const childTypeArgs = properties.sort(({ name: name1 }, { name: name2 }) => name1 > name2 ? 1 : -1).map((typeArg) => {
+            const childTypeArgs = properties.sort(({
+                name: name1,
+            }, {
+                name: name2,
+            }) => name1 > name2 ? 1 : -1).map((typeArg) => {
                 const { name: typeArgName, typeAnnotation: typeArgTypeAnnotation } = typeArg || {};
                 return `${typeArgName}: ${genTypeKey(typeArgTypeAnnotation)}`;
             });
@@ -43,7 +50,11 @@ export function genTypeKey(typeAnnotation) {
         if (typeKind === 'generic') {
             typeKeyArr.push('<');
             if (Array.isArray(typeArguments)) {
-                const childTypeArgs = typeArguments.map((typeArg) => genTypeKey(typeArg));
+                const childTypeArgs = typeArguments.sort(({
+                    name: name1,
+                }, {
+                    name: name2,
+                }) => name1 > name2 ? 1 : -1).map((typeArg) => genTypeKey(typeArg));
                 typeKeyArr.push(childTypeArgs.join(', '));
             }
             typeKeyArr.push('>');
@@ -63,6 +74,7 @@ function genConstructor(typeKey, definition) {
         if (
             typeKind === 'generic'
         ) {
+            // List和Map属于特殊范型
             if (
                 typeNamespace === 'nasl.collection'
                 && ['List', 'Map'].includes(typeName)
@@ -162,9 +174,22 @@ export function isInstanceOf(variable, typeKey) {
     const typeConstructor = typeMap[typeKey];
     const typeDefinition = typeDefinitionMap[typeKey];
     const varStr = Object.prototype.toString.call(variable);
-    const { typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
+    const { concept, typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
     const isPrimitive = isDefPrimitive(typeKey);
-    if (isPrimitive) { // 基础类型
+    if (concept === 'Enum') { // 枚举
+        const { enumItems } = typeDefinition;
+        if (Array.isArray(enumItems)) {
+            if (varStr === '[object String]') {
+                // 当前值在枚举中存在
+                const enumItemIndex = enumItems.findIndex((enumItem) => variable === enumItem.value);
+                return enumItemIndex !== -1;
+            } else if (varStr === '[object Array]') {
+                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, genTypeKey(typeDefinition)));
+                // 当前枚举数组与定义完全匹配
+                return enumItemIndex === -1;
+            }
+        }
+    } else if (isPrimitive) { // 基础类型
         if (varStr === '[object String]') {
             const actualStrType = judgeStrType(variable);
             if (actualStrType) {
@@ -187,7 +212,11 @@ export function isInstanceOf(variable, typeKey) {
         } else if (varStr === '[object Boolean]' && typeKey === 'nasl.core.Boolean') {
             return true;
         }
-    } else if (typeKind === 'generic' && typeNamespace === 'nasl.collection' && ['List', 'Map'].includes(typeName)) { // 范型
+    } else if (
+        typeKind === 'generic'
+        && typeNamespace === 'nasl.collection'
+        && ['List', 'Map'].includes(typeName)
+    ) { // 特殊范型List/Map
         let keyChecked = true;
         // 期望的值的类型
         const valueTypeArg = typeName === 'List' ? typeArguments?.[0] : typeArguments?.[1];
@@ -202,7 +231,7 @@ export function isInstanceOf(variable, typeKey) {
                 ].includes(key)) {
                     continue;
                 }
-                if (!isInstanceOf(key, keyTypeArg)) {
+                if (!isInstanceOf(key, genTypeKey(keyTypeArg))) {
                     keyChecked = false;
                 }
             }
@@ -243,7 +272,7 @@ export function isInstanceOf(variable, typeKey) {
                             }
                             return checked;
                         } else {
-                            const { __valueInstance, __valueTypeAnnotation } = variable;
+                            const { __valueInstance, __valueTypeAnnotation } = variable || {};
                             if (!__valueInstance && __valueTypeAnnotation) {
                                 return __valueTypeAnnotation.typeKind === expectedItemTypeAnnotation.typeKind
                                     && __valueTypeAnnotation.typeNamespace === expectedItemTypeAnnotation.typeNamespace
@@ -258,20 +287,10 @@ export function isInstanceOf(variable, typeKey) {
             }
             return expectedItemTypeAnnotationIndex !== -1;
         }
-    } else if (typeKind === 'reference' && typeNamespace === 'app.enums' && typeDefinition) { // 枚举
-        const { enumItems } = typeDefinition;
-        if (Array.isArray(enumItems)) {
-            if (varStr === '[object String]') {
-                // 当前值在枚举中存在
-                const enumItemIndex = enumItems.findIndex((enumItem) => variable === enumItem.value);
-                return enumItemIndex !== -1;
-            } else if (varStr === '[object Array]') {
-                const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, genTypeKey(typeDefinition)));
-                // 当前枚举数组与定义完全匹配
-                return enumItemIndex === -1;
-            }
-        }
-    } else if (typeConstructor && variable instanceof typeConstructor) {
+    } else if (
+        typeConstructor
+        && variable instanceof typeConstructor
+    ) {
         return true;
     }
     return false;
@@ -309,8 +328,9 @@ const isTypeMatch = (typeKey, value) => {
     const isPrimitive = isDefPrimitive(typeKey); // 类型字符串
     const typeAnnotation = typeDefinitionMap[typeKey];
     const isValuePrimitive = isValPrimitive(value); // 类型字符串
-    let isMatch = isPrimitive === isValuePrimitive;
     const typeStr = Object.prototype.toString.call(value);
+    const { concept, typeKind, typeNamespace, typeName } = typeAnnotation || {};
+    let isMatch = (isPrimitive === isValuePrimitive) || (concept === 'Enum' && typeStr === '[object String]');
     // 大类型匹配的基础上继续深入判断
     if (isMatch) {
         if (isPrimitive) {
@@ -335,7 +355,6 @@ const isTypeMatch = (typeKey, value) => {
                 isMatch = false;
             }
         } else {
-            const { typeKind, typeNamespace, typeName } = typeAnnotation || {};
             const isArray = typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List';
             const isValueArray = typeStr === '[object Array]';
             if (isArray !== isValueArray) {
@@ -359,16 +378,23 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
     if (parentLevel !== undefined) {
         level = parentLevel + 1;
     }
-    let parsedValue = defaultValue;
-    if (!(
-        [
-            'nasl.core.String', 'nasl.core.Text', 'nasl.core.Email',
-        ].includes(typeKey)
-    )) {
+    const defaultValueType = Object.prototype.toString.call(defaultValue);
+    // 设置成null，才能同步给后端清除该值，但是null对checkbox组件是一种特殊状态
+    let parsedValue = defaultValue ?? undefined;
+    const typeDefinition = typeDefinitionMap[typeKey];
+    const { concept, typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
+    if (
+        defaultValueType === '[object String]'
+        && (
+            ![
+                'nasl.core.String', 'nasl.core.Text', 'nasl.core.Email',
+            ].includes(typeKey)
+            && concept !== 'Enum'
+        )
+    ) {
         // 一些特殊情况，特殊处理成undefined
         // 1.defaultValue在nasl节点上错误得赋值给了空制符串
-        // 2.设置成null，才能同步给后端清楚该值，但是null对checkbox组件是一种特殊状态
-        if (['', null].includes(defaultValue)) {
+        if ([''].includes(defaultValue)) {
             parsedValue = undefined;
         } else {
             parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
@@ -379,9 +405,11 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
     }
     const isTypeMatched = parsedValue === undefined || isTypeMatch(typeKey, parsedValue);
     if (isTypeMatched) {
-        const typeDefinition = typeDefinitionMap[typeKey];
-        const { typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
-        if (typeKind === 'generic' && typeNamespace === 'nasl.collection') { // 范型
+        if (
+            typeKind === 'generic'
+            && typeNamespace === 'nasl.collection'
+            && ['List', 'Map'].includes(typeName)
+        ) { // 特殊范型List/Map
             let initVal = (typeName === 'List' ? [] : {});
             if (Array.isArray(typeArguments) && typeArguments.length > 0) {
                 const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
@@ -402,9 +430,11 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         }
         if (typeKey) {
             const TypeConstructor = typeMap[typeKey];
-            // union 不使用构造函数初始化
-            // && typeKind !== 'union' && (typeKind !== 'reference' || typeNamespace !== 'app.enums')
-            if (TypeConstructor) {
+            if (
+                TypeConstructor
+                && !['primitive', 'union'].includes(typeKind)
+                && concept !== 'Enum'
+            ) {
                 const instance = new TypeConstructor({
                     defaultValue: parsedValue,
                     level,
