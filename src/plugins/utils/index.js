@@ -32,30 +32,34 @@ function toValue(date, converter) {
 
 export const utils = {
     Vue: undefined,
-    Enum(enumName, value) {
-        if (arguments.length === 0)
-            return '';
-        else if (arguments.length === 1)
-            return enumsMap[enumName];
-        else if (enumsMap[enumName])
+    EnumValueToText(value, enumTypeAnnotation) {
+        const { typeName, typeNamespace } = enumTypeAnnotation || {};
+        if (typeName) {
+            let enumName = typeName;
+            if (typeNamespace?.startsWith('extensions')) {
+                enumName = typeNamespace + '.' + enumName;
+            }
             return enumsMap[enumName](value);
-        else
-            return '';
+        }
+        return '';
     },
-    EnumValue(enumName, value) {
-        return value;
-    },
-    EnumLabel(enumName, value) {
-        if (arguments.length === 0)
-            return '';
-        else if (arguments.length === 1)
-            return enumsMap[enumName];
-        else if (enumsMap[enumName])
+    StringToEnumValue(value, enumTypeAnnotation) {
+        const { typeName, typeNamespace } = enumTypeAnnotation || {};
+        if (typeName) {
+            let enumName = typeName;
+            if (typeNamespace?.startsWith('extensions')) {
+                enumName = typeNamespace + '.' + enumName;
+            }
             return enumsMap[enumName](value);
-        else
-            return '';
+        }
+        return null;
     },
-    EnumList(enumName, value) {
+    EnumToList(enumTypeAnnotation) {
+        const { typeName, typeNamespace } = enumTypeAnnotation || {};
+        let enumName = typeName;
+        if (typeName && typeNamespace?.startsWith('extensions')) {
+            enumName = typeNamespace + '.' + enumName;
+        }
         const enumeration = enumsMap[enumName];
         if (!enumeration)
             return [];
