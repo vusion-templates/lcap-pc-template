@@ -298,8 +298,8 @@ export const genInitData = (typeAnnotation, parentLevel) => {
     if (parentLevel !== undefined) {
         level = parentLevel + 1;
     }
-    const defaultValueType = Object.prototype.toString.call(defaultValue);
     const { typeKind, typeNamespace, typeName, typeArguments, defaultValue } = typeAnnotation || {};
+    const defaultValueType = Object.prototype.toString.call(defaultValue);
     let parsedValue = defaultValue;
     if (
         defaultValueType === '[object String]'
