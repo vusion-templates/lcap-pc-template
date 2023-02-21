@@ -50,7 +50,10 @@ export const utils = {
             if (typeNamespace?.startsWith('extensions')) {
                 enumName = typeNamespace + '.' + enumName;
             }
-            return enumsMap[enumName](value);
+            if (enumsMap[enumName] && enumsMap[enumName].hasOwnProperty(value)) {
+                return value;
+            }
+            return null;
         }
         return null;
     },
