@@ -113,10 +113,14 @@ function genConstructor(typeKey, definition) {
                     defaultValue,
                 } = property || {};
                 const defaultValueType = Object.prototype.toString.call(defaultValue);
-                const { concept, typeKind } = typeAnnotation || {};
                 const typeKey = genSortedTypeKey(typeAnnotation);
+                const typeDefinition = typeDefinitionMap[typeKey];
+                const { concept } = typeDefinition || {};
+                let parsedValue = defaultValue;
                 // 设置成null，才能同步给后端清除该值，但是null对checkbox组件是一种特殊状态
-                let parsedValue = defaultValue ?? undefined;
+                if (typeKey === 'nasl.core.Boolean') {
+                    parsedValue = defaultValue ?? undefined;
+                }
                 if (
                     defaultValueType === '[object String]'
                     && (
@@ -358,8 +362,11 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         level = parentLevel + 1;
     }
     const defaultValueType = Object.prototype.toString.call(defaultValue);
+    let parsedValue = defaultValue;
     // 设置成null，才能同步给后端清除该值，但是null对checkbox组件是一种特殊状态
-    let parsedValue = defaultValue ?? undefined;
+    if (typeKey === 'nasl.core.Boolean') {
+        parsedValue = defaultValue ?? undefined;
+    }
     const typeDefinition = typeDefinitionMap[typeKey];
     const { concept, typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
     if (
