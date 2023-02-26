@@ -77,7 +77,7 @@ function genConstructor(typeKey, definition) {
             typeName && typeArr.push(typeName);
             const genericTypeKey = typeArr.join('.');
             // 范型定义
-            const genericDefinition = typeMap[genericTypeKey];
+            const genericDefinition = typeDefinitionMap[genericTypeKey];
             if (genericDefinition) {
                 const { typeParams, properties } = genericDefinition || {};
                 if (Array.isArray(properties)) {
