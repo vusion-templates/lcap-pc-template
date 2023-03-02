@@ -37,8 +37,20 @@ const httpError = {
             throw err;
         }
         let handle;
-        if (!err.response || err.code === undefined) {
+        if (!err.response) {
             handle = errHandles.remoteError;
+        } else if (err.code === undefined) {
+            if (err.response) {
+                const code = err.response.data && (err.response.data.code || err.response.data.Code);
+                if (typeof code === 'number') {
+                    const status = err.response.status;
+                    handle = errHandles[code] || errHandles[status] || errHandles.remoteError;
+                } else {
+                    handle = errHandles.remoteError;
+                }
+            } else {
+                handle = errHandles.remoteError;
+            }
         } else {
             const code = err.response && err.response.status || err.code;
             handle = errHandles[code];
