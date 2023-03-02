@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.4.26",
+  "version": "0.4.27",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -20,8 +20,9 @@
     "build:designer": "npm run check && cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js",
     "deploy:dev": "lcap deploy ./public --platform http://defaulttenant.lcap.dev.env.com",
     "deploy:test": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.test.com",
-    "deploy:pre": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.dri.com",
-    "deploy:online": "vusion deploy ./public",
+    "deploy:pre": "lcap deploy ./public --platform http://defaulttenant.lcap.hadri.163yun.com",
+    "deploy:online": "lcap deploy ./public --platform http://netease-template.lcap.163yun.com",
+    "deploy:online-saas": "lcap deploy ./public --platform http://defaulttenant.lcap.qz.163yun.com",
     "postinstall": "node node_modules/vusion-install/index.js",
     "prepublishOnly": "cp .gitignore _.gitignore && npm run build:designer && npm run deploy:online",
     "postpublish": "rm _.gitignore"
@@ -91,7 +92,6 @@
   "dependencies": {
     "@vusion/utils": "^0.4.10",
     "axios": "^0.19.0",
-    "babel-generator": "^6.26.1",
     "babel-polyfill": "^6.26.0",
     "cloud-ui.vusion": "^0.14.1",
     "crypto-js": "^4.1.1",

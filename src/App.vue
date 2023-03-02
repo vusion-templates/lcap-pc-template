@@ -19,7 +19,7 @@ export default {
             return neteaseStrList.some((it) => location.host.includes(it));
         },
         isFreeSass() {
-            return +window.appInfo?.tenantType === 1;
+            return +window.appInfo?.tenantType === 1 && +window.appInfo?.tenantLevel === 0;
         },
     },
     async mounted() {

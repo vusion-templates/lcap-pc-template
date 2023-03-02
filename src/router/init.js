@@ -6,7 +6,7 @@ export function initRouter(routes) {
 
     return new VueRouter({
         mode: 'history',
-        base: process.env.BASE_URL,
+        base: window.ICESTARK?.basename || process.env.BASE_URL,
         routes,
     });
 }

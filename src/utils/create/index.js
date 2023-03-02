@@ -6,6 +6,7 @@ import cookie from '@/utils/cookie';
 import addConfigs from './add.configs';
 import { getFilenameFromContentDispositionHeader } from './tools';
 import paramsSerializer from './paramsSerializer';
+import { formatMicroFrontUrl } from '@/plugins/router/microFrontUrl';
 
 const formatContentType = function (contentType, data) {
     const map = {
@@ -72,7 +73,9 @@ function download(url) {
 
 const requester = function (requestInfo) {
     const { url, config = {} } = requestInfo;
-    const { path, method, body = {}, headers = {}, query = {} } = url;
+    const { method, body = {}, headers = {}, query = {} } = url;
+    const path = formatMicroFrontUrl(url.path);
+
     const baseURL = config.baseURL ? config.baseURL : '';
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
     if (!headers.Authorization && cookie.get('authorization')) {
