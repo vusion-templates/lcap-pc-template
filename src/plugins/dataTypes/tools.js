@@ -77,7 +77,7 @@ function genConstructor(typeKey, definition) {
             typeName && typeArr.push(typeName);
             const genericTypeKey = typeArr.join('.');
             // 范型定义
-            const genericDefinition = typeMap[genericTypeKey];
+            const genericDefinition = typeDefinitionMap[genericTypeKey];
             if (genericDefinition) {
                 const { typeParams, properties } = genericDefinition || {};
                 if (Array.isArray(properties)) {
@@ -113,10 +113,14 @@ function genConstructor(typeKey, definition) {
                     defaultValue,
                 } = property || {};
                 const defaultValueType = Object.prototype.toString.call(defaultValue);
-                const { concept, typeKind } = typeAnnotation || {};
                 const typeKey = genSortedTypeKey(typeAnnotation);
+                const typeDefinition = typeDefinitionMap[typeKey];
+                const { concept } = typeDefinition || {};
+                let parsedValue = defaultValue;
                 // 设置成null，才能同步给后端清除该值，但是null对checkbox组件是一种特殊状态
-                let parsedValue = defaultValue ?? undefined;
+                if (typeKey === 'nasl.core.Boolean') {
+                    parsedValue = defaultValue ?? undefined;
+                }
                 if (
                     defaultValueType === '[object String]'
                     && (
@@ -358,8 +362,11 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         level = parentLevel + 1;
     }
     const defaultValueType = Object.prototype.toString.call(defaultValue);
+    let parsedValue = defaultValue;
     // 设置成null，才能同步给后端清除该值，但是null对checkbox组件是一种特殊状态
-    let parsedValue = defaultValue ?? undefined;
+    if (typeKey === 'nasl.core.Boolean') {
+        parsedValue = defaultValue ?? undefined;
+    }
     const typeDefinition = typeDefinitionMap[typeKey];
     const { concept, typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
     if (
@@ -377,7 +384,7 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         if ([''].includes(defaultValue)) {
             parsedValue = undefined;
         } else {
-            parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+            parsedValue = tryJSONParse(defaultValue) !== undefined ? tryJSONParse(defaultValue) : defaultValue;
         }
     }
     if (level > 2 && parsedValue === undefined) {
