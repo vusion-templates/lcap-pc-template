@@ -10,13 +10,31 @@ const getBaseHeaders = () => ({
 
 let userInfoPromise = null;
 let userResourcesPromise = null;
+const userInfo = {
+    UserName: cookie.get('zzdUserName') || '',
+    UserId: cookie.get('zzdUserId') || '',
+};
 
+const $global = Vue.prototype.$global = Vue.prototype.$global || {};
+$global.userInfo = userInfo.UserId ? userInfo : $global.userInfo;
 export default {
     _map: undefined,
+    setUserInfoFromCookie() {
+        const userInfo = {
+            UserName: cookie.get('zzdUserName') || '',
+            UserId: cookie.get('zzdUserId') || '',
+        };
+        const $global = Vue.prototype.$global = Vue.prototype.$global || {};
+        $global.userInfo = userInfo.UserId ? userInfo : $global.userInfo;
+    },
     getUserInfo() {
         if (!userInfoPromise) {
-            if (window.appInfo.hasUserCenter) {
-                userInfoPromise = Promise.resolve({});
+            if (window.appInfo.hasUserCenter || window.appInfo.envConfig.name === 'zhezhengding') {
+                const userInfo = {
+                    UserName: cookie.get('zzdUserName') || '',
+                    UserId: cookie.get('zzdUserId') || '',
+                };
+                userInfoPromise = Promise.resolve({ Data: userInfo });
             } else {
                 userInfoPromise = authService.GetUser({
                     headers: getBaseHeaders(),
@@ -27,23 +45,38 @@ export default {
             }
             userInfoPromise = userInfoPromise.then((result) => {
                 const userInfo = result.Data;
-                const $global = Vue.prototype.$global || {};
-                $global.userInfo = userInfo;
+                const $global = Vue.prototype.$global = Vue.prototype.$global || {};
+
+                $global.userInfo = userInfo.UserId ? userInfo : $global.userInfo;
                 return userInfo;
             }).catch((e) => {
                 userInfoPromise = null;
                 throw e;
             });
         }
+        const userInfo = {
+            UserName: cookie.get('zzdUserName') || '',
+            UserId: cookie.get('zzdUserId') || '',
+        };
+        const $global = Vue.prototype.$global = Vue.prototype.$global || {};
+
+        $global.userInfo = userInfo.UserId ? userInfo : $global.userInfo;
         return userInfoPromise;
     },
     getUserResources(DomainName) {
         if (!userResourcesPromise) {
             if (window.appInfo.hasAuth) {
+                let userId;
+                if (Vue.prototype.$global?.userInfo?.UserId) {
+                    userId = Vue.prototype.$global.userInfo.UserId;
+                } else {
+                    userId = cookie.get('zzdUserId') || Vue.prototype.$global.userInfo.UserId;
+                }
+                this.setUserInfoFromCookie();
                 userResourcesPromise = lowauthService.GetUserResources({
                     headers: getBaseHeaders(),
                     query: {
-                        userId: Vue.prototype.$global.userInfo.UserId,
+                        userId,
                     },
                 }).then((result) => {
                     const resources = result.filter((resource) => resource.resourceType === 'ui');
