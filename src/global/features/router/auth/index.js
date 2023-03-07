@@ -29,7 +29,13 @@ export default {
     },
     getUserInfo() {
         if (!userInfoPromise) {
-            if (window.appInfo.hasUserCenter || window.appInfo.envConfig.name === 'zhezhengding') {
+            // let isZZD = window.appInfo.envConfig.name === 'zhezhengding'
+            let isZZD = false;
+            if (window.appInfo?.extendedConfig && JSON.parse(window.appInfo.extendedConfig)) {
+                isZZD = JSON.parse(window.appInfo.extendedConfig)?.amapKey === 'zhezhengding';
+            }
+
+            if (window.appInfo.hasUserCenter || isZZD) {
                 const userInfo = {
                     UserName: cookie.get('zzdUserName') || '',
                     UserId: cookie.get('zzdUserId') || '',
