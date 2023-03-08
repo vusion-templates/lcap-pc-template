@@ -37,7 +37,7 @@ const httpError = {
             throw err;
         }
         let handle;
-        if (!err.response || err.code === undefined) {
+        if (err.response?.status === undefined && err.code === undefined) {
             handle = errHandles.remoteError;
         } else {
             const code = err.response && err.response.status || err.code;
