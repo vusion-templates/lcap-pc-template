@@ -312,7 +312,7 @@ const isTypeMatch = (typeKey, value) => {
     const typeAnnotation = typeDefinitionMap[typeKey];
     const isValuePrimitive = isValPrimitive(value); // 类型字符串
     const typeStr = Object.prototype.toString.call(value);
-    const { concept, typeKind, typeNamespace, typeName } = typeAnnotation || {};
+    const { concept } = typeAnnotation || {};
     let isMatch = (isPrimitive === isValuePrimitive) || (concept === 'Enum' && typeStr === '[object String]');
     // 大类型匹配的基础上继续深入判断
     if (isMatch) {
@@ -335,12 +335,6 @@ const isTypeMatch = (typeKey, value) => {
                     'nasl.core.Email',
                 ].includes(typeKey) && typeStr !== '[object String]'
             ) {
-                isMatch = false;
-            }
-        } else {
-            const isArray = typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List';
-            const isValueArray = typeStr === '[object Array]';
-            if (isArray !== isValueArray) {
                 isMatch = false;
             }
         }
