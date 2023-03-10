@@ -381,7 +381,7 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
             parsedValue = tryJSONParse(defaultValue) !== undefined ? tryJSONParse(defaultValue) : defaultValue;
         }
     }
-    if (level > 2 && parsedValue === undefined) {
+    if (level > 2 && [undefined, null].includes(parsedValue)) {
         return;
     }
     const isTypeMatched = parsedValue === undefined || isTypeMatch(typeKey, parsedValue);
