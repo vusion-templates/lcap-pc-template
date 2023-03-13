@@ -401,8 +401,11 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
                     const sortedTypeKey = genSortedTypeKey(valueTypeAnnotation);
                     if (typeName === 'List' && Array.isArray(parsedValue)) {
                         initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
-                    } else {
-                        initVal = genInitData(sortedTypeKey, parsedValue, level);
+                    } else if (typeName === 'Map') {
+                        for (const key in parsedValue) {
+                            const val = parsedValue[key];
+                            initVal[key] = genInitData(sortedTypeKey, val, level);
+                        }
                     }
                 }
             }
