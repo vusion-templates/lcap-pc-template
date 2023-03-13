@@ -425,3 +425,8 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         return parsedValue;
     }
 };
+
+// 变量转字符串
+export const toString = (variable, typeKey) => {
+    console.log(variable, typeKey);
+};
