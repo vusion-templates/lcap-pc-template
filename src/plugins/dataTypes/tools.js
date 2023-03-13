@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 function tryJSONParse(str) {
     let result;
 
@@ -426,7 +428,103 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
     }
 };
 
-// 变量转字符串
-export const toString = (variable, typeKey) => {
-    console.log(variable, typeKey);
+/**
+ * 生成缩进
+ * @param tabSize 缩进次数
+ * @returns
+ */
+function indent(tabSize) {
+    return ' '.repeat(4 * tabSize);
+}
+
+/**
+ * 变量转字符串
+ * @param {*} variable
+ * @param {*} typeKey
+ * @param {*} tabSize
+ * @returns
+ */
+export const toString = (variable, typeKey, tabSize = 0) => {
+    const isPrimitive = isDefPrimitive(typeKey);
+    // null 或 undefined 返回 "（空）"
+    if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') {
+        return '（空）';
+    } else if (isPrimitive) {
+        if ([
+            'nasl.core.Boolean',
+            'nasl.core.Integer',
+            'nasl.core.Long',
+            'nasl.core.Email',
+        ].includes(typeKey)) {
+            return variable;
+        } else if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) { // 科学计数法
+            return variable.toExponential();
+        } else if (['nasl.core.String', 'nasl.core.Text'].includes(typeKey)) { // 超过100个字符加...省略
+            const maxLen = 100;
+            const moreThanMax = variable.length > maxLen;
+            if (moreThanMax) {
+                return variable.slice(0, maxLen) + '...';
+            } else {
+                return variable;
+            }
+        } else if (typeKey === 'nasl.core.Date') {
+            return format(new Date(variable), 'yyyy-MM-dd');
+        } else if (typeKey === 'nasl.core.Time') {
+            if (/^\d{2}:\d{2}:\d{2}$/.test(variable)) // 纯时间 12:30:00
+                return format(new Date('2022-01-01 ' + variable), 'HH:mm:ss');
+            else
+                return format(new Date(variable), 'HH:mm:ss');
+        } else if (typeKey === 'nasl.core.DateTime') {
+            return format(new Date(variable), 'yyyy-MM-dd HH:mm:ss');
+        }
+    } else {
+        const typeDefinition = typeDefinitionMap[typeKey];
+        const { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties } = typeDefinition || {};
+        if (['TypeAnnotation', 'Structure', 'Entity'].includes(concept)) {
+            if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
+                const maxLen = 10;
+                if (typeName === 'List') {
+                    const moreThanMax = variable.length > maxLen;
+                    const arr = moreThanMax ? variable : variable.slice(0, maxLen);
+                    const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
+                    const arrStr = arr.map((varItem) => toString(varItem, itemTypeKey, tabSize)).join(', ');
+                    return moreThanMax ? `${arrStr}, ...` : arrStr;
+                } else if (typeName === 'Map') {
+                    const keys = Object.keys(variable);
+                    const moreThanMax = keys.length > maxLen;
+                    const arr = moreThanMax ? keys : keys.slice(0, maxLen);
+                    const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
+                    const arrStr = arr.map((key) => `${key} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join('\n');
+                    return moreThanMax ? `${arrStr}\n...` : arrStr;
+                }
+            } else if (tabSize > 0) {
+                if (typeKind === 'anonymousStructure') {
+                    return '{...}';
+                } else {
+                    return name;
+                }
+            } else {
+                let code = `${indent(tabSize)}`;
+                if (name) {
+                    code += `${name} `;
+                }
+                code += '{\n';
+                if (Array.isArray(properties) && properties.length) {
+                    code += properties.map((property) => {
+                        const { name: propName, typeAnnotation: propTypeAnnotation } = property || {};
+                        return `${indent(tabSize + 1)}${propName}: ${toString(variable[propName], genSortedTypeKey(propTypeAnnotation), tabSize + 1)}`;
+                    }).join(',\n');
+                }
+                code += `\n${indent(tabSize)}}`;
+                return code;
+            }
+        }
+        console.log(typeDefinition);
+    }
+};
+
+export const fromString = (variable, typeKey) => {
+    const typeDefinition = typeDefinitionMap[typeKey];
+    const isPrimitive = isDefPrimitive(typeKey, isPrimitive);
+    console.log(variable, typeDefinition);
 };

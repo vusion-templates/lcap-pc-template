@@ -15,7 +15,7 @@ import {
 } from 'date-fns';
 import Vue from 'vue';
 
-import { toString } from '../dataTypes/tools';
+import { toString, fromString } from '../dataTypes/tools';
 
 let enumsMap = {};
 
@@ -524,6 +524,9 @@ export const utils = {
     },
     ToString(value, typeKey) {
         return toString(value, typeKey);
+    },
+    FromString(value, typeKey) {
+        return fromString(value, typeKey);
     },
     /**
      * 数字格式化
