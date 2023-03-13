@@ -298,6 +298,37 @@ const isDefPrimitive = (typeKey) => [
     'nasl.core.Email',
 ].includes(typeKey);
 
+// 类型定义是否属于字符串大类
+const isDefString = (typeKey) => [
+    'nasl.core.String',
+    'nasl.core.Text',
+    'nasl.core.Binary',
+    'nasl.core.Date',
+    'nasl.core.Time',
+    'nasl.core.DateTime',
+    'nasl.core.Email',
+].includes(typeKey);
+
+// 类型定义是否属于数字大类
+const isDefNumber = (typeKey) => [
+    'nasl.core.Integer',
+    'nasl.core.Long',
+    'nasl.core.Double',
+    'nasl.core.Decimal',
+].includes(typeKey);
+
+// 类型定义是否属于数组
+const isDefList = (typeDefinition) => {
+    const { typeKind, typeNamespace, typeName } = typeDefinition || {};
+    return typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List';
+};
+
+// 类型定义是否属于Map
+const isDefMap = (typeDefinition) => {
+    const { typeKind, typeNamespace, typeName } = typeDefinition || {};
+    return typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'Map';
+};
+
 // 值是否属于基础类型
 // 数字（number）、字符串（string）、布尔值（boolean）、undefined、null、对象（Object）
 const isValPrimitive = (value) => {
@@ -321,22 +352,9 @@ const isTypeMatch = (typeKey, value) => {
     if (isMatch) {
         if (isPrimitive) {
             if (
-                typeKey === 'Boolean' && typeStr !== '[object Boolean]'
-                || [
-                    'nasl.core.Integer',
-                    'nasl.core.Long',
-                    'nasl.core.Double',
-                    'nasl.core.Decimal',
-                ].includes(typeKey) && typeStr !== '[object Number]'
-                || [
-                    'nasl.core.String',
-                    'nasl.core.Text',
-                    'nasl.core.Binary',
-                    'nasl.core.Date',
-                    'nasl.core.Time',
-                    'nasl.core.DateTime',
-                    'nasl.core.Email',
-                ].includes(typeKey) && typeStr !== '[object String]'
+                typeKey === 'nasl.core.Boolean' && typeStr !== '[object Boolean]'
+                || isDefNumber(typeKey) && typeStr !== '[object Number]'
+                || isDefString(typeKey) && typeStr !== '[object String]'
             ) {
                 isMatch = false;
             }
@@ -448,82 +466,108 @@ function indent(tabSize) {
  * @returns
  */
 export const toString = (variable, typeKey, tabSize = 0) => {
+    let str = variable;
     const isPrimitive = isDefPrimitive(typeKey);
     // null 或 undefined 返回 "（空）"
-    if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') {
-        return '（空）';
-    } else if (isPrimitive) {
+    if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') { // 空
+        str = '（空）';
+    } else if (isPrimitive) { // 基础类型
         if ([
             'nasl.core.Boolean',
             'nasl.core.Integer',
             'nasl.core.Long',
             'nasl.core.Email',
         ].includes(typeKey)) {
-            return variable;
+            // 转字符串
+            str = '' + variable;
         } else if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) { // 科学计数法
             return variable.toExponential();
-        } else if (['nasl.core.String', 'nasl.core.Text'].includes(typeKey)) { // 超过100个字符加...省略
-            const maxLen = 100;
-            const moreThanMax = variable.length > maxLen;
-            if (moreThanMax) {
-                return variable.slice(0, maxLen) + '...';
-            } else {
-                return variable;
-            }
         } else if (typeKey === 'nasl.core.Date') {
-            return format(new Date(variable), 'yyyy-MM-dd');
+            str = format(new Date(variable), 'yyyy-MM-dd');
         } else if (typeKey === 'nasl.core.Time') {
             if (/^\d{2}:\d{2}:\d{2}$/.test(variable)) // 纯时间 12:30:00
-                return format(new Date('2022-01-01 ' + variable), 'HH:mm:ss');
+                str = format(new Date('2022-01-01 ' + variable), 'HH:mm:ss');
             else
-                return format(new Date(variable), 'HH:mm:ss');
+                str = format(new Date(variable), 'HH:mm:ss');
         } else if (typeKey === 'nasl.core.DateTime') {
-            return format(new Date(variable), 'yyyy-MM-dd HH:mm:ss');
+            str = format(new Date(variable), 'yyyy-MM-dd HH:mm:ss');
+        }
+        if (tabSize > 0) {
+            if (['nasl.core.String', 'nasl.core.Text'].includes(typeKey)) {
+                const maxLen = 100;
+                const moreThanMax = variable.length > maxLen;
+                if (moreThanMax) {
+                    str = variable.slice(0, maxLen) + '...';
+                }
+            }
+            // 是否属于字符串大类
+            if (isDefString(typeKey)) {
+                str = `"${str}"`;
+            }
         }
     } else {
         const typeDefinition = typeDefinitionMap[typeKey];
         const { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties } = typeDefinition || {};
-        if (['TypeAnnotation', 'Structure', 'Entity'].includes(concept)) {
-            if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
-                const maxLen = 10;
-                if (typeName === 'List') {
-                    const moreThanMax = variable.length > maxLen;
-                    const arr = moreThanMax ? variable : variable.slice(0, maxLen);
-                    const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
-                    const arrStr = arr.map((varItem) => toString(varItem, itemTypeKey, tabSize)).join(', ');
-                    return moreThanMax ? `${arrStr}, ...` : arrStr;
-                } else if (typeName === 'Map') {
-                    const keys = Object.keys(variable);
-                    const moreThanMax = keys.length > maxLen;
-                    const arr = moreThanMax ? keys : keys.slice(0, maxLen);
-                    const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
-                    const arrStr = arr.map((key) => `${key} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join('\n');
-                    return moreThanMax ? `${arrStr}\n...` : arrStr;
+        if (typeKind === 'union') {
+            if (Array.isArray(typeArguments) && typeArguments.length) {
+                const typeArg = typeArguments.find((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
+                if (typeArg) {
+                    str = toString(variable, genSortedTypeKey(typeArg), tabSize);
                 }
-            } else if (tabSize > 0) {
-                if (typeKind === 'anonymousStructure') {
-                    return '{...}';
+            }
+        } else if (['TypeAnnotation', 'Structure', 'Entity'].includes(concept)) { // 复合类型
+            if (tabSize > 0) {
+                str = '';
+                if (isDefList(typeDefinition)) {
+                    str += '[...]';
+                } else if (isDefMap(typeDefinition)) {
+                    str += '[... -> ...]';
                 } else {
-                    return name;
+                    if (name) {
+                        str += `${name} `;
+                    }
+                    str += '{...}';
                 }
             } else {
-                let code = `${indent(tabSize)}`;
-                if (name) {
-                    code += `${name} `;
+                if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
+                    const maxLen = 10;
+                    if (typeName === 'List') {
+                        const moreThanMax = variable.length > maxLen;
+                        const arr = moreThanMax ? variable : variable.slice(0, maxLen);
+                        const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
+                        const arrStr = arr.map((varItem) => toString(varItem, itemTypeKey, tabSize + 1)).join(', ');
+                        str = moreThanMax ? `${arrStr}, ...` : arrStr;
+                    } else if (typeName === 'Map') {
+                        const keys = Object.keys(variable);
+                        const moreThanMax = keys.length > maxLen;
+                        const arr = moreThanMax ? keys : keys.slice(0, maxLen);
+                        const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
+                        const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
+                        const arrStr = arr.map((key) => `${toString(key, keyTypeKey, tabSize + 1)} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join('\n');
+                        str = moreThanMax ? `${arrStr}\n...` : arrStr;
+                    }
+                } else {
+                    let code = `${indent(tabSize)}`;
+                    if (name) {
+                        code += `${name} `;
+                    }
+                    code += '{\n';
+                    if (Array.isArray(properties) && properties.length) {
+                        code += properties.map((property) => {
+                            const { name: propName, typeAnnotation: propTypeAnnotation } = property || {};
+                            const propVal = variable[propName];
+                            const propTypeKey = genSortedTypeKey(propTypeAnnotation);
+                            const propValStr = toString(propVal, propTypeKey, tabSize + 1);
+                            return `${indent(tabSize + 1)}${propName}: ${propValStr}`;
+                        }).join(',\n');
+                    }
+                    code += `\n${indent(tabSize)}}`;
+                    str = code;
                 }
-                code += '{\n';
-                if (Array.isArray(properties) && properties.length) {
-                    code += properties.map((property) => {
-                        const { name: propName, typeAnnotation: propTypeAnnotation } = property || {};
-                        return `${indent(tabSize + 1)}${propName}: ${toString(variable[propName], genSortedTypeKey(propTypeAnnotation), tabSize + 1)}`;
-                    }).join(',\n');
-                }
-                code += `\n${indent(tabSize)}}`;
-                return code;
             }
         }
-        console.log(typeDefinition);
     }
+    return str;
 };
 
 export const fromString = (variable, typeKey) => {
