@@ -12,6 +12,7 @@ import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
 
 window.appVue = Vue;
+window.Vue = Vue;
 window.CloudUI = CloudUI;
 
 Vue.use(VueI18n);
