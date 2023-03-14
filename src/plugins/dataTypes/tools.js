@@ -472,17 +472,32 @@ export const toString = (variable, typeKey, tabSize = 0) => {
     if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') { // 空
         str = '（空）';
     } else if (isPrimitive) { // 基础类型
+        // 布尔和数字类型转字符串
         if ([
             'nasl.core.Boolean',
             'nasl.core.Integer',
             'nasl.core.Long',
-            'nasl.core.Email',
+            'nasl.core.Double',
+            'nasl.core.Decimal',
         ].includes(typeKey)) {
             // 转字符串
             str = '' + variable;
-        } else if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) { // 科学计数法
-            return variable.toExponential();
-        } else if (typeKey === 'nasl.core.Date') {
+        }
+        // >=8位有效数字时，按小e
+        if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) {
+            const varArr = str.split('.');
+            let count = 0;
+            varArr.forEach((varStr) => {
+                count += varStr.length;
+            });
+            const maxLen = 8;
+            if (count >= maxLen) {
+                // 去掉+是为了跟后端保持统一
+                str = variable.toExponential().replace('e+', 'e');
+            }
+        }
+        // 日期处理
+        if (typeKey === 'nasl.core.Date') {
             str = format(new Date(variable), 'yyyy-MM-dd');
         } else if (typeKey === 'nasl.core.Time') {
             if (/^\d{2}:\d{2}:\d{2}$/.test(variable)) // 纯时间 12:30:00
@@ -507,13 +522,18 @@ export const toString = (variable, typeKey, tabSize = 0) => {
         }
     } else {
         const typeDefinition = typeDefinitionMap[typeKey];
-        const { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties } = typeDefinition || {};
+        const { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties, enumItems } = typeDefinition || {};
         if (typeKind === 'union') {
             if (Array.isArray(typeArguments) && typeArguments.length) {
                 const typeArg = typeArguments.find((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
                 if (typeArg) {
                     str = toString(variable, genSortedTypeKey(typeArg), tabSize);
                 }
+            }
+        } else if (concept === 'Enum') {
+            if (Array.isArray(enumItems) && enumItems.length) {
+                const enumItem = enumItems.find((enumItem) => variable === enumItem.value);
+                str = enumItem?.label;
             }
         } else if (['TypeAnnotation', 'Structure', 'Entity'].includes(concept)) { // 复合类型
             if (tabSize > 0) {
