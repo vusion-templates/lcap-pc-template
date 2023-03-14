@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 function tryJSONParse(str) {
     let result;
@@ -590,8 +590,78 @@ export const toString = (variable, typeKey, tabSize = 0) => {
     return str;
 };
 
+// yyyy-MM-dd HH:mm:ss
+// yyyy/MM/dd HH:mm:ss
+// yyyy.MM.dd HH:mm:ss
+
+const DateReg = /(^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$)|(^[1-9]\d{3}\/(0[1-9]|1[0-2])\/(0[1-9]|[1-2][0-9]|3[0-1])$)|(^[1-9]\d{3}\.(0[1-9]|1[0-2])\.(0[1-9]|[1-2][0-9]|3[0-1])$)/;
+const TimeReg = /^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
+const DateTimeReg = /(^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$)|^[1-9]\d{3}\/(0[1-9]|1[0-2])\/(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$|^[1-9]\d{3}\.(0[1-9]|1[0-2])\.(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
+const FloatNumberReg = /^(-?\d+)(\.\d+)?$/;
+// (长)整型
+const IntegerReg = /^-?\d+$/;
+
+/**
+ * 判断字符串日期是否合法
+ * yyyy-MM-dd yyyy/MM/dd HH:mm:ss yyyy.MM.dd 3种格式
+ * @param {*} dateString
+ * @returns
+ */
+function isValidDate(dateString, reg) {
+    if (!reg.test(dateString)) {
+        return false;
+    }
+    // 验证日期是否真实存在
+    const date = new Date(dateString);
+    if (date.toString() === 'Invalid Date') {
+        return false;
+    }
+    let splitChar;
+    if (dateString.includes('-')) {
+        splitChar = '-';
+    } else if (dateString.includes('/')) {
+        splitChar = '/';
+    } else if (dateString.includes('.')) {
+        splitChar = '.';
+    }
+    const [year, month, day] = dateString.split(' ')?.[0]?.split(splitChar).map(Number);
+    if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
+        return false;
+    }
+    return true;
+}
+
 export const fromString = (variable, typeKey) => {
     const typeDefinition = typeDefinitionMap[typeKey];
     const isPrimitive = isDefPrimitive(typeKey, isPrimitive);
-    console.log(variable, typeDefinition);
+    const { typeName } = typeDefinition || {};
+    // 日期
+    if (typeName === 'DateTime' && isValidDate(variable, DateTimeReg)) {
+        const formatString = 'yyyy-MM-dd HH:mm:ss';
+        const localDate = parse(variable, formatString, new Date());
+        const utcDateString = format(localDate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", {
+            timeZone: 'UTC',
+        });
+        return utcDateString;
+    } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
+        return format(new Date(variable), 'yyyy-MM-dd');
+    } else if (typeName === 'Time' && TimeReg.test(variable)) {
+        return format(new Date(variable), 'HH:mm:ss');
+    }
+    // 浮点数
+    else if (['Decimal', 'Double'].includes(typeName) && FloatNumberReg.test(variable)) {
+        return parseFloat(+variable);
+    }
+    // 整数
+    else if (['Integer', 'Long'].includes(typeName) && IntegerReg.test(variable)) {
+        return +variable;
+    }
+    // 布尔
+    else if (typeName === 'Boolean') {
+        const lowerVar = variable.toLowerCase();
+        if (['true', 'false'].includes(lowerVar)) {
+            return JSON.parse(lowerVar);
+        }
+    }
+    return new Error(`${typeName}格式不正确`);
 };
