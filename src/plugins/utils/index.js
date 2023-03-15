@@ -15,6 +15,8 @@ import {
 } from 'date-fns';
 import Vue from 'vue';
 
+import { toString, fromString } from '../dataTypes/tools';
+
 let enumsMap = {};
 
 function toValue(date, converter) {
@@ -518,8 +520,13 @@ export const utils = {
             else if (typeAnnotation.typeName === 'Boolean') // 布尔值
                 return !!value;
         }
-
         return value;
+    },
+    ToString(value, typeKey) {
+        return toString(value, typeKey);
+    },
+    FromString(value, typeKey) {
+        return fromString(value, typeKey);
     },
     /**
      * 数字格式化
@@ -682,6 +689,10 @@ export const utils = {
      */
     CreateListPage(list, total) {
         return { list, total };
+    },
+    // 输出逻辑，此处的console.log是功能，不要删！
+    ConsoleLog(val, typeKey) {
+        console.log(this.ToString(val, typeKey));
     },
 };
 

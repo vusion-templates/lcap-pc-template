@@ -1,3 +1,5 @@
+import { format, formatISO } from 'date-fns';
+
 function tryJSONParse(str) {
     let result;
 
@@ -148,13 +150,14 @@ function genConstructor(typeKey, definition) {
                 if (needGenInitFromSchema) {
                     code += `Vue.prototype.$genInitFromSchema('${sortedTypeKey}',`;
                 }
-                code += `(defaultValue && defaultValue.${propertyName}) ?? ${parsedValue}`;
+                code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined) ? ${parsedValue} : defaultValue && defaultValue.${propertyName}`;
                 if (needGenInitFromSchema) {
                     code += `, level)`;
                 }
                 code += `;\n`;
             });
         }
+        // eslint-disable-next-line no-new-func
         const fn = Function('params', code);
         typeMap[typeKey] = fn;
         return fn;
@@ -295,6 +298,37 @@ const isDefPrimitive = (typeKey) => [
     'nasl.core.Email',
 ].includes(typeKey);
 
+// 类型定义是否属于字符串大类
+const isDefString = (typeKey) => [
+    'nasl.core.String',
+    'nasl.core.Text',
+    'nasl.core.Binary',
+    'nasl.core.Date',
+    'nasl.core.Time',
+    'nasl.core.DateTime',
+    'nasl.core.Email',
+].includes(typeKey);
+
+// 类型定义是否属于数字大类
+const isDefNumber = (typeKey) => [
+    'nasl.core.Integer',
+    'nasl.core.Long',
+    'nasl.core.Double',
+    'nasl.core.Decimal',
+].includes(typeKey);
+
+// 类型定义是否属于数组
+const isDefList = (typeDefinition) => {
+    const { typeKind, typeNamespace, typeName } = typeDefinition || {};
+    return typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List';
+};
+
+// 类型定义是否属于Map
+const isDefMap = (typeDefinition) => {
+    const { typeKind, typeNamespace, typeName } = typeDefinition || {};
+    return typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'Map';
+};
+
 // 值是否属于基础类型
 // 数字（number）、字符串（string）、布尔值（boolean）、undefined、null、对象（Object）
 const isValPrimitive = (value) => {
@@ -312,35 +346,16 @@ const isTypeMatch = (typeKey, value) => {
     const typeAnnotation = typeDefinitionMap[typeKey];
     const isValuePrimitive = isValPrimitive(value); // 类型字符串
     const typeStr = Object.prototype.toString.call(value);
-    const { concept, typeKind, typeNamespace, typeName } = typeAnnotation || {};
+    const { concept } = typeAnnotation || {};
     let isMatch = (isPrimitive === isValuePrimitive) || (concept === 'Enum' && typeStr === '[object String]');
     // 大类型匹配的基础上继续深入判断
     if (isMatch) {
         if (isPrimitive) {
             if (
-                typeKey === 'Boolean' && typeStr !== '[object Boolean]'
-                || [
-                    'nasl.core.Integer',
-                    'nasl.core.Long',
-                    'nasl.core.Double',
-                    'nasl.core.Decimal',
-                ].includes(typeKey) && typeStr !== '[object Number]'
-                || [
-                    'nasl.core.String',
-                    'nasl.core.Text',
-                    'nasl.core.Binary',
-                    'nasl.core.Date',
-                    'nasl.core.Time',
-                    'nasl.core.DateTime',
-                    'nasl.core.Email',
-                ].includes(typeKey) && typeStr !== '[object String]'
+                typeKey === 'nasl.core.Boolean' && typeStr !== '[object Boolean]'
+                || isDefNumber(typeKey) && typeStr !== '[object Number]'
+                || isDefString(typeKey) && typeStr !== '[object String]'
             ) {
-                isMatch = false;
-            }
-        } else {
-            const isArray = typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List';
-            const isValueArray = typeStr === '[object Array]';
-            if (isArray !== isValueArray) {
                 isMatch = false;
             }
         }
@@ -387,7 +402,7 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
             parsedValue = tryJSONParse(defaultValue) !== undefined ? tryJSONParse(defaultValue) : defaultValue;
         }
     }
-    if (level > 2 && parsedValue === undefined) {
+    if (level > 2 && [undefined, null].includes(parsedValue)) {
         return;
     }
     const isTypeMatched = parsedValue === undefined || isTypeMatch(typeKey, parsedValue);
@@ -404,14 +419,20 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
                     const sortedTypeKey = genSortedTypeKey(valueTypeAnnotation);
                     if (typeName === 'List' && Array.isArray(parsedValue)) {
                         initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
-                    } else {
-                        initVal = genInitData(sortedTypeKey, parsedValue, level);
+                    } else if (typeName === 'Map') {
+                        for (const key in parsedValue) {
+                            const val = parsedValue[key];
+                            initVal[key] = genInitData(sortedTypeKey, val, level);
+                        }
                     }
                 }
             }
             return initVal;
         }
-        if (typeKey) {
+        if (typeName === 'DateTime') {
+            const date = new Date(parsedValue);
+            parsedValue = formatISO(date, { format: 'extended', fractionDigits: 3 });
+        } else if (typeKey) {
             const TypeConstructor = typeMap[typeKey];
             if (
                 TypeConstructor
@@ -429,4 +450,211 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
     if (parsedValue !== undefined) {
         return parsedValue;
     }
+};
+
+/**
+ * 生成缩进
+ * @param tabSize 缩进次数
+ * @returns
+ */
+function indent(tabSize) {
+    return ' '.repeat(4 * tabSize);
+}
+
+/**
+ * 变量转字符串
+ * @param {*} variable
+ * @param {*} typeKey
+ * @param {*} tabSize
+ * @returns
+ */
+export const toString = (variable, typeKey, tabSize = 0) => {
+    if (variable instanceof Error) {
+        return variable;
+    }
+    // null 或 undefined 返回 "（空）"
+    if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') { // 空
+        return '（空）';
+    }
+    let str = '' + variable;
+    const isPrimitive = isDefPrimitive(typeKey);
+    if (isPrimitive) { // 基础类型
+        // >=8位有效数字时，按小e
+        if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) {
+            const varArr = str.split('.');
+            let count = 0;
+            varArr.forEach((varStr) => {
+                count += varStr.length;
+            });
+            const maxLen = 8;
+            if (count >= maxLen) {
+                // 去掉+是为了跟后端保持统一
+                str = variable?.toExponential?.().replace?.('e+', 'e');
+            }
+        }
+        // 日期处理
+        if (typeKey === 'nasl.core.Date') {
+            str = format(new Date(variable), 'yyyy-MM-dd');
+        } else if (typeKey === 'nasl.core.Time') {
+            if (/^\d{2}:\d{2}:\d{2}$/.test(variable)) // 纯时间 12:30:00
+                str = format(new Date('2022-01-01 ' + variable), 'HH:mm:ss');
+            else
+                str = format(new Date(variable), 'HH:mm:ss');
+        } else if (typeKey === 'nasl.core.DateTime') {
+            str = format(new Date(variable), 'yyyy-MM-dd HH:mm:ss');
+        }
+        if (tabSize > 0) {
+            if (['nasl.core.String', 'nasl.core.Text'].includes(typeKey)) {
+                const maxLen = 100;
+                const moreThanMax = variable.length > maxLen;
+                if (moreThanMax) {
+                    str = variable.slice(0, maxLen) + '...';
+                }
+            }
+            // 是否属于字符串大类
+            if (isDefString(typeKey)) {
+                str = `"${str}"`;
+            }
+        }
+    } else {
+        const typeDefinition = typeDefinitionMap[typeKey];
+        const { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties, enumItems } = typeDefinition || {};
+        if (typeKind === 'union') {
+            if (Array.isArray(typeArguments) && typeArguments.length) {
+                const typeArg = typeArguments.find((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
+                if (typeArg) {
+                    str = toString(variable, genSortedTypeKey(typeArg), tabSize);
+                }
+            }
+        } else if (concept === 'Enum') {
+            if (Array.isArray(enumItems) && enumItems.length) {
+                const enumItem = enumItems.find((enumItem) => variable === enumItem.value);
+                str = enumItem?.label;
+            }
+        } else if (['TypeAnnotation', 'Structure', 'Entity'].includes(concept)) { // 复合类型
+            if (tabSize > 0) {
+                str = '';
+                if (isDefList(typeDefinition)) {
+                    str += '[...]';
+                } else if (isDefMap(typeDefinition)) {
+                    str += '[... -> ...]';
+                } else {
+                    if (name) {
+                        str += `${name} `;
+                    }
+                    str += '{...}';
+                }
+            } else {
+                if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
+                    const maxLen = 10;
+                    if (typeName === 'List') {
+                        const moreThanMax = variable.length > maxLen;
+                        const arr = moreThanMax ? variable : variable.slice(0, maxLen);
+                        const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
+                        const arrStr = arr.map((varItem) => toString(varItem, itemTypeKey, tabSize + 1)).join(', ');
+                        str = moreThanMax ? `${arrStr}, ...` : arrStr;
+                    } else if (typeName === 'Map') {
+                        const keys = Object.keys(variable);
+                        const moreThanMax = keys.length > maxLen;
+                        const arr = moreThanMax ? keys : keys.slice(0, maxLen);
+                        const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
+                        const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
+                        const arrStr = arr.map((key) => `${toString(key, keyTypeKey, tabSize + 1)} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join('\n');
+                        str = moreThanMax ? `${arrStr}\n...` : arrStr;
+                    }
+                } else {
+                    let code = `${indent(tabSize)}`;
+                    if (name) {
+                        code += `${name} `;
+                    }
+                    code += '{\n';
+                    if (Array.isArray(properties) && properties.length) {
+                        code += properties.map((property) => {
+                            const { name: propName, typeAnnotation: propTypeAnnotation } = property || {};
+                            const propVal = variable[propName];
+                            const propTypeKey = genSortedTypeKey(propTypeAnnotation);
+                            const propValStr = toString(propVal, propTypeKey, tabSize + 1);
+                            return `${indent(tabSize + 1)}${propName}: ${propValStr}`;
+                        }).join(',\n');
+                    }
+                    code += `\n${indent(tabSize)}}`;
+                    str = code;
+                }
+            }
+        }
+    }
+    return str;
+};
+
+// yyyy-MM-dd HH:mm:ss
+// yyyy/MM/dd HH:mm:ss
+// yyyy.MM.dd HH:mm:ss
+
+const DateReg = /(^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$)|(^[1-9]\d{3}\/(0[1-9]|1[0-2])\/(0[1-9]|[1-2][0-9]|3[0-1])$)|(^[1-9]\d{3}\.(0[1-9]|1[0-2])\.(0[1-9]|[1-2][0-9]|3[0-1])$)/;
+const TimeReg = /^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
+const DateTimeReg = /(^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$)|^[1-9]\d{3}\/(0[1-9]|1[0-2])\/(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$|^[1-9]\d{3}\.(0[1-9]|1[0-2])\.(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
+const FloatNumberReg = /^(-?\d+)(\.\d+)?$/;
+// (长)整型
+const IntegerReg = /^-?\d+$/;
+
+/**
+ * 判断字符串日期是否合法
+ * yyyy-MM-dd yyyy/MM/dd HH:mm:ss yyyy.MM.dd 3种格式
+ * @param {*} dateString
+ * @returns
+ */
+function isValidDate(dateString, reg) {
+    if (!reg.test(dateString)) {
+        return false;
+    }
+    // 验证日期是否真实存在
+    const date = new Date(dateString);
+    if (date.toString() === 'Invalid Date') {
+        return false;
+    }
+    let splitChar;
+    if (dateString.includes('-')) {
+        splitChar = '-';
+    } else if (dateString.includes('/')) {
+        splitChar = '/';
+    } else if (dateString.includes('.')) {
+        splitChar = '.';
+    }
+    const [year, month, day] = dateString.split(' ')?.[0]?.split(splitChar).map(Number);
+    if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
+        return false;
+    }
+    return true;
+}
+
+export const fromString = (variable, typeKey) => {
+    const typeDefinition = typeDefinitionMap[typeKey];
+    const isPrimitive = isDefPrimitive(typeKey, isPrimitive);
+    const { typeName } = typeDefinition || {};
+    // 日期
+    if (typeName === 'DateTime' && isValidDate(variable, DateTimeReg)) {
+        const date = new Date(variable);
+        const outputDate = formatISO(date, { format: 'extended', fractionDigits: 3 });
+        return outputDate;
+    } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
+        return format(new Date(variable), 'yyyy-MM-dd');
+    } else if (typeName === 'Time' && TimeReg.test(variable)) {
+        return format(new Date(variable), 'HH:mm:ss');
+    }
+    // 浮点数
+    else if (['Decimal', 'Double'].includes(typeName) && FloatNumberReg.test(variable)) {
+        return parseFloat(+variable);
+    }
+    // 整数
+    else if (['Integer', 'Long'].includes(typeName) && IntegerReg.test(variable)) {
+        return +variable;
+    }
+    // 布尔
+    else if (typeName === 'Boolean') {
+        const lowerVar = variable.toLowerCase();
+        if (['true', 'false'].includes(lowerVar)) {
+            return JSON.parse(lowerVar);
+        }
+    }
+    return new Error(`${typeName}格式不正确`);
 };

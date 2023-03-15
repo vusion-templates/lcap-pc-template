@@ -6,7 +6,7 @@ import configuration from '@/apis/configuration';
 import lowauth from '@/apis/lowauth';
 import io from '@/apis/io';
 import authService from '../auth/authService';
-import { initApplicationConstructor, genInitData, isInstanceOf } from './tools';
+import { initApplicationConstructor, genSortedTypeKey, genInitData, isInstanceOf } from './tools';
 import { porcessPorts } from '../router/processService';
 
 window.CryptoJS = CryptoJS;
@@ -40,7 +40,7 @@ export default {
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
                 const { name, typeAnnotation, defaultValue } = frontendVariable;
-                frontendVariables[name] = genInitFromSchema(typeAnnotation, defaultValue);
+                frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
             });
         }
         const $global = {
