@@ -1,4 +1,4 @@
-import { format, parse, formatISO } from 'date-fns';
+import { format, formatISO } from 'date-fns';
 
 function tryJSONParse(str) {
     let result;
@@ -429,7 +429,10 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
             }
             return initVal;
         }
-        if (typeKey) {
+        if (typeName === 'DateTime') {
+            const date = new Date(parsedValue);
+            parsedValue = formatISO(date, { format: 'extended', fractionDigits: 3 });
+        } else if (typeKey) {
             const TypeConstructor = typeMap[typeKey];
             if (
                 TypeConstructor
@@ -630,9 +633,8 @@ export const fromString = (variable, typeKey) => {
     const { typeName } = typeDefinition || {};
     // 日期
     if (typeName === 'DateTime' && isValidDate(variable, DateTimeReg)) {
-        const formatString = 'yyyy-MM-dd HH:mm:ss';
-        const parsedDate = parse(variable, formatString, new Date());
-        const outputDate = formatISO(parsedDate, { format: 'extended', fractionDigits: 3 });
+        const date = new Date(variable);
+        const outputDate = formatISO(date, { format: 'extended', fractionDigits: 3 });
         return outputDate;
     } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
         return format(new Date(variable), 'yyyy-MM-dd');
