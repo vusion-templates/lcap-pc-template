@@ -1,4 +1,4 @@
-import { format, parse } from 'date-fns';
+import { format, parse, formatISO } from 'date-fns';
 
 function tryJSONParse(str) {
     let result;
@@ -631,11 +631,9 @@ export const fromString = (variable, typeKey) => {
     // 日期
     if (typeName === 'DateTime' && isValidDate(variable, DateTimeReg)) {
         const formatString = 'yyyy-MM-dd HH:mm:ss';
-        const localDate = parse(variable, formatString, new Date());
-        const utcDateString = format(localDate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", {
-            timeZone: 'UTC',
-        });
-        return utcDateString;
+        const parsedDate = parse(variable, formatString, new Date());
+        const outputDate = formatISO(parsedDate, { format: 'extended', fractionDigits: 3 });
+        return outputDate;
     } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
         return format(new Date(variable), 'yyyy-MM-dd');
     } else if (typeName === 'Time' && TimeReg.test(variable)) {
