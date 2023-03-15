@@ -656,5 +656,5 @@ export const fromString = (variable, typeKey) => {
             return JSON.parse(lowerVar);
         }
     }
-    return new Error(`${typeName}格式不正确`);
+    throw Error(`${typeName}格式不正确`);
 };
