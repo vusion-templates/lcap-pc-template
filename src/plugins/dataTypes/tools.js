@@ -469,23 +469,13 @@ export const toString = (variable, typeKey, tabSize = 0) => {
     if (variable instanceof Error) {
         return variable;
     }
-    let str = variable;
-    const isPrimitive = isDefPrimitive(typeKey);
     // null 或 undefined 返回 "（空）"
     if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') { // 空
-        str = '（空）';
-    } else if (isPrimitive) { // 基础类型
-        // 布尔和数字类型转字符串
-        if ([
-            'nasl.core.Boolean',
-            'nasl.core.Integer',
-            'nasl.core.Long',
-            'nasl.core.Double',
-            'nasl.core.Decimal',
-        ].includes(typeKey)) {
-            // 转字符串
-            str = '' + variable;
-        }
+        return '（空）';
+    }
+    let str = '' + variable;
+    const isPrimitive = isDefPrimitive(typeKey);
+    if (isPrimitive) { // 基础类型
         // >=8位有效数字时，按小e
         if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) {
             const varArr = str.split('.');
