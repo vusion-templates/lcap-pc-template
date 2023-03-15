@@ -41,7 +41,7 @@
 			"query": {}
 		}
 	},
-	"getProcessStartBy": {
+	"getUserList": {
 		"url": {
 			"method": "post",
 			"path": "/system/user/userListFromNuimOrApp"
