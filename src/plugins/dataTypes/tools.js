@@ -651,9 +651,8 @@ export const fromString = (variable, typeKey) => {
     }
     // 布尔
     else if (typeName === 'Boolean') {
-        const lowerVar = variable.toLowerCase();
-        if (['true', 'false'].includes(lowerVar)) {
-            return JSON.parse(lowerVar);
+        if (['true', 'false'].includes(variable)) {
+            return JSON.parse(variable);
         }
     }
     throw Error(`${typeName}格式不正确`);
