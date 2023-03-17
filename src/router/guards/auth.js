@@ -65,6 +65,8 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                 next({ path: noAuthView.path });
             }
         }
-    }
+    } else if (!$auth.isInit() && userInfo.UserId)
+        await $auth.getUserResources(appConfig.domainName);
+
     next();
 };
