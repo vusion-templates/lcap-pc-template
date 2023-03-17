@@ -639,7 +639,7 @@ export const fromString = (variable, typeKey) => {
     } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
         return format(new Date(variable), 'yyyy-MM-dd');
     } else if (typeName === 'Time' && TimeReg.test(variable)) {
-        return format(new Date(variable), 'HH:mm:ss');
+        return format(new Date('2022-01-01 ' + variable), 'HH:mm:ss');
     }
     // 浮点数
     else if (['Decimal', 'Double'].includes(typeName) && FloatNumberReg.test(variable)) {
