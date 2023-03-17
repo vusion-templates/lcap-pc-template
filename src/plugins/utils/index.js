@@ -690,10 +690,6 @@ export const utils = {
     CreateListPage(list, total) {
         return { list, total };
     },
-    // 输出逻辑，此处的console.log是功能，不要删！
-    ConsoleLog(val, typeKey) {
-        console.log(this.ToString(val, typeKey));
-    },
 };
 
 export default {
