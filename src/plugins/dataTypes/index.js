@@ -272,11 +272,11 @@ export default {
                 const res = await configuration.getCurrentIp();
                 return res;
             },
-            async getProcessStartBy(query) {
+            async getUserList(query) {
                 const appEnv = window.appInfo.env;
                 const cookies = document.cookie.split('; ');
                 const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization')?.split('=')[1];
-                const res = await lowauth.getProcessStartBy({
+                const res = await lowauth.getUserList({
                     body: {
                         appEnv,
                         token,
