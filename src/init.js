@@ -10,7 +10,7 @@ import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin
 import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter } from '@/router';
 import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
-import SError from '@/components/s-error.vue';
+import STenantExpiration from '@/components/s-tenant-expiration.vue';
 
 window.appVue = Vue;
 window.Vue = Vue;
@@ -62,8 +62,8 @@ const init = (appConfig, platformConfig, routes, metaData) => {
 
     // 增加后端错误页面相关路由
     const backendErrorRoute = {
-        path: '/backendError',
-        component: SError,
+        path: '/tenantExpiration',
+        component: STenantExpiration,
     };
     baseRoutes = [...baseRoutes, backendErrorRoute];
     const router = initRouter(baseRoutes);
