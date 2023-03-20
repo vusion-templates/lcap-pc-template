@@ -4,8 +4,8 @@ import SToast from '@/components/s-toast.vue';
 
 const Ctr = Vue.component('s-toast', SToast);
 const instance = new Ctr();
-const getErrMessage = (err) => err.msg || err.Message || '暂无错误信息';
-const getErrStrack = (err) => err.StackTrace || '暂无错误信息';
+const getErrMessage = (err) => err.msg || err.Message || '系统错误，请查看日志！';
+const getErrStrack = (err) => err.StackTrace || '系统错误，请查看日志！';
 
 export default {
     defaults({ config }, err) {
@@ -47,14 +47,20 @@ export default {
                 location.href = '/login';
         }
     },
+    401339({ config }, err = {}) {
+        if (!config.noErrorTip) {
+            instance.show('当前租户已过期');
+        }
+        location.href = '/tenantExpiration';
+    },
     remoteError({ config }, err) {
         if (!config.noErrorTip) {
-            instance.show('系统错误，请联系管理员！');
+            instance.show('系统错误，请查看日志！');
         }
     },
     localError({ config }, err) {
         if (!config.noErrorTip) {
-            instance.show('系统错误，请联系管理员！');
+            instance.show('系统错误，请查看日志！');
         }
     },
 };
