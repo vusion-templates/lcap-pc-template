@@ -549,7 +549,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                     const maxLen = 10;
                     if (typeName === 'List') {
                         const moreThanMax = variable.length > maxLen;
-                        const arr = moreThanMax ? variable : variable.slice(0, maxLen);
+                        const arr = moreThanMax ? variable.slice(0, maxLen) : variable;
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const arrStr = arr.map((varItem) => toString(varItem, itemTypeKey, tabSize + 1)).join(', ');
                         str = moreThanMax ? `${arrStr}, ...` : arrStr;
