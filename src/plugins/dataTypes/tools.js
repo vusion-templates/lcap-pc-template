@@ -518,7 +518,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
         }
     } else {
         const typeDefinition = typeDefinitionMap[typeKey];
-        const { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties, enumItems } = typeDefinition || {};
+        let { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties, enumItems } = typeDefinition || {};
         if (typeKind === 'union') {
             if (Array.isArray(typeArguments) && typeArguments.length) {
                 const typeArg = typeArguments.find((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
@@ -563,6 +563,34 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                         str = moreThanMax ? `{\n${arrStr}\n...\n}` : `{\n${arrStr}\n}`;
                     }
                 } else {
+                    // 处理一些范型数据结构的情况
+                    if (typeKind === 'generic') {
+                        const genericTypeKey = `${typeNamespace}.${typeName}`;
+                        const genericTypeDefinition = typeDefinitionMap[genericTypeKey];
+                        if (genericTypeDefinition) {
+                            name = genericTypeDefinition?.name;
+                            const genericProperties = genericTypeDefinition?.properties || [];
+                            if (Array.isArray(genericTypeDefinition.typeParams) && genericTypeDefinition.typeParams.length) {
+                                const map = {};
+                                genericTypeDefinition.typeParams.forEach((typeParam, index) => {
+                                    const { name } = typeParam || {};
+                                    map[name] = index;
+                                });
+                                properties = genericProperties.map((genericProperty) => {
+                                    let typeAnnotation = genericProperty?.typeAnnotation;
+                                    const { typeName } = typeAnnotation || {};
+                                    const typeParamIndex = map[typeName];
+                                    if (typeParamIndex !== undefined) {
+                                        typeAnnotation = typeArguments[typeParamIndex];
+                                    }
+                                    return {
+                                        ...genericProperty,
+                                        typeAnnotation,
+                                    };
+                                });
+                            }
+                        }
+                    }
                     let code = `${indent(tabSize)}`;
                     if (name) {
                         code += `${name} `;
