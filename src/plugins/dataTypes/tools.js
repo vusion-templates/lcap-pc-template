@@ -476,7 +476,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
     if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') { // 空
         return '（空）';
     }
-    let str = '' + variable;
+    let str = '';
     const isPrimitive = isDefPrimitive(typeKey);
     if (isPrimitive) { // 基础类型
         // >=8位有效数字时，按小e
@@ -609,6 +609,25 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                     str = code;
                 }
             }
+        }
+    }
+    if (!str) {
+        if (Object.prototype.toString.call(variable) === '[object Object]') {
+            if (tabSize > 0) {
+                str = '{...}';
+            } else {
+                str = `{\n`;
+                const propStr = [];
+                for (const key in variable) {
+                    const propVal = variable[key];
+                    const propValStr = toString(propVal, undefined, tabSize + 1);
+                    propStr.push(`${indent(tabSize + 1)}${key}: ${propValStr}`);
+                }
+                str += propStr.join(',\n');
+                str += `\n}`;
+            }
+        } else {
+            str = '' + variable;
         }
     }
     return str;
