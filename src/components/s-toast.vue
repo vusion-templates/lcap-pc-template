@@ -61,6 +61,7 @@ export default {
         display: flex;
         height: 40px;
         line-height: 40px;
+        margin-right: 18px;
     }
 
     .copybox {
