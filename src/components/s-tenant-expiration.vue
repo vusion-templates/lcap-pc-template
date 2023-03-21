@@ -1,7 +1,8 @@
 <template>
     <div class="container">
         <img :src="require('/source/page/assets/tenant-expired.png')" class="errorImg">
-        <div class="errorText">当前租户已过期，请联系管理员</div>
+        <div class="errorText">当前租户已过期，请联系平台工作人员</div>
+        <div class="errorText">或拨打客服电话：0571-89926330</div>
     </div>
 </template>
 
