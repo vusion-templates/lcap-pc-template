@@ -675,7 +675,14 @@ export const fromString = (variable, typeKey) => {
     }
     // 整数
     else if (['Integer', 'Long'].includes(typeName) && IntegerReg.test(variable)) {
-        return +variable;
+        const maxMap = {
+            Integer: 2147483647,
+            Long: 9223372036854775807,
+        };
+        const numberVar = +variable;
+        if ((numberVar > 0 && numberVar < maxMap[typeName]) || (numberVar < 0 && numberVar > -maxMap[typeName])) {
+            return numberVar;
+        }
     }
     // 布尔
     else if (typeName === 'Boolean') {
