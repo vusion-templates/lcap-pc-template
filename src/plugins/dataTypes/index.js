@@ -309,8 +309,7 @@ export default {
             enumsMap[enumKey] = createEnum(enumsMap[enumKey] || {});
         });
 
-        // 判断两个对象是否相等，不需要引用完全一致
-        Vue.prototype.$isLooseEqualFn = (obj1, obj2, cache = new Map()) => {
+        function isLooseEqualFn(obj1, obj2, cache = new Map()) {
             // 检查对象是否相同
             if (obj1 === obj2) {
                 return true;
@@ -337,7 +336,7 @@ export default {
                 const val2 = obj2[key];
                 // 递归
                 if (typeof val1 === 'object' && typeof val2 === 'object') {
-                    if (!this.$isLooseEqualFn(val1, val2, cache)) {
+                    if (!isLooseEqualFn(val1, val2, cache)) {
                         return false;
                     }
                 } else {
@@ -348,7 +347,10 @@ export default {
                 }
             }
             return true;
-        };
+        }
+
+        // 判断两个对象是否相等，不需要引用完全一致
+        Vue.prototype.$isLooseEqualFn = isLooseEqualFn;
 
         Vue.prototype.$enums = (key, value) => {
             if (!key || !value)
