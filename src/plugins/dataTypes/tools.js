@@ -479,6 +479,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
     let str = '';
     const isPrimitive = isDefPrimitive(typeKey);
     if (isPrimitive) { // 基础类型
+        str = '' + variable;
         // >=8位有效数字时，按小e
         if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) {
             const varArr = str.split('.');
@@ -611,7 +612,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
             }
         }
     }
-    if (!str) {
+    if (str === '') {
         if (Object.prototype.toString.call(variable) === '[object Object]') {
             if (tabSize > 0) {
                 str = '{...}';
