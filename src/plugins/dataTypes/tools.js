@@ -552,15 +552,15 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                         const arr = moreThanMax ? variable.slice(0, maxLen) : variable;
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const arrStr = arr.map((varItem) => toString(varItem, itemTypeKey, tabSize + 1)).join(', ');
-                        str = moreThanMax ? `${arrStr}, ...` : arrStr;
+                        str = moreThanMax ? `[${arrStr}, ...]` : `[${arrStr}]`;
                     } else if (typeName === 'Map') {
                         const keys = Object.keys(variable);
                         const moreThanMax = keys.length > maxLen;
                         const arr = moreThanMax ? keys : keys.slice(0, maxLen);
                         const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
-                        const arrStr = arr.map((key) => `${toString(key, keyTypeKey, tabSize + 1)} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join('\n');
-                        str = moreThanMax ? `${arrStr}\n...` : arrStr;
+                        const arrStr = arr.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1)} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join('\n');
+                        str = moreThanMax ? `{\n${arrStr}\n...\n}` : `{\n${arrStr}\n}`;
                     }
                 } else {
                     let code = `${indent(tabSize)}`;
