@@ -429,7 +429,7 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
             }
             return initVal;
         }
-        if (typeName === 'DateTime') {
+        if (typeName === 'DateTime' && parsedValue !== undefined) {
             const date = new Date(parsedValue);
             parsedValue = formatISO(date, { format: 'extended', fractionDigits: 3 });
         } else if (typeKey) {
