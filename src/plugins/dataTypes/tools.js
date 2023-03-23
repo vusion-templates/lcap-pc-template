@@ -474,7 +474,11 @@ export const toString = (variable, typeKey, tabSize = 0) => {
     }
     // null 或 undefined 返回 "（空）"
     if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') { // 空
-        return '（空）';
+        if (tabSize > 0) {
+            return '（空）';
+        } else {
+            return '';
+        }
     }
     let str = '';
     const isPrimitive = isDefPrimitive(typeKey);
@@ -536,14 +540,28 @@ export const toString = (variable, typeKey, tabSize = 0) => {
             if (tabSize > 0) {
                 str = '';
                 if (isDefList(typeDefinition)) {
-                    str += '[...]';
+                    if (variable.length > 0) {
+                        str += '[...]';
+                    } else {
+                        str += '[]';
+                    }
                 } else if (isDefMap(typeDefinition)) {
-                    str += '[... -> ...]';
+                    const keys = Object.keys(variable);
+                    if (keys.length > 0) {
+                        str += '[... -> ...]';
+                    } else {
+                        str += '[->]';
+                    }
                 } else {
+                    const keys = Object.keys(variable);
                     if (name) {
                         str += `${name} `;
                     }
-                    str += '{...}';
+                    if (keys.length > 0) {
+                        str += '{...}';
+                    } else {
+                        str += '{}';
+                    }
                 }
             } else {
                 if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
