@@ -414,16 +414,15 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         ) { // 特殊范型List/Map
             let initVal = (typeName === 'List' ? [] : {});
             if (parsedValue) {
-                if (Array.isArray(typeArguments) && typeArguments.length > 0) {
-                    const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
-                    const sortedTypeKey = genSortedTypeKey(valueTypeAnnotation);
-                    if (typeName === 'List' && Array.isArray(parsedValue)) {
-                        initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
-                    } else if (typeName === 'Map') {
-                        for (const key in parsedValue) {
-                            const val = parsedValue[key];
-                            initVal[key] = genInitData(sortedTypeKey, val, level);
-                        }
+                // valueTypeAnnotation可能会由于一些情况出现空，因此不能加上对typeArguments数组的整体容错判断
+                const valueTypeAnnotation = typeName === 'List' ? typeArguments?.[0] : typeArguments?.[1];
+                const sortedTypeKey = genSortedTypeKey(valueTypeAnnotation);
+                if (typeName === 'List' && Array.isArray(parsedValue)) {
+                    initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
+                } else if (typeName === 'Map') {
+                    for (const key in parsedValue) {
+                        const val = parsedValue[key];
+                        initVal[key] = genInitData(sortedTypeKey, val, level);
                     }
                 }
             }
