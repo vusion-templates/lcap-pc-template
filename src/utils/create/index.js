@@ -81,6 +81,7 @@ const requester = function (requestInfo) {
     if (!headers.Authorization && cookie.get('authorization')) {
         headers.Authorization = cookie.get('authorization');
     }
+    headers.DomainName = window.appInfo?.domainName;
 
     if (config.download) {
         return download(url);

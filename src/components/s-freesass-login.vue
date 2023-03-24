@@ -1,6 +1,6 @@
 <template>
     <div :class="$style.freesassroot">
-        <u-modal disable-esc :visible.sync="visible" ok-button="" cancel-button="" @cancel="close">
+        <u-modal :class="$style.loginModal" disable-esc :visible.sync="visible" ok-button="" cancel-button="" @cancel="close">
             <template #title>
                 <div style="font-style: normal;font-weight: 500;font-size: 16px;color: #333333;">登录/注册</div>
             </template>
@@ -85,7 +85,7 @@ export default {
         align-items: flex-start;
         gap:10px;
      }
-    .freesassroot [class^=u-modal_close__] {
+    .loginModal [class^=u-modal_close__] {
         display: none!important;
     }
 </style>
