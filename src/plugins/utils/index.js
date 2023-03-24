@@ -264,7 +264,7 @@ export const utils = {
         }
     },
     ListSlice(arr, start, end) {
-        if (Array.isArray(arr)) {
+        if (isArrayOutBounds(arr, start) && isArrayOutBounds(arr, end)) {
             return arr.slice(start, end);
         }
     },
