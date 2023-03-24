@@ -473,7 +473,7 @@ export const utils = {
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
-                    obj[key] = null;
+                    utils.Vue.delete(obj, key);
             }
         } else {
             obj = undefined;
@@ -486,7 +486,7 @@ export const utils = {
     ClearObject(obj) {
         for (const key in obj) {
             if (obj.hasOwnProperty(key))
-                obj[key] = undefined;
+                utils.Vue.delete(obj, key);
         }
         return obj;
     },
