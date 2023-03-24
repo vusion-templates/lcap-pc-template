@@ -1,37 +1,48 @@
-import generate from 'babel-generator'; // @babel/generator use ES6, not support IE11
 import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
+import cookie from '@/utils/cookie';
 
 import configuration from '@/apis/configuration';
 import lowauth from '@/apis/lowauth';
 import io from '@/apis/io';
 import authService from '../auth/authService';
-import { genInitData } from './tools';
+import { initApplicationConstructor, genSortedTypeKey, genInitData, isInstanceOf } from './tools';
 import { porcessPorts } from '../router/processService';
 
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 
+// // 获取真实值
+// function getActualValue(value) {
+//    let actualValue = value;
+//    const { __isPrimitive, value: primitiveVal } = value || {};
+//    if (__isPrimitive) {
+//        actualValue = primitiveVal;
+//    }
+//    return actualValue;
+// }
+
 export default {
     install(Vue, options = {}) {
-        const genInitFromSchema = (schema = {}, defaultValue) => {
-            schema.defaultValue = defaultValue;
+        const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
 
-            // read from file
-            const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
-            const expressDataTypeObject = genInitData(schema, dataTypesMap);
-            const expression = generate(expressDataTypeObject).code;
-            // eslint-disable-next-line no-new-func
-            return Function('return ' + expression)();
-        };
+        initApplicationConstructor(dataTypesMap);
+
+        const genInitFromSchema = (typeKey, defaultValue, level) => genInitData(typeKey, defaultValue, level);
+
+        /**
+         * read datatypes from template, then parse schema
+         * @param {*} schema 是前端用的 refSchema
+         */
+        Vue.prototype.$genInitFromSchema = genInitFromSchema;
+
         const frontendVariables = {};
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
                 const { name, typeAnnotation, defaultValue } = frontendVariable;
-                frontendVariables[name] = genInitFromSchema(typeAnnotation, defaultValue);
+                frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
             });
         }
-
         const $global = {
             // 用户信息
             userInfo: {},
@@ -88,6 +99,57 @@ export default {
                 const yy = new Decimal(y + '');
                 return xx.div(yy).toNumber();
             },
+            // 相等
+            isEqual(x, y) {
+                return x == y;
+            },
+            // // 不相等
+            // isNotEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX != actualY;
+            // },
+            // // 大于
+            // isGreater(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX > actualY;
+            // },
+            // // 大于等于
+            // isGreaterOrEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX >= actualY;
+            // },
+            // // 小于
+            // isLess(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX < actualY;
+            // },
+            // // 小于等于
+            // isLessOrEqual(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX <= actualY;
+            // },
+            // // 与
+            // isAnd(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX && actualY;
+            // },
+            // // 或
+            // isOr(x, y) {
+            //    const actualX = getActualValue(x);
+            //    const actualY = getActualValue(y);
+            //    return actualX || actualY;
+            // },
+            // // 非
+            // isNot(val) {
+            //    const actualVal = getActualValue(val);
+            //    return !actualVal;
+            // },
             requestFullscreen() {
                 return document.body.requestFullscreen();
             },
@@ -119,14 +181,10 @@ export default {
                 return new Promise((res, rej) => {
                     function showPosition(position) {
                         const { latitude, longitude } = position.coords;
-                        // eslint-disable-next-line no-console
-                        console.log(latitude, longitude);
                         const [mglng, mglat] = [longitude, latitude];
                         res(`${mglng},${mglat}`);
                     }
                     function showError(error) {
-                        // eslint-disable-next-line no-console
-                        console.log(error, error.code);
                         switch (error.code) {
                             case error.PERMISSION_DENIED:
                                 this.$toast.show('用户禁止获取地理定位');
@@ -149,8 +207,6 @@ export default {
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(showPosition, showError);
                     } else {
-                        // eslint-disable-next-line no-console
-                        console.log('Geolocation is not supported by this browser.');
                         this.$toast.show('当前系统不支持地理定位');
                         rej({ code: 666, msg: '当前系统不支持地理定位' });
                     }
@@ -175,50 +231,21 @@ export default {
                 return d * 1000;
             },
             logout() {
-                Vue.prototype.$confirm('确定退出登录吗？', '提示')
+                Vue.prototype.$confirm({
+                    content: '确定退出登录吗？',
+                    title: '提示',
+                    okButton: '确定',
+                    cancelButton: '取消',
+                })
                     .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
-                        const cookies = document.cookie.split(';');
-                        cookies.forEach((cookie) => {
-                            const eqPos = cookie.indexOf('=');
-                            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                            const d = new Date();
-                            d.setTime(d.getTime() - (1 * 24 * 60 * 60 * 1000));
-                            document.cookie = `${name}=; expires=${d.toGMTString()}; path=/`;
-                        });
+                        cookie.erase('authorization');
+                        cookie.erase('username');
                         location.reload();
                     });
             },
-            async getCustomConfig(configKey = '') {
-                const res = await configuration.getCustomConfig({
-                    path: { configKey },
-                });
-                return res;
-            },
-            async getCurrentIp() {
-                const res = await configuration.getCurrentIp();
-                return res;
-            },
-            async getProcessStartBy(query) {
-                const { userNameFilter, limit, offset } = query;
-                const appEnv = window.appInfo.env;
-                const cookies = document.cookie.split(';');
-                const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization').split('=')[1];
-                const res = await lowauth.getProcessStartBy({
-                    body: {
-                        appEnv,
-                        token,
-                        userNameFilter,
-                    },
-                    query: {
-                        limit,
-                        offset,
-                    },
-                });
-                return res;
-            },
             async downloadFile(url, fileName) {
-                await io.downloadFile({
+                await io.downloadFiles({
                     body: {
                         urls: [url],
                         fileName,
@@ -235,6 +262,29 @@ export default {
                 }).then((res) => Promise.resolve(res))
                     .catch((err) => Promise.resolve(err));
             },
+            async getCustomConfig(configKey = '') {
+                const res = await configuration.getCustomConfig({
+                    path: { configKey },
+                });
+                return res;
+            },
+            async getCurrentIp() {
+                const res = await configuration.getCurrentIp();
+                return res;
+            },
+            async getUserList(query) {
+                const appEnv = window.appInfo.env;
+                const cookies = document.cookie.split('; ');
+                const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization')?.split('=')[1];
+                const res = await lowauth.getUserList({
+                    body: {
+                        appEnv,
+                        token,
+                        ...query,
+                    },
+                });
+                return res;
+            },
         };
         Object.keys(porcessPorts).forEach((service) => {
             $global[service] = porcessPorts[service];
@@ -247,11 +297,7 @@ export default {
 
         Vue.prototype.$global = $global;
 
-        /**
-         * read datatypes from template, then parse schema
-         * @param {*} schema 是前端用的 refSchema
-         */
-        Vue.prototype.$genInitFromSchema = genInitFromSchema;
+        Vue.prototype.$isInstanceOf = isInstanceOf;
 
         const enumsMap = options.enumsMap || {};
         function createEnum(items) {
@@ -262,6 +308,49 @@ export default {
         Object.keys(enumsMap).forEach((enumKey) => {
             enumsMap[enumKey] = createEnum(enumsMap[enumKey] || {});
         });
+
+        function isLooseEqualFn(obj1, obj2, cache = new Map()) {
+            // 检查对象是否相同
+            if (obj1 === obj2) {
+                return true;
+            }
+            // 对象是否已经比较过，解决循环依赖的问题
+            if (cache.has(obj1) && cache.get(obj1) === obj2) {
+                return true;
+            }
+            // 判断类型相等
+            if (typeof obj1 !== typeof obj2) {
+                return false;
+            }
+            // 判断数组长度或者对象属性数量一致
+            const keys1 = Object.keys(obj1);
+            const keys2 = Object.keys(obj2);
+            if (keys1.length !== keys2.length) {
+                return false;
+            }
+            // 加入缓存中
+            cache.set(obj1, obj2);
+            // 比较属性中的每个值是否一致
+            for (const key of keys1) {
+                const val1 = obj1[key];
+                const val2 = obj2[key];
+                // 递归
+                if (typeof val1 === 'object' && typeof val2 === 'object') {
+                    if (!isLooseEqualFn(val1, val2, cache)) {
+                        return false;
+                    }
+                } else {
+                    // 判断非对象的值是否一致
+                    if (val1 !== val2) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // 判断两个对象是否相等，不需要引用完全一致
+        Vue.prototype.$isLooseEqualFn = isLooseEqualFn;
 
         Vue.prototype.$enums = (key, value) => {
             if (!key || !value)
@@ -274,5 +363,4 @@ export default {
         };
     },
 };
-
 

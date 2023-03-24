@@ -126,4 +126,36 @@ export const porcessPorts = {
         });
         return res;
     },
+    async transferTaskInstance(query) {
+        const res = await process.transferTaskInstance({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async withdrawProcessInstance(query) {
+        const res = await process.withdrawProcessInstance({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async endProcessInstance(query) {
+        const res = await process.endProcessInstance({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getRejectableTaskDefinitionList(query) {
+        const res = await process.getRejectableTaskDefinitionList({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
 };

@@ -28,16 +28,21 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
     if (authPath) {
         if (!$auth.isInit()) {
             if (!userInfo.UserId) {
-                next({ path: '/login' });
+                localStorage.setItem('beforeLogin', JSON.stringify(location));
+                if (window.ICESTARK?.loginFn) {
+                    window.ICESTARK.loginFn();
+                    return;
+                } else
+                    next({ path: '/login' });
             } else {
                 try {
                     const resources = await $auth.getUserResources(appConfig.domainName);
-                    if (resources && resources.length) {
-                        const userResourcePaths = (resources || []).map((resource) => resource.resourceValue);
+                    if (Array.isArray(resources) && resources.length) {
+                        const userResourcePaths = (resources || []).map((resource) => resource?.resourceValue || resource?.ResourceValue);
                         const otherRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
                             const routePath = route.path;
                             const completePath = [...ancestorPaths, routePath].join('/');
-                            const authPath = userResourcePaths.find((userResourcePath) => userResourcePath.startsWith(completePath));
+                            const authPath = userResourcePaths.find((userResourcePath) => userResourcePath?.startsWith(completePath));
                             return authPath;
                         });
                         otherRoutes.forEach((route) => {
@@ -53,7 +58,6 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                     if (noAuthView?.path) {
                         next({ path: noAuthView.path });
                     }
-                    console.log(err);
                 }
             }
         } else if (redirectedFrom?.path !== to.path && to.path === '/notFound') {
@@ -61,6 +65,8 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                 next({ path: noAuthView.path });
             }
         }
-    }
+    } else if (!$auth.isInit() && userInfo.UserId)
+        await $auth.getUserResources(appConfig.domainName);
+
     next();
 };

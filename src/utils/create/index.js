@@ -6,6 +6,7 @@ import cookie from '@/utils/cookie';
 import addConfigs from './add.configs';
 import { getFilenameFromContentDispositionHeader } from './tools';
 import paramsSerializer from './paramsSerializer';
+import { formatMicroFrontUrl } from '@/plugins/router/microFrontUrl';
 
 const formatContentType = function (contentType, data) {
     const map = {
@@ -33,7 +34,6 @@ function download(url) {
         responseType: 'blob',
         timeout,
     }).then((res) => {
-        console.log(res, 333333);
         // 包含 content-disposition， 从中解析名字，不包含 content-disposition 的获取请求地址的后缀
         let effectiveFileName = res.request.getAllResponseHeaders().includes('content-disposition') ? getFilenameFromContentDispositionHeader(res.request.getResponseHeader('content-disposition')) : res.request.responseURL.split('/').pop();
         effectiveFileName = decodeURIComponent(effectiveFileName);
@@ -73,12 +73,15 @@ function download(url) {
 
 const requester = function (requestInfo) {
     const { url, config = {} } = requestInfo;
-    const { path, method, body = {}, headers = {}, query = {} } = url;
+    const { method, body = {}, headers = {}, query = {} } = url;
+    const path = formatMicroFrontUrl(url.path);
+
     const baseURL = config.baseURL ? config.baseURL : '';
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
     if (!headers.Authorization && cookie.get('authorization')) {
         headers.Authorization = cookie.get('authorization');
     }
+    headers.DomainName = window.appInfo?.domainName;
 
     if (config.download) {
         return download(url);

@@ -5,11 +5,32 @@
 			"path": "/system/logout",
 			"query": {}
 		}
+    },
+	"getAppLoginTypes": {
+	    "url": {
+	        "method": "get",
+	        "path": "/system/getAppLoginTypes",
+	        "query": {}
+	    }
+	},
+    "CheckExtendToken": {
+	    "url": {
+	        "method": "get",
+	        "path": "/system/checkExtendToken",
+	        "query": {}
+	    }
+	},
+    "Logout": {
+	    "url": {
+	        "method": "get",
+	        "path": "/system/logout",
+	        "query": {}
+	    }
 	},
 	"GetUser": {
 		"url": {
 			"method": "get",
-			"path": "/user/system/getUser",
+			"path": "/api/user/system/getUser",
 			"query": {}
 		}
 	},
@@ -20,7 +41,7 @@
 			"query": {}
 		}
 	},
-	"getProcessStartBy": {
+	"getUserList": {
 		"url": {
 			"method": "post",
 			"path": "/system/user/userListFromNuimOrApp"
