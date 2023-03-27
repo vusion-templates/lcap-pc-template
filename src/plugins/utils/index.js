@@ -364,7 +364,7 @@ export const utils = {
     },
     MapRemove(map, key) {
         if (isObject(map)) {
-            delete map[key];
+            utils.Vue.delete(map, key);
         }
     },
     MapContains(map, key) {
@@ -488,7 +488,7 @@ export const utils = {
     ClearObject(obj) {
         for (const key in obj) {
             if (obj.hasOwnProperty(key))
-                utils.Vue.delete(obj, key);
+                obj[key] = undefined;
         }
         return obj;
     },
