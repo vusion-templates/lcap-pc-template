@@ -99,7 +99,7 @@ export const utils = {
         if (isObject(str1)) {
             return Object.keys(str1).length;
         }
-        return str1 && str1.length;
+        return str1 ? str1.length : null;
     },
     ToLower(str) {
         return str && str.toLowerCase();
