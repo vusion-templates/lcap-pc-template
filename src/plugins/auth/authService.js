@@ -172,10 +172,7 @@ export default {
      * 是否有权限
      * @param {*} authPath 权限路径，如 /dashboard/entity/list
      */
-    async has(authPath) {
-        if (!this.isInit()) {
-            await this.getUserResources();
-        }
+    has(authPath) {
         return (this._map && this._map.has(authPath)) || false;
     },
 };
