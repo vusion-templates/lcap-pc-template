@@ -475,7 +475,7 @@ export const utils = {
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
-                    utils.Vue.delete(obj, key);
+                    obj[key] = null;
             }
         } else {
             obj = undefined;
