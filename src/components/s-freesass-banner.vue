@@ -6,7 +6,7 @@
         </svg>
         <div :class="$style.bannertext">网易轻舟低代码提供技术支持，点击
             <span style="color:#337EFF;cursor:pointer" @click="jumpPage">访问轻舟低代码</span>
-            ，轻松搭建您的专属应用。</div>
+            ，轻松搭建您的软件应用。</div>
     </div>
 </template>
 

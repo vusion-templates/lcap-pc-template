@@ -31,6 +31,18 @@ function toValue(date, converter) {
     else
         return date;
 }
+function isArrayOutBounds(arr, index) {
+    if (!Array.isArray(arr))
+        throw new Error('传入内容不是数组');
+    if (typeof index !== 'number' || isNaN(index)) {
+        throw new Error('传入下标不是数字');
+    }
+    // 传入要找的下标，大于数组长度
+    if ((index + 1) > arr.length) {
+        throw new Error(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
+    }
+    return true;
+}
 
 export const utils = {
     Vue: undefined,
@@ -84,7 +96,10 @@ export const utils = {
         return arr.join('');
     },
     Length(str1) {
-        return str1 && str1.length;
+        if (isObject(str1)) {
+            return Object.keys(str1).length;
+        }
+        return str1 ? str1.length : null;
     },
     ToLower(str) {
         return str && str.toLowerCase();
@@ -96,12 +111,14 @@ export const utils = {
         return str && str.trim();
     },
     Get(arr, index) {
-        if (Array.isArray(arr)) {
+        if (isArrayOutBounds(arr, index)) {
             return arr[index];
         }
     },
     Set(arr, index, item) {
-        return utils.Vue.set(arr, index, item);
+        if (isArrayOutBounds(arr, index)) {
+            return utils.Vue.set(arr, index, item);
+        }
     },
     Contains(arr, item) {
         return typeof arr.find((ele) => isEqual(ele, item)) !== 'undefined';
@@ -118,7 +135,7 @@ export const utils = {
         }
     },
     Insert(arr, index, item) {
-        if (Array.isArray(arr)) {
+        if (isArrayOutBounds(arr, index)) {
             arr.splice(index, 0, item);
         }
     },
@@ -129,7 +146,7 @@ export const utils = {
         }
     },
     RemoveAt(arr, index) {
-        if (Array.isArray(arr)) {
+        if (isArrayOutBounds(arr, index)) {
             return arr.splice(index, 1)[0];
         }
     },
@@ -229,7 +246,7 @@ export const utils = {
     ListFind(arr, by) {
         if (Array.isArray(arr)) {
             if (typeof by === 'function') {
-                return arr.find(by);
+                return arr.find(by) || null;
             }
         }
     },
@@ -242,12 +259,12 @@ export const utils = {
     ListFindIndex(arr, callback) {
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                return arr.findIndex(callback);
+                return arr.findIndex(callback) || null;
             }
         }
     },
     ListSlice(arr, start, end) {
-        if (Array.isArray(arr)) {
+        if (isArrayOutBounds(arr, start) && isArrayOutBounds(arr, end)) {
             return arr.slice(start, end);
         }
     },
@@ -337,7 +354,7 @@ export const utils = {
     },
     MapGet(map, key) {
         if (isObject(map)) {
-            return map[key];
+            return map[key] || null;
         }
     },
     MapPut(map, key, value) {
@@ -347,7 +364,7 @@ export const utils = {
     },
     MapRemove(map, key) {
         if (isObject(map)) {
-            delete map[key];
+            utils.Vue.delete(map, key);
         }
     },
     MapContains(map, key) {
@@ -458,7 +475,7 @@ export const utils = {
         } else if (isObject(obj)) {
             for (const key in obj) {
                 if (obj.hasOwnProperty(key))
-                    obj[key] = null;
+                    utils.Vue.delete(obj, key);
             }
         } else {
             obj = undefined;
@@ -512,7 +529,7 @@ export const utils = {
                     return format(new Date(value), 'HH:mm:ss');
             } else if (typeAnnotation.typeName === 'String')
                 return String(value);
-            else if (typeAnnotation.typeName === 'Double') // 小数
+            else if (typeAnnotation.typeName === 'Double' || typeAnnotation.typeName === 'Decimal') // 小数 或者精确小数
                 return parseFloat(+value);
             else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
                 // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
