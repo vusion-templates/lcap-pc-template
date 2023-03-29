@@ -29,6 +29,16 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
+    if (window.ICESTARK?.root) {
+        if (!window.ICESTARK.active)
+            return;
+
+        if (window.appVM) {
+            window.appVM.$destroy();
+            window.appVM = null;
+        }
+    }
+
     window.appInfo = Object.assign(appConfig, platformConfig);
 
     installFilters(Vue, filters);
