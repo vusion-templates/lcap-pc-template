@@ -241,8 +241,11 @@ export function isInstanceOf(variable, typeKey) {
     } else if (
         typeKind === 'generic'
         && typeNamespace === 'nasl.collection'
-        && ['List', 'Map'].includes(typeName)
-    ) { // 特殊范型List/Map
+    ) {
+        if (!((typeName === 'List' && varStr === '[object Array]') || (typeName === 'Map' && varStr === '[object Object]'))) {
+            return false;
+        }
+        // 特殊范型List/Map
         let keyChecked = true;
         // 期望的值的类型
         const valueTypeArg = typeName === 'List' ? typeArguments?.[0] : typeArguments?.[1];
