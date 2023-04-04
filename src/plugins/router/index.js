@@ -32,7 +32,7 @@ export default {
                 else {
                     // 处理同页面锚点跳转无效的问题
                     const beforeHashUrl = url.slice(0, url.indexOf('#'));
-                    if (url.indexOf('#') !== -1 && beforeHashUrl === location.pathname) {
+                    if (url.indexOf('#') !== -1 && beforeHashUrl === (location.pathname + location.search)) {
                         const hash = url.slice(url.indexOf('#'))?.replace('#', '');
                         if (document.getElementById(hash)) {
                             document.getElementById(hash).scrollIntoView();
