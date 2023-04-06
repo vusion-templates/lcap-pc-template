@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.4.27",
+  "version": "0.4.29",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "dev": "vue-cli-service serve",

@@ -12,6 +12,7 @@ import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
 
 window.appVue = Vue;
+window.Vue = Vue;
 window.CloudUI = CloudUI;
 
 Vue.use(VueI18n);
@@ -28,6 +29,12 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
+    if (window.ICESTARK?.root) {
+        if (!document.head.contains(document.currentScript)
+            || document.currentScript.active === false)
+            return;
+    }
+
     window.appInfo = Object.assign(appConfig, platformConfig);
 
     installFilters(Vue, filters);
