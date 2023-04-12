@@ -82,6 +82,8 @@ const requester = function (requestInfo) {
         headers.Authorization = cookie.get('authorization');
     }
     headers.DomainName = window.appInfo?.domainName;
+    if (window.appInfo?.frontendName)
+        headers['LCAP-FRONTEND'] = window.appInfo?.frontendName;
 
     if (config.download) {
         return download(url);
