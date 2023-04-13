@@ -2,13 +2,13 @@
 	"getCustomConfig": {
 		"url": {
 			"method": "get",
-			"path": "/getCustomConfig/{configKey}"
+			"path": "/api/getCustomConfig/{configKey}"
 		}
 	},
 	"getCurrentIp": {
 		"url": {
 			"method": "get",
-			"path": "/getCurrentIp"
+			"path": "/api/getCurrentIp"
 		}
 	}
 }
