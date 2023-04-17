@@ -2,13 +2,17 @@ import Vue from 'vue';
 
 import { filterRoutes, parsePath } from '@/utils/route';
 
+function getBasePath() {
+    return window.appInfo && window.appInfo.basePath ? window.appInfo.basePath : '';
+}
+
 /**
  * 是否有无权限页面
  * @param {*} routes
  */
 function findNoAuthView(routes) {
     if (Array.isArray(routes)) {
-        return routes.find((route) => route?.path === `${window.appInfo.basePath ? window.appInfo.basePath : ''}/noAuth`);
+        return routes.find((route) => route?.path === `${getBasePath()}/noAuth`);
     }
 }
 
@@ -49,7 +53,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                     window.ICESTARK.loginFn();
                     return;
                 } else
-                    next({ path: `${window.appInfo.basePath ? window.appInfo.basePath : ''}/login` });
+                    next({ path: `${getBasePath()}/login` });
             } else {
                 try {
                     const resources = await $auth.getUserResources(appConfig.domainName);
@@ -65,7 +69,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                     }
                 }
             }
-        } else if (redirectedFrom?.path !== to.path && to.path === '/notFound') {
+        } else if (redirectedFrom?.path !== to.path && to.path === `${getBasePath()}/notFound`) {
             if (noAuthView?.path) {
                 next({ path: noAuthView.path });
             }
