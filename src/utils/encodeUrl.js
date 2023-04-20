@@ -98,3 +98,7 @@ const encodeUrl = function (url) {
 };
 
 export default encodeUrl;
+
+export function getBasePath() {
+    return window.appInfo && window.appInfo.basePath ? window.appInfo.basePath : '';
+}

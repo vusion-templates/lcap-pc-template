@@ -1,10 +1,7 @@
 import Vue from 'vue';
 
 import { filterRoutes, parsePath } from '@/utils/route';
-
-function getBasePath() {
-    return window.appInfo && window.appInfo.basePath ? window.appInfo.basePath : '';
-}
+import { getBasePath } from '@/utils/encodeUrl';
 
 /**
  * 是否有无权限页面
