@@ -211,11 +211,11 @@ export function isInstanceOf(variable, typeAnnotation) {
                 }
                 return checked;
             }
-        } else if (typeConstructor && variable instanceof typeConstructor) {
-            return true;
         }
-        return false;
+    } else if (typeConstructor && variable instanceof typeConstructor) {
+        return true;
     }
+    return false;
 }
 
 // 类型定义是否属于基础类型
