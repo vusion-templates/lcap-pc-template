@@ -90,11 +90,21 @@ const encodeUrl = function (url) {
     if (!url) {
         return url;
     }
-    const parsedPath = parsePath(url || '');
-    const path = parsedPath.path;
-    const hash = parsedPath.hash;
-    const query = parseQuery(parsedPath.query || '');
-    return (path || '/') + stringifyQuery(query) + hash;
+    try {
+        // 包含单个 '%' 的 query 参数会被 decodeURIComponent 解析报错，例如：ABC%DEF
+        const parsedPath = parsePath(url || '');
+        const path = parsedPath.path;
+        const hash = parsedPath.hash;
+        const query = parseQuery(parsedPath.query || '');
+        return (path || '/') + stringifyQuery(query) + hash;
+    } catch (e) {
+        console.log(e);
+        return url;
+    }
 };
 
 export default encodeUrl;
+
+export function getBasePath() {
+    return window.appInfo && window.appInfo.basePath ? window.appInfo.basePath : '';
+}

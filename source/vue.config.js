@@ -12,11 +12,6 @@ module.exports = {
     devServer: {
         port: 8810,
         proxy: {
-            '/system': {
-                target: 'http://localhost:8080', // 后端服务的 ip 或者域名
-                changeOrigin: true,
-                autoRewrite: true,
-            },
             '/api': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,

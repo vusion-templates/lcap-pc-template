@@ -42,19 +42,21 @@ export default {
             }
             this.$refs.iframe2.$el.style.height = `${value - 190}px`;
         },
-        async dealMessage(msg) {
+        dealMessage(msg) {
             if (msg?.data && typeof msg?.data === 'string' && JSON.parse(msg?.data)?.name === 'updateHeight') {
                 this.updateHeight(JSON.parse(msg?.data)?.value);
             }
             if (msg?.data && typeof msg?.data === 'string' && JSON.parse(msg?.data)?.token) {
                 const userId = JSON.parse(msg?.data)?.token.userId;
-                cookie.set({ authorization_extend_token_key: userId }, 15);
+                // 改为 iframe 里做
+                // cookie.set({ authorization_extend_token_key: userId }, 15);
                 this.close();
-                const res = await auth.GenerateExtendToken({});
-                const token = res?.Data;
-                if (token) {
-                    cookie.set({ authorization_extend_token: token }, 15);
-                }
+                this.$emit('afterShufanLogin', userId);
+                // const res = await auth.GenerateExtendToken({});
+                // const token = res?.Data;
+                // if (token) {
+                // cookie.set({ authorization_extend_token: token }, 15);
+                // }
             }
         },
         open() {

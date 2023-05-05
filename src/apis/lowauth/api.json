@@ -2,28 +2,28 @@
 	"Logout": {
 		"url": {
 			"method": "get",
-			"path": "/system/logout",
+			"path": "/api/system/logout",
 			"query": {}
 		}
     },
 	"getAppLoginTypes": {
 	    "url": {
 	        "method": "get",
-	        "path": "/system/getAppLoginTypes",
+	        "path": "/api/system/getAppLoginTypes",
 	        "query": {}
 	    }
 	},
     "CheckExtendToken": {
 	    "url": {
 	        "method": "get",
-	        "path": "/system/checkExtendToken",
+	        "path": "/api/system/checkExtendToken",
 	        "query": {}
 	    }
 	},
     "Logout": {
 	    "url": {
 	        "method": "get",
-	        "path": "/system/logout",
+	        "path": "/api/system/logout",
 	        "query": {}
 	    }
 	},
@@ -44,7 +44,7 @@
 	"getUserList": {
 		"url": {
 			"method": "post",
-			"path": "/system/user/userListFromNuimOrApp"
+			"path": "/api/system/user/userListFromNuimOrApp"
 		}
 	}
 }
