@@ -9,8 +9,9 @@ const filterRoutes = (routes, ancestorPaths, compareFn) => {
             }
             let newRoute = null;
             if (compareFn(route, ancestorPaths)) {
+                const { children, ...others } = route || {};
                 newRoute = {
-                    ...route,
+                    ...others,
                 };
                 newRoutes.push(newRoute);
             }
