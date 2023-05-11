@@ -27,15 +27,6 @@ installComponents(Vue, CloudUI);
 Vue.mixin(CloudUI.MEmitter);
 Vue.mixin(CloudUI.MPubSub);
 
-// 全局catch error，主要来处理中止组件
-Vue.config.errorHandler = (err, vm, info) => {
-    // err，错误对象
-    // vm，发生错误的组件实例
-    // info，Vue特定的错误信息，例如错误发生的生命周期、错误发生的事件
-    console.error('errorHandle', err, vm, info);
-    CloudUI.UToast.error(err);
-};
-
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
     if (window.ICESTARK?.root) {
@@ -62,12 +53,13 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     // 是否已经登录
     Vue.prototype.logined = true;
 
-    window.addEventListener('unhandledrejection', (event) => {
-        console.error('unhandledrejection', event);
-        CloudUI.UToast.error(event.reason);
-    });
-    window.onunhandledrejection = (event) => {
-        console.warn(`UNHANDLED PROMISE REJECTION: ${event.reason}`);
+    // 全局catch error，主要来处理中止组件
+    Vue.config.errorHandler = (err, vm, info) => {
+        console.error('errorHandle', err, vm, info);
+        this.$toast && this.$toast.show(err);
+        // err，错误对象
+        // vm，发生错误的组件实例
+        // info，Vue特定的错误信息，例如错误发生的生命周期、错误发生的事件
     };
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
     const authResourcePaths = platformConfig.authResourcePaths || [];
@@ -95,11 +87,6 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             locale: localStorage.i18nLocale || 'zh-CN',
         },
         ...App,
-        errorCaptured(err, vm, info) {
-            console.error('Error captured:', err, vm, info);
-            // 返回false阻止错误继续向上传递
-            return false;
-        },
     });
 
     if (window.ICESTARK?.root) {
