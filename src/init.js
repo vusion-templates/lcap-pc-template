@@ -52,6 +52,15 @@ const init = (appConfig, platformConfig, routes, metaData) => {
 
     // 是否已经登录
     Vue.prototype.logined = true;
+
+    // 全局catch error，主要来处理中止组件
+    Vue.config.errorHandler = (err, vm, info) => {
+        console.error('errorHandle', err, vm, info);
+        this.$toast && this.$toast.show(err);
+        // err，错误对象
+        // vm，发生错误的组件实例
+        // info，Vue特定的错误信息，例如错误发生的生命周期、错误发生的事件
+    };
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
     const authResourcePaths = platformConfig.authResourcePaths || [];
     const baseRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
