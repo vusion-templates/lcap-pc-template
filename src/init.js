@@ -55,7 +55,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
 
     // 全局catch error，主要来处理中止组件
     Vue.config.errorHandler = (err, vm, info) => {
-        console.error('errorHandle', err, vm, info);
+        console.warn('errorHandle', err, vm, info);
         CloudUI.UToast.error(err);
         // err，错误对象
         // vm，发生错误的组件实例
