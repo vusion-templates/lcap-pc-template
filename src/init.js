@@ -101,6 +101,14 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     } else
         app.$mount('#app');
 
+    // 全局catch error，主要来处理中止组件
+    app.config.errorHandler = (err, vm, info) => {
+        // err，错误对象
+        // vm，发生错误的组件实例
+        // info，Vue特定的错误信息，例如错误发生的生命周期、错误发生的事件
+        console.error('errorHandle', err, vm, info);
+        CloudUI.UToast.error(err);
+    };
     return app;
 };
 
