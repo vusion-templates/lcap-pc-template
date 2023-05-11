@@ -55,12 +55,16 @@ const init = (appConfig, platformConfig, routes, metaData) => {
 
     // 全局catch error，主要来处理中止组件
     Vue.config.errorHandler = (err, vm, info) => {
-        console.error('errorHandle', err, vm, info);
-        Vue.$toast && Vue.$toast.show(err);
         // err，错误对象
         // vm，发生错误的组件实例
         // info，Vue特定的错误信息，例如错误发生的生命周期、错误发生的事件
+        console.error('errorHandle', err, vm, info);
+        CloudUI.UToast.error(err);
     };
+    window.addEventListener('unhandledrejection', (event) => {
+        console.error('unhandledrejection', event);
+        CloudUI.UToast.error(event.reason);
+    });
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
     const authResourcePaths = platformConfig.authResourcePaths || [];
     const baseRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
