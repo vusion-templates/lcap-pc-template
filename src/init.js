@@ -90,11 +90,6 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             locale: localStorage.i18nLocale || 'zh-CN',
         },
         ...App,
-        errorCaptured(err, vm, info) {
-            console.warn('Error captured:', err, vm, info);
-            // 返回false阻止错误继续向上传递
-            return false;
-        },
     });
 
     if (window.ICESTARK?.root) {
