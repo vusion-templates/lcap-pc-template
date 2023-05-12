@@ -53,13 +53,16 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     // 是否已经登录
     Vue.prototype.logined = true;
 
-    // 全局catch error，主要来处理中止组件
+    // 全局catch error，主要来处理中止组件,的错误不想暴露给用户，其余的还是在控制台提示出来
     Vue.config.errorHandler = (err, vm, info) => {
-        console.warn('errorHandle', err, vm, info);
-        CloudUI.UToast.error(err);
-        // err，错误对象
-        // vm，发生错误的组件实例
-        // info，Vue特定的错误信息，例如错误发生的生命周期、错误发生的事件
+        if (err.name === 'Error' && err.message === '程序中止') {
+            console.warn('程序中止');
+        } else {
+            // err，错误对象
+            // vm，发生错误的组件实例
+            // info，Vue特定的错误信息，例如错误发生的生命周期、错误发生的事件
+            console.error(err);
+        }
     };
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
     const authResourcePaths = platformConfig.authResourcePaths || [];

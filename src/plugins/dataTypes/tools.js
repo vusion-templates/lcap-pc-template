@@ -730,5 +730,11 @@ export const fromString = (variable, typeKey) => {
             return JSON.parse(variable);
         }
     }
-    throw Error(`${typeName}格式不正确`);
+    toastAndThrowError(`${typeName}格式不正确`);
 };
+export function toastAndThrowError(err) {
+    console.warn(window.Vue);
+    console.warn(window.CloudUI);
+    window.Vue.$toast.error(err);
+    throw new Error(err);
+}
