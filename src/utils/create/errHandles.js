@@ -18,6 +18,9 @@ export default {
             instance.show(getErrMessage(err), getErrStrack(err));
         }
     },
+    501(a, b) {
+        console.warn(a, b);
+    },
     400({ config }, err = {}) {
         if (!config.noErrorTip) {
             instance.show(getErrMessage(err), getErrStrack(err));
