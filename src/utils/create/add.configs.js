@@ -33,7 +33,7 @@ const httpError = {
         const { url, config = {} } = requestInfo;
         const { method, body = {}, headers = {} } = url;
         // 处理code
-        if (err === 'expired request') {
+        if (err === 'expired request' || err === '程序中止') {
             throw err;
         }
         let handle;
