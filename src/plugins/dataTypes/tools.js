@@ -1,4 +1,5 @@
 import { format, formatISO } from 'date-fns';
+import { UToast } from 'cloud-ui.vusion';
 
 function tryJSONParse(str) {
     let result;
@@ -734,6 +735,6 @@ export const fromString = (variable, typeKey) => {
 };
 export function toastAndThrowError(err) {
     // 全局提示toast
-    window?.CloudUI?.UToast?.error(err);
+    UToast?.error(err);
     throw new Error(err);
 }
