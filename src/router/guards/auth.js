@@ -18,7 +18,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
     const $auth = Vue.prototype.$auth;
     const redirectedFrom = parsePath(to.redirectedFrom);
     const toPath = redirectedFrom?.path || to.path;
-    const toQuery = redirectedFrom?.query || to.query;
+    const toQuery = to.query;
     const authPath = authResourcePaths.find((authResourcePath) => {
         if (authResourcePath === toPath || `${authResourcePath}/` === toPath) {
             return true;
