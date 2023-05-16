@@ -246,7 +246,8 @@ export const utils = {
     ListFind(arr, by) {
         if (Array.isArray(arr)) {
             if (typeof by === 'function') {
-                return arr.find(by) || null;
+                const value = arr.find(by);
+                return (typeof value === 'undefined') ? null : value;
             }
         }
     },
@@ -259,7 +260,7 @@ export const utils = {
     ListFindIndex(arr, callback) {
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                return arr.findIndex(callback) || null;
+                return arr.findIndex(callback);
             }
         }
     },
@@ -354,7 +355,8 @@ export const utils = {
     },
     MapGet(map, key) {
         if (isObject(map)) {
-            return map[key] || null;
+            const value = map[key];
+            return (typeof value === 'undefined') ? null : value;
         }
     },
     MapPut(map, key, value) {
