@@ -14,8 +14,8 @@ import SFreesassBanner from '@/components/s-freesass-banner';
 import auth from '@/apis/auth';
 
 const serviceMap = {
-    // generateSfToken: 'http://sfsso.community1.lcap.qz.163yun.com/api/generateSfToken',
-    checkSfToken: 'http://sfsso.community1.lcap.qz.163yun.com/api/checkSfToken',
+    checkSfToken: `${location.protocol}//sfsso.community1.lcap.qz.163yun.com/api/checkSfToken`,
+    checkSfTokenNew: `${location.protocol}//sfsso-community1.app.codewave.163.com/api/checkSfToken`,
 };
 export default {
     components: { SFreesassLogin, SFreesassBanner, SFreesassTransfer },
