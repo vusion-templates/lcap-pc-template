@@ -11,7 +11,6 @@
 import SFreesassLogin from '@/components/s-freesass-login';
 import SFreesassTransfer from '@/components/s-freesass-transfer';
 import SFreesassBanner from '@/components/s-freesass-banner';
-import auth from '@/apis/auth';
 
 const newDomain = location.host.split('.').includes('163');
 const serviceMap = {

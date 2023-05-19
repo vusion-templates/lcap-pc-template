@@ -2,6 +2,7 @@ import authService from './authService';
 
 export default {
     install(Vue, options = {}) {
+        authService.start();
         const router = options.router;
         const base = (options.base || '').replace(/\/$/, '');
         /**
