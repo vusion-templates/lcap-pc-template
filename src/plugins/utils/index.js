@@ -15,7 +15,7 @@ import {
 } from 'date-fns';
 import Vue from 'vue';
 
-import { toString, fromString } from '../dataTypes/tools';
+import { toString, fromString, toastAndThrowError } from '../dataTypes/tools';
 
 let enumsMap = {};
 
@@ -33,13 +33,13 @@ function toValue(date, converter) {
 }
 function isArrayOutBounds(arr, index) {
     if (!Array.isArray(arr))
-        throw new Error('传入内容不是数组');
+        toastAndThrowError('传入内容不是数组');
     if (typeof index !== 'number' || isNaN(index)) {
-        throw new Error('传入下标不是数字');
+        toastAndThrowError('传入下标不是数字');
     }
     // 传入要找的下标，大于数组长度
     if ((index + 1) > arr.length) {
-        throw new Error(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
+        toastAndThrowError(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
     }
     return true;
 }
@@ -249,7 +249,8 @@ export const utils = {
     ListFind(arr, by) {
         if (Array.isArray(arr)) {
             if (typeof by === 'function') {
-                return arr.find(by) || null;
+                const value = arr.find(by);
+                return (typeof value === 'undefined') ? null : value;
             }
         }
     },
@@ -262,7 +263,7 @@ export const utils = {
     ListFindIndex(arr, callback) {
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                return arr.findIndex(callback) || null;
+                return arr.findIndex(callback);
             }
         }
     },
@@ -357,7 +358,8 @@ export const utils = {
     },
     MapGet(map, key) {
         if (isObject(map)) {
-            return map[key] || null;
+            const value = map[key];
+            return (typeof value === 'undefined') ? null : value;
         }
     },
     MapPut(map, key, value) {
