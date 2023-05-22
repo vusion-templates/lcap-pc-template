@@ -6,7 +6,7 @@
             </template>
             <template #body>
                 <div :class="$style.title">轻舟低代码，人人皆可开发软件应用</div>
-                <u-iframe ref="iframe2" style="width:100%;height:360px;" src="//id.163yun.com/sdk-login?cmsKey=SdkLoginPage&i18nEnable=true&locale=zh_CN&h=shufanqzlcap&t=shufanqzlcap&fromnsf=lcapAppShare"></u-iframe>
+                <u-iframe ref="iframe2" style="width:100%;height:360px;" src="//id.sf.163.com/sdk-login?cmsKey=SdkLoginPage&i18nEnable=true&locale=zh_CN&h=shufanqzlcap&t=shufanqzlcap&fromnsf=lcapAppShare"></u-iframe>
                 <div :class="$style.content">
                     <div style="width:14px;height:14px;margin-top:3px;">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
