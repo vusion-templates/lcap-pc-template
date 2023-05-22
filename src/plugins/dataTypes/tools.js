@@ -241,8 +241,11 @@ export function isInstanceOf(variable, typeKey) {
     } else if (
         typeKind === 'generic'
         && typeNamespace === 'nasl.collection'
-        && ['List', 'Map'].includes(typeName)
-    ) { // 特殊范型List/Map
+    ) {
+        if (!((typeName === 'List' && varStr === '[object Array]') || (typeName === 'Map' && varStr === '[object Object]'))) {
+            return false;
+        }
+        // 特殊范型List/Map
         let keyChecked = true;
         // 期望的值的类型
         const valueTypeArg = typeName === 'List' ? typeArguments?.[0] : typeArguments?.[1];
@@ -414,22 +417,21 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         ) { // 特殊范型List/Map
             let initVal = (typeName === 'List' ? [] : {});
             if (parsedValue) {
-                if (Array.isArray(typeArguments) && typeArguments.length > 0) {
-                    const valueTypeAnnotation = typeName === 'List' ? typeArguments[0] : typeArguments[1];
-                    const sortedTypeKey = genSortedTypeKey(valueTypeAnnotation);
-                    if (typeName === 'List' && Array.isArray(parsedValue)) {
-                        initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
-                    } else if (typeName === 'Map') {
-                        for (const key in parsedValue) {
-                            const val = parsedValue[key];
-                            initVal[key] = genInitData(sortedTypeKey, val, level);
-                        }
+                // valueTypeAnnotation可能会由于一些情况出现空，因此不能加上对typeArguments数组的整体容错判断
+                const valueTypeAnnotation = typeName === 'List' ? typeArguments?.[0] : typeArguments?.[1];
+                const sortedTypeKey = genSortedTypeKey(valueTypeAnnotation);
+                if (typeName === 'List' && Array.isArray(parsedValue)) {
+                    initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
+                } else if (typeName === 'Map') {
+                    for (const key in parsedValue) {
+                        const val = parsedValue[key];
+                        initVal[key] = genInitData(sortedTypeKey, val, level);
                     }
                 }
             }
             return initVal;
         }
-        if (typeName === 'DateTime') {
+        if (typeName === 'DateTime' && parsedValue !== undefined) {
             const date = new Date(parsedValue);
             parsedValue = formatISO(date, { format: 'extended', fractionDigits: 3 });
         } else if (typeKey) {
@@ -474,11 +476,16 @@ export const toString = (variable, typeKey, tabSize = 0) => {
     }
     // null 或 undefined 返回 "（空）"
     if ([undefined, null].includes(variable) || typeKey === 'nasl.core.Null') { // 空
-        return '（空）';
+        if (tabSize > 0) {
+            return '（空）';
+        } else {
+            return '';
+        }
     }
-    let str = '' + variable;
+    let str = '';
     const isPrimitive = isDefPrimitive(typeKey);
     if (isPrimitive) { // 基础类型
+        str = '' + variable;
         // >=8位有效数字时，按小e
         if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) {
             const varArr = str.split('.');
@@ -518,7 +525,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
         }
     } else {
         const typeDefinition = typeDefinitionMap[typeKey];
-        const { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties, enumItems } = typeDefinition || {};
+        let { concept, typeKind, typeNamespace, typeName, typeArguments, name, properties, enumItems } = typeDefinition || {};
         if (typeKind === 'union') {
             if (Array.isArray(typeArguments) && typeArguments.length) {
                 const typeArg = typeArguments.find((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
@@ -535,14 +542,28 @@ export const toString = (variable, typeKey, tabSize = 0) => {
             if (tabSize > 0) {
                 str = '';
                 if (isDefList(typeDefinition)) {
-                    str += '[...]';
+                    if (variable.length > 0) {
+                        str += '[...]';
+                    } else {
+                        str += '[]';
+                    }
                 } else if (isDefMap(typeDefinition)) {
-                    str += '[... -> ...]';
+                    const keys = Object.keys(variable);
+                    if (keys.length > 0) {
+                        str += '[... -> ...]';
+                    } else {
+                        str += '[->]';
+                    }
                 } else {
+                    const keys = Object.keys(variable);
                     if (name) {
                         str += `${name} `;
                     }
-                    str += '{...}';
+                    if (keys.length > 0) {
+                        str += '{...}';
+                    } else {
+                        str += '{}';
+                    }
                 }
             } else {
                 if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
@@ -563,6 +584,34 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                         str = moreThanMax ? `{\n${arrStr}\n...\n}` : `{\n${arrStr}\n}`;
                     }
                 } else {
+                    // 处理一些范型数据结构的情况
+                    if (typeKind === 'generic') {
+                        const genericTypeKey = `${typeNamespace}.${typeName}`;
+                        const genericTypeDefinition = typeDefinitionMap[genericTypeKey];
+                        if (genericTypeDefinition) {
+                            name = genericTypeDefinition?.name;
+                            const genericProperties = genericTypeDefinition?.properties || [];
+                            if (Array.isArray(genericTypeDefinition.typeParams) && genericTypeDefinition.typeParams.length) {
+                                const map = {};
+                                genericTypeDefinition.typeParams.forEach((typeParam, index) => {
+                                    const { name } = typeParam || {};
+                                    map[name] = index;
+                                });
+                                properties = genericProperties.map((genericProperty) => {
+                                    let typeAnnotation = genericProperty?.typeAnnotation;
+                                    const { typeName } = typeAnnotation || {};
+                                    const typeParamIndex = map[typeName];
+                                    if (typeParamIndex !== undefined) {
+                                        typeAnnotation = typeArguments[typeParamIndex];
+                                    }
+                                    return {
+                                        ...genericProperty,
+                                        typeAnnotation,
+                                    };
+                                });
+                            }
+                        }
+                    }
                     let code = `${indent(tabSize)}`;
                     if (name) {
                         code += `${name} `;
@@ -581,6 +630,25 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                     str = code;
                 }
             }
+        }
+    }
+    if (str === '') {
+        if (Object.prototype.toString.call(variable) === '[object Object]') {
+            if (tabSize > 0) {
+                str = '{...}';
+            } else {
+                str = `{\n`;
+                const propStr = [];
+                for (const key in variable) {
+                    const propVal = variable[key];
+                    const propValStr = toString(propVal, undefined, tabSize + 1);
+                    propStr.push(`${indent(tabSize + 1)}${key}: ${propValStr}`);
+                }
+                str += propStr.join(',\n');
+                str += `\n}`;
+            }
+        } else {
+            str = '' + variable;
         }
     }
     return str;
@@ -647,7 +715,14 @@ export const fromString = (variable, typeKey) => {
     }
     // 整数
     else if (['Integer', 'Long'].includes(typeName) && IntegerReg.test(variable)) {
-        return +variable;
+        const maxMap = {
+            Integer: 2147483647,
+            Long: 9223372036854775807,
+        };
+        const numberVar = +variable;
+        if ((numberVar > 0 && numberVar < maxMap[typeName]) || (numberVar < 0 && numberVar > -maxMap[typeName])) {
+            return numberVar;
+        }
     }
     // 布尔
     else if (typeName === 'Boolean') {

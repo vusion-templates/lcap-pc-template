@@ -47,12 +47,6 @@ export default {
                 location.href = '/login';
         }
     },
-    401339({ config }, err = {}) {
-        if (!config.noErrorTip) {
-            instance.show('当前租户已过期');
-        }
-        location.href = '/tenantExpiration';
-    },
     remoteError({ config }, err) {
         if (!config.noErrorTip) {
             instance.show('系统错误，请查看日志！');

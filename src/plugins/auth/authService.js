@@ -1,7 +1,8 @@
 import Vue from 'vue';
-import auth from '@/apis/auth';
-import lowauth from '@/apis/lowauth';
+import { initService as authInitService } from '@/apis/auth';
+import { initService as lowauthInitService } from '@/apis/lowauth';
 import cookie from '@/utils/cookie';
+import { getBasePath } from '@/utils/encodeUrl';
 
 const getBaseHeaders = () => {
     const headers = {
@@ -18,17 +19,24 @@ let userResourcesPromise = null;
 
 export default {
     _map: undefined,
+    authService: undefined,
+    lowauthInitService: undefined,
+    start() {
+        this.authService = authInitService();
+        this.lowauthInitService = lowauthInitService();
+        window.authService = this.authService;
+    },
     getUserInfo() {
         if (!userInfoPromise) {
             if (window.appInfo.hasUserCenter) {
-                userInfoPromise = lowauth.GetUser({
+                userInfoPromise = this.lowauthInitService.GetUser({
                     headers: getBaseHeaders(),
                     config: {
                         noErrorTip: true,
                     },
                 });
             } else {
-                userInfoPromise = auth.GetUser({
+                userInfoPromise = this.authService.GetUser({
                     headers: getBaseHeaders(),
                     config: {
                         noErrorTip: true,
@@ -53,7 +61,7 @@ export default {
     },
     getUserResources(DomainName) {
         if (window.appInfo.hasAuth) {
-            userResourcesPromise = lowauth.GetUserResources({
+            userResourcesPromise = this.lowauthInitService.GetUserResources({
                 headers: getBaseHeaders(),
                 query: {
                     userId: Vue.prototype.$global.userInfo.UserId,
@@ -73,7 +81,7 @@ export default {
                 return resources;
             });
         } else {
-            userResourcesPromise = auth.GetUserResources({
+            userResourcesPromise = this.authService.GetUserResources({
                 headers: getBaseHeaders(),
                 query: {
                     DomainName,
@@ -94,8 +102,9 @@ export default {
     },
     async getKeycloakLogoutUrl() {
         let logoutUrl = '';
+        const basePath = getBasePath();
         if (window.appInfo.hasUserCenter) {
-            const res = await lowauth.getAppLoginTypes({
+            const res = await this.lowauthInitService.getAppLoginTypes({
                 query: {
                     Action: 'GetTenantLoginTypes',
                     Version: '2020-06-01',
@@ -104,10 +113,10 @@ export default {
             });
             const KeycloakConfig = res?.Data.Keycloak;
             if (KeycloakConfig) {
-                logoutUrl = `${KeycloakConfig?.config?.logoutUrl}?redirect_uri=${window.location.protocol}//${window.location.host}/login`;
+                logoutUrl = `${KeycloakConfig?.config?.logoutUrl}?redirect_uri=${window.location.protocol}//${window.location.host}${basePath}/login`;
             }
         } else {
-            const res = await auth.getNuimsTenantLoginTypes({
+            const res = await this.authService.getNuimsTenantLoginTypes({
                 query: {
                     Action: 'GetTenantLoginTypes',
                     Version: '2020-06-01',
@@ -116,7 +125,7 @@ export default {
             });
             const KeycloakConfig = res?.Data.find((item) => (item.LoginType === 'Keycloak'));
             if (KeycloakConfig) {
-                logoutUrl = `${KeycloakConfig?.extendProperties?.logoutUrl}?redirect_uri=${window.location.protocol}//${window.location.host}/login`;
+                logoutUrl = `${KeycloakConfig?.extendProperties?.logoutUrl}?redirect_uri=${window.location.protocol}//${window.location.host}${basePath}/login`;
             }
         }
 
@@ -132,7 +141,7 @@ export default {
                 window.location.href = logoutUrl;
                 await sleep(1000);
             } else {
-                return lowauth.Logout({
+                return this.lowauthInitService.Logout({
                     headers: getBaseHeaders(),
                 }).then(() => {
                     // 用户中心，去除认证和用户名信息
@@ -147,7 +156,7 @@ export default {
                 window.location.href = logoutUrl;
                 await sleep(1000);
             } else {
-                return auth.Logout({
+                return this.authService.Logout({
                     headers: getBaseHeaders(),
                 }).then(() => {
                     cookie.erase('authorization');

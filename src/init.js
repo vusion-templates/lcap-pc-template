@@ -10,7 +10,6 @@ import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin
 import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter } from '@/router';
 import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
-import STenantExpiration from '@/components/s-tenant-expiration.vue';
 
 window.appVue = Vue;
 window.Vue = Vue;
@@ -30,6 +29,12 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
+    if (window.ICESTARK?.root) {
+        if (!document.head.contains(document.currentScript)
+            || document.currentScript.active === false)
+            return;
+    }
+
     window.appInfo = Object.assign(appConfig, platformConfig);
 
     installFilters(Vue, filters);
@@ -49,7 +54,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     Vue.prototype.logined = true;
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
     const authResourcePaths = platformConfig.authResourcePaths || [];
-    let baseRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
+    const baseRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
         const routePath = route.path;
         const completePath = [...ancestorPaths, routePath].join('/');
         let completeRedirectPath = '';
@@ -60,12 +65,6 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         return baseResourcePaths.includes(completePath) || completeRedirectPath;
     });
 
-    // 增加后端错误页面相关路由
-    const backendErrorRoute = {
-        path: '/tenantExpiration',
-        component: STenantExpiration,
-    };
-    baseRoutes = [...baseRoutes, backendErrorRoute];
     const router = initRouter(baseRoutes);
 
     router.beforeEach(userInfoGuard);

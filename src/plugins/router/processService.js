@@ -1,4 +1,4 @@
-import process from '@/apis/process';
+import { initService as processInitService } from '@/apis/process';
 import authService from '../auth/authService';
 
 let user;
@@ -7,7 +7,7 @@ export default {
         const userInfo = await authService.getUserInfo() || {};
         user = userInfo.UserName;
         const { query } = param;
-        const res = await process.getTasks({
+        const res = await processInitService().getTasks({
             query: {
                 ...query,
                 user,
@@ -17,7 +17,7 @@ export default {
     },
     async claimTask(param = {}) {
         const { path = {} } = param;
-        const res = await process.claimTask({
+        const res = await processInitService().claimTask({
             path: { ...path },
             body: {
                 user,
@@ -27,7 +27,7 @@ export default {
     },
     async getDestinationUrl(param = {}) {
         const { path: { id } } = param;
-        const res = await process.getDestinationUrl({
+        const res = await processInitService().getDestinationUrl({
             path: { id },
             query: {
                 user,
@@ -39,7 +39,7 @@ export default {
 
 export const porcessPorts = {
     async getProcessDefinitionList(query) {
-        const res = await process.getProcessDefinitionList({
+        const res = await processInitService().getProcessDefinitionList({
             body: {
                 ...query,
             },
@@ -47,7 +47,7 @@ export const porcessPorts = {
         return res;
     },
     async getProcessDefinition(query) {
-        const res = await process.getProcessDefinition({
+        const res = await processInitService().getProcessDefinition({
             body: {
                 ...query,
             },
@@ -55,7 +55,7 @@ export const porcessPorts = {
         return res;
     },
     async getProcessInstanceList(query) {
-        const res = await process.getProcessInstanceList({
+        const res = await processInitService().getProcessInstanceList({
             body: {
                 ...query,
             },
@@ -63,7 +63,7 @@ export const porcessPorts = {
         return res;
     },
     async getProcessInstance(query) {
-        const res = await process.getProcessInstance({
+        const res = await processInitService().getProcessInstance({
             body: {
                 ...query,
             },
@@ -71,7 +71,7 @@ export const porcessPorts = {
         return res;
     },
     async getTaskDefinitionList(query) {
-        const res = await process.getTaskDefinitionList({
+        const res = await processInitService().getTaskDefinitionList({
             body: {
                 ...query,
             },
@@ -79,7 +79,7 @@ export const porcessPorts = {
         return res;
     },
     async getTaskDefinition(query) {
-        const res = await process.getTaskDefinition({
+        const res = await processInitService().getTaskDefinition({
             body: {
                 ...query,
             },
@@ -87,7 +87,7 @@ export const porcessPorts = {
         return res;
     },
     async getTaskInstanceList(query) {
-        const res = await process.getTaskInstanceList({
+        const res = await processInitService().getTaskInstanceList({
             body: {
                 ...query,
             },
@@ -95,7 +95,7 @@ export const porcessPorts = {
         return res;
     },
     async getTaskInstance(query) {
-        const res = await process.getTaskInstance({
+        const res = await processInitService().getTaskInstance({
             body: {
                 ...query,
             },
@@ -103,7 +103,7 @@ export const porcessPorts = {
         return res;
     },
     async claimTaskInstance(query) {
-        const res = await process.claimTaskInstance({
+        const res = await processInitService().claimTaskInstance({
             body: {
                 ...query,
             },
@@ -111,7 +111,7 @@ export const porcessPorts = {
         return res;
     },
     async unclaimTaskInstance(query) {
-        const res = await process.unclaimTaskInstance({
+        const res = await processInitService().unclaimTaskInstance({
             body: {
                 ...query,
             },
@@ -119,7 +119,7 @@ export const porcessPorts = {
         return res;
     },
     async getTaskDestinationUrl(query) {
-        const res = await process.getTaskDestinationUrl({
+        const res = await processInitService().getTaskDestinationUrl({
             body: {
                 ...query,
             },
@@ -127,7 +127,7 @@ export const porcessPorts = {
         return res;
     },
     async transferTaskInstance(query) {
-        const res = await process.transferTaskInstance({
+        const res = await processInitService().transferTaskInstance({
             body: {
                 ...query,
             },
@@ -135,7 +135,7 @@ export const porcessPorts = {
         return res;
     },
     async withdrawProcessInstance(query) {
-        const res = await process.withdrawProcessInstance({
+        const res = await processInitService().withdrawProcessInstance({
             body: {
                 ...query,
             },
@@ -143,7 +143,7 @@ export const porcessPorts = {
         return res;
     },
     async endProcessInstance(query) {
-        const res = await process.endProcessInstance({
+        const res = await processInitService().endProcessInstance({
             body: {
                 ...query,
             },
@@ -151,7 +151,7 @@ export const porcessPorts = {
         return res;
     },
     async getRejectableTaskDefinitionList(query) {
-        const res = await process.getRejectableTaskDefinitionList({
+        const res = await processInitService().getRejectableTaskDefinitionList({
             body: {
                 ...query,
             },
