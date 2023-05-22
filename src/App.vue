@@ -3,7 +3,7 @@
         <s-freesass-banner v-if="isFreeSass"></s-freesass-banner>
         <router-view></router-view>
         <s-freesass-login @afterShufanLogin="afterShufanLogin" ref="freeSassLogin"></s-freesass-login>
-        <s-freesass-transfer v-if="isFreeSass&&loginFinished" ref="freesassTransfer"></s-freesass-transfer>
+        <s-freesass-transfer v-if="isPersonSass&&loginFinished" ref="freesassTransfer"></s-freesass-transfer>
     </div>
 </template>
 
@@ -14,8 +14,8 @@ import SFreesassBanner from '@/components/s-freesass-banner';
 import auth from '@/apis/auth';
 
 const serviceMap = {
-    // generateSfToken: 'http://sfsso.community1.lcap.qz.163yun.com/api/generateSfToken',
-    checkSfToken: 'http://sfsso.community1.lcap.qz.163yun.com/api/checkSfToken',
+    checkSfToken: `${location.protocol}//sfsso.community1.lcap.qz.163yun.com/api/checkSfToken`,
+    checkSfTokenNew: `${location.protocol}//sfsso-community1.app.codewave.163.com/api/checkSfToken`,
 };
 export default {
     components: { SFreesassLogin, SFreesassBanner, SFreesassTransfer },
@@ -28,6 +28,9 @@ export default {
         isSharePage() {
             const neteaseStrList = 'lcap.qz.163yun'.split('.');
             return neteaseStrList.some((it) => location.host.includes(it));
+        },
+        isPersonSass() {
+            return +window.appInfo?.tenantType === 1;
         },
         isFreeSass() {
             return +window.appInfo?.tenantType === 1 && +window.appInfo?.tenantLevel === 0;

@@ -1,7 +1,7 @@
 <template>
     <div :class="$style.freesassroot">
         <u-iframe ref="iframe3" style="width:1px;height:1px;opacity: 0;"
-            src="https://sfsso.community1.lcap.qz.163yun.com/sso"></u-iframe>
+            src="https://sfsso-community1.app.codewave.163.com/sso"></u-iframe>
 
     </div>
 </template>
@@ -27,7 +27,7 @@ export default {
                 d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
                 return d.toGMTString();
             }
-            const target = 'https://sfsso.community1.lcap.qz.163yun.com';
+            const target = 'https://sfsso-community1.app.codewave.163.com';
             if (msg?.origin === target && msg?.data && typeof msg?.data === 'string' && JSON.parse(msg?.data)?.sf_token_http) {
                 const token = JSON.parse(msg?.data)?.sf_token_http;
                 const expires = JSON.parse(msg?.data)?.expires;
