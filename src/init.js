@@ -29,7 +29,7 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
-    if (window.ICESTARK?.root) {
+    if (window.LcapMicro?.root) {
         if (!document.head.contains(document.currentScript)
             || document.currentScript.active === false)
             return;
@@ -92,8 +92,8 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         ...App,
     });
 
-    if (window.ICESTARK?.root) {
-        const container = window.ICESTARK.root;
+    if (window.LcapMicro?.root) {
+        const container = window.LcapMicro.root;
         container.innerHTML = '';
         app.$mount();
         container.appendChild(app.$el);

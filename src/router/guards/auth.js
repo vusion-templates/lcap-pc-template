@@ -46,8 +46,8 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
         if (!$auth.isInit()) {
             if (!userInfo.UserId) {
                 localStorage.setItem('beforeLogin', JSON.stringify(location));
-                if (window.ICESTARK?.loginFn) {
-                    window.ICESTARK.loginFn();
+                if (window.LcapMicro?.loginFn) {
+                    window.LcapMicro.loginFn();
                     return;
                 } else
                     next({ path: `${getBasePath()}/login` });
