@@ -2,9 +2,9 @@ import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
 import cookie from '@/utils/cookie';
 
-import configuration from '@/apis/configuration';
-import lowauth from '@/apis/lowauth';
-import io from '@/apis/io';
+import { initService as configurationInitService } from '@/apis/configuration';
+import { initService as lowauthInitService } from '@/apis/lowauth';
+import { initService as ioInitService } from '@/apis/io';
 import authService from '../auth/authService';
 import { initApplicationConstructor, genSortedTypeKey, genInitData, isInstanceOf } from './tools';
 import { porcessPorts } from '../router/processService';
@@ -246,7 +246,7 @@ export default {
                     });
             },
             async downloadFile(url, fileName) {
-                await io.downloadFiles({
+                await ioInitService().downloadFiles({
                     body: {
                         urls: [url],
                         fileName,
@@ -255,7 +255,7 @@ export default {
                     .catch((err) => Promise.resolve(err));
             },
             async downloadFiles(urls, fileName) {
-                await io.downloadFiles({
+                await ioInitService().downloadFiles({
                     body: {
                         urls,
                         fileName,
@@ -273,21 +273,21 @@ export default {
                 if (configKey.startsWith('extensions.')) {
                     query.group = `${configKeys[0]}.${configKeys[1]}.${groupName}`;
                 }
-                const res = await configuration.getCustomConfig({
+                const res = await configurationInitService().getCustomConfig({
                     path: { configKey: finalConfigKey },
                     query,
                 });
                 return res;
             },
             async getCurrentIp() {
-                const res = await configuration.getCurrentIp();
+                const res = await configurationInitService().getCurrentIp();
                 return res;
             },
             async getUserList(query) {
                 const appEnv = window.appInfo.env;
                 const cookies = document.cookie.split('; ');
                 const token = cookies.find((cookie) => cookie.split('=')[0] === 'authorization')?.split('=')[1];
-                const res = await lowauth.getUserList({
+                const res = await lowauthInitService().getUserList({
                     body: {
                         appEnv,
                         token,

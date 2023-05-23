@@ -22,7 +22,6 @@
 </template>
 
 <script>
-import auth from '@/apis/auth';
 import cookie from '@/utils/cookie';
 
 export default {

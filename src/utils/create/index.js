@@ -112,6 +112,19 @@ const requester = function (requestInfo) {
 const service = new Service(requester);
 addConfigs(service);
 
+// 调整请求路径
+const adjustPathWithSysPrefixPath = (apiSchemaList) => {
+    const sysPrefixPath = window.appInfo?.sysPrefixPath;
+    if (sysPrefixPath && apiSchemaList) {
+        for (const key in apiSchemaList) {
+            const path = apiSchemaList[key]?.url?.path;
+            if (path && path.startsWith('/')) {
+                apiSchemaList[key].url.path = sysPrefixPath + path;
+            }
+        }
+    }
+};
+
 export const createService = function createService(apiSchemaList, serviceConfig, dynamicServices) {
     const fixServiceConfig = serviceConfig || {};
     fixServiceConfig.config = fixServiceConfig.config || {};
@@ -121,7 +134,7 @@ export const createService = function createService(apiSchemaList, serviceConfig
         shortResponse: true,
     });
     serviceConfig = fixServiceConfig;
-
+    adjustPathWithSysPrefixPath(apiSchemaList);
     return service.generator(apiSchemaList, dynamicServices, serviceConfig);
 };
 
@@ -135,6 +148,6 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
         concept: 'Logic',
     });
     serviceConfig = fixServiceConfig;
-
+    adjustPathWithSysPrefixPath(apiSchemaList);
     return service.generator(apiSchemaList, dynamicServices, serviceConfig);
 };
