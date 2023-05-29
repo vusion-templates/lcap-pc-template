@@ -375,9 +375,14 @@ export default {
         };
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
-        function parseRequestDataType(root, prop, event, current) {
-            // eslint-disable-next-line no-eval
-            const value = eval(root[prop]);
+        function parseRequestDataType(root, _prop, event, current, _scopeData = {}) {
+            let value;
+            try {
+                // eslint-disable-next-line no-eval
+                value = eval(root[_prop]);
+            } catch (err) {
+                value = _scopeData[root[_prop]];
+            }
             const type = typeof value;
             // console.log('type:', type, value)
             if (type === 'number') {
@@ -408,7 +413,7 @@ export default {
         }
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
-        function resolveRequestData(root, event, current) {
+        function resolveRequestData(root, event, current, scopeData = {}) {
             if (!root)
                 return;
             // console.log(root.concept)
@@ -425,14 +430,14 @@ export default {
             } else if (root.concept === 'BooleanLiteral') {
                 root.value = root.value === 'true';
             } else if (root.concept === 'Identifier') {
-                parseRequestDataType.call(this, root, 'expression', event, current);
+                parseRequestDataType.call(this, root, 'expression', event, current, scopeData);
             } else if (root.concept === 'MemberExpression') {
                 if (root.expression) {
-                    parseRequestDataType.call(this, root, 'expression', event, current);
+                    parseRequestDataType.call(this, root, 'expression', event, current, scopeData);
                 }
             }
-            resolveRequestData.call(this, root.left, event, current);
-            resolveRequestData.call(this, root.right, event, current);
+            resolveRequestData.call(this, root.left, event, current, scopeData);
+            resolveRequestData.call(this, root.right, event, current, scopeData);
             return root;
         }
 
