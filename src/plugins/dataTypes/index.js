@@ -375,13 +375,13 @@ export default {
         };
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
-        function parseRequestDataType(root, _prop, event, current, _scopeData = {}) {
+        function parseRequestDataType(root, _prop) {
             let value;
             try {
                 // eslint-disable-next-line no-eval
                 value = eval(root[_prop]);
             } catch (err) {
-                value = _scopeData[root[_prop]];
+                value = root.value;
             }
             const type = typeof value;
             // console.log('type:', type, value)
@@ -413,7 +413,7 @@ export default {
         }
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
-        function resolveRequestData(root, event, current, scopeData = {}) {
+        function resolveRequestData(root) {
             if (!root)
                 return;
             // console.log(root.concept)
@@ -430,14 +430,14 @@ export default {
             } else if (root.concept === 'BooleanLiteral') {
                 root.value = root.value === 'true';
             } else if (root.concept === 'Identifier') {
-                parseRequestDataType.call(this, root, 'expression', event, current, scopeData);
+                parseRequestDataType.call(this, root, 'expression');
             } else if (root.concept === 'MemberExpression') {
                 if (root.expression) {
-                    parseRequestDataType.call(this, root, 'expression', event, current, scopeData);
+                    parseRequestDataType.call(this, root, 'expression');
                 }
             }
-            resolveRequestData.call(this, root.left, event, current, scopeData);
-            resolveRequestData.call(this, root.right, event, current, scopeData);
+            resolveRequestData.call(this, root.left);
+            resolveRequestData.call(this, root.right);
             return root;
         }
 
