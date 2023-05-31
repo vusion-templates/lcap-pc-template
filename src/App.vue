@@ -11,11 +11,9 @@
 import SFreesassLogin from '@/components/s-freesass-login';
 import SFreesassTransfer from '@/components/s-freesass-transfer';
 import SFreesassBanner from '@/components/s-freesass-banner';
-import auth from '@/apis/auth';
 
 const newDomain = location.host.split('.').includes('163');
 const serviceMap = {
-    // generateSfToken: 'http://sfsso.community1.lcap.qz.163yun.com/api/generateSfToken',
     checkSfToken: `${location.protocol}//sfsso.community1.lcap.qz.163yun.com/api/checkSfToken`,
     checkSfTokenNew: `${location.protocol}//sfsso-community1.app.codewave.163.com/api/checkSfToken`,
 };

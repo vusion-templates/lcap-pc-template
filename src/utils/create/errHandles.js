@@ -18,6 +18,12 @@ export default {
             instance.show(getErrMessage(err), getErrStrack(err));
         }
     },
+    501({ config }, err = {}) {
+        // 遇到服务端中止，前端也要中止程序
+        if (err.Code === 501 && err.Message === 'abort') {
+            throw Error('程序中止');
+        }
+    },
     400({ config }, err = {}) {
         if (!config.noErrorTip) {
             instance.show(getErrMessage(err), getErrStrack(err));
