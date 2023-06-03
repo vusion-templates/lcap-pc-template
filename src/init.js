@@ -7,7 +7,7 @@ import '@/assets/css/index.css';
 import * as Components from '@/components';
 import filters from '@/filters';
 import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin, UtilsPlugin } from '@/plugins';
-import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter } from '@/router';
+import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter, microFrontend } from '@/router';
 import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
 
@@ -82,6 +82,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     router.beforeEach(userInfoGuard);
     router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig));
     router.beforeEach(getTitleGuard(appConfig));
+    router.beforeEach(microFrontend);
 
     const app = new Vue({
         name: 'app',
