@@ -6,7 +6,7 @@
         </svg>
         <div :class="$style.bannertext">网易轻舟低代码提供技术支持，点击
             <span style="color:#337EFF;cursor:pointer" @click="jumpPage">访问轻舟低代码</span>
-            ，轻松搭建您的专属应用。</div>
+            ，轻松搭建您的软件应用。</div>
     </div>
 </template>
 
@@ -22,7 +22,7 @@ export default {
     },
     methods: {
         jumpPage() {
-            const url = 'https://id.163yun.com/login?h=shufanqz&t=shufanqz&locale=zh_CN&referrer=https://community1.user.lcap.qz.163yun.com/cb%3Fredirect%3Dhttps%3A%2F%2Fcommunity1.lcap.qz.163yun.com%2Flogin%253FloginSuccessUrl%253Dhttps%253A%252F%252Fcommunity1.lcap.qz.163yun.com%252Fsso%253FtenantSource%253D2%26env%3Donline%26span%3Dshufan_nologin%26';
+            const url = 'https://defaulttenant.codewave.163.com/sso?tenantSource=1&from=shufan';
             window.location.href = url;
         },
     },
