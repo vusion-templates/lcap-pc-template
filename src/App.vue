@@ -1,6 +1,6 @@
 <template>
     <div style="height:100%">
-        <s-freesass-banner v-if="isFreeSass"></s-freesass-banner>
+        <s-freesass-banner v-if="isPersonSass"></s-freesass-banner>
         <router-view></router-view>
         <s-freesass-login @afterShufanLogin="afterShufanLogin" ref="freeSassLogin"></s-freesass-login>
         <s-freesass-transfer v-if="isPersonSass&&loginFinished" ref="freesassTransfer"></s-freesass-transfer>
