@@ -1,7 +1,9 @@
 import Vue from 'vue';
 
-import { filterRoutes, parsePath } from '@/utils/route';
+import { filterRoutes, parsePath, getFatherPath } from '@/utils/route';
 import { getBasePath } from '@/utils/encodeUrl';
+
+const ROOT_PATH = '/';
 
 /**
  * 是否有无权限页面
@@ -13,7 +15,45 @@ function findNoAuthView(routes) {
     }
 }
 
-export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => async (to, from, next) => {
+const checkPath = (path, map) => {
+    if (
+        path === ROOT_PATH
+        || (map[path] && checkPath(getFatherPath(path), map))
+    )
+        return true;
+    else
+        return false;
+};
+
+export const filterAuthResources = (resources) => {
+    const res = [];
+    if (!(Array.isArray(resources) && resources.length)) {
+        return res;
+    }
+
+    const map = resources.reduce(
+        (acc, cur) => {
+            acc[cur.resourceValue] = true;
+            return acc;
+        },
+        { [ROOT_PATH]: true, '': true },
+    ); // 初始两个默认key，为覆盖边缘情况
+
+    resources.forEach((item) => {
+        const fPath = getFatherPath(item.resourceValue);
+        if (fPath === ROOT_PATH || checkPath(fPath, map)) {
+            res.push(item);
+        }
+    });
+    return res;
+};
+
+export const getAuthGuard = (
+    router,
+    routes,
+    authResourcePaths,
+    appConfig,
+) => async (to, from, next) => {
     const userInfo = Vue.prototype.$global.userInfo || {};
     const $auth = Vue.prototype.$auth;
     const redirectedFrom = parsePath(to.redirectedFrom);
@@ -28,13 +68,22 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
 
     function addAuthRoutes(resources) {
         if (Array.isArray(resources) && resources.length) {
-            const userResourcePaths = (resources || []).map((resource) => resource?.resourceValue || resource?.ResourceValue);
-            const otherRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
-                const routePath = route.path;
-                const completePath = [...ancestorPaths, routePath].join('/');
-                const authPath = userResourcePaths.find((userResourcePath) => userResourcePath?.startsWith(completePath));
-                return authPath;
-            });
+            const userResourcePaths = (resources || []).map(
+                (resource) => resource?.resourceValue || resource?.ResourceValue,
+            );
+            const otherRoutes = filterRoutes(
+                routes,
+                null,
+                (route, ancestorPaths) => {
+                    const routePath = route.path;
+                    const completePath = [...ancestorPaths, routePath].join(
+                        '/',
+                    );
+                    const authPath = userResourcePaths.find((userResourcePath) =>
+                        userResourcePath?.startsWith(completePath));
+                    return authPath;
+                },
+            );
             otherRoutes.forEach((route) => {
                 router.addRoute(route);
             });
@@ -53,8 +102,10 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                     next({ path: `${getBasePath()}/login` });
             } else {
                 try {
-                    const resources = await $auth.getUserResources(appConfig.domainName);
-                    addAuthRoutes(resources);
+                    const resources = await $auth.getUserResources(
+                        appConfig.domainName,
+                    );
+                    addAuthRoutes(filterAuthResources(resources));
                     // 即使没有查到权限，也需要重新进一遍，来决定去 无权限页面 还是 404页面
                     next({
                         path: toPath,
@@ -66,14 +117,17 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
                     }
                 }
             }
-        } else if (redirectedFrom?.path !== to.path && to.path === `${getBasePath()}/notFound`) {
+        } else if (
+            redirectedFrom?.path !== to.path
+            && to.path === `${getBasePath()}/notFound`
+        ) {
             if (noAuthView?.path) {
                 next({ path: noAuthView.path });
             }
         }
     } else if (!$auth.isInit() && userInfo.UserId) {
         const resources = await $auth.getUserResources(appConfig.domainName);
-        addAuthRoutes(resources);
+        addAuthRoutes(filterAuthResources(resources));
     }
 
     next();

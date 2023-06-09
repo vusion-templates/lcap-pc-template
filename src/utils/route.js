@@ -16,8 +16,16 @@ const filterRoutes = (routes, ancestorPaths, compareFn) => {
                 newRoutes.push(newRoute);
             }
             const routeChildren = route.children;
-            if (newRoute && Array.isArray(routeChildren) && routeChildren.length) {
-                const children = filterRoutes(routeChildren, [...ancestorPaths, routePath], compareFn);
+            if (
+                newRoute
+                && Array.isArray(routeChildren)
+                && routeChildren.length
+            ) {
+                const children = filterRoutes(
+                    routeChildren,
+                    [...ancestorPaths, routePath],
+                    compareFn,
+                );
                 if (Array.isArray(children) && children.length) {
                     newRoute.children = children;
                 }
@@ -62,7 +70,20 @@ function parsePath(path) {
     };
 }
 
-export {
-    filterRoutes,
-    parsePath,
-};
+function getFatherPath(path) {
+    if (path.indexOf('/') === -1)
+        return '';
+
+    const arr = path.split('/');
+    let fatherPath = '';
+
+    if (arr.length > 2) {
+        arr.pop();
+        fatherPath = arr.join('/');
+    } else if (arr.length === 2) {
+        fatherPath = '/';
+    }
+    return fatherPath;
+}
+
+export { filterRoutes, parsePath, getFatherPath };
