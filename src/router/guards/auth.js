@@ -76,7 +76,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
             } else {
                 try {
                     const resources = await $auth.getUserResources(appConfig.domainName);
-                    addAuthRoutes(resources);
+                    addAuthRoutes(filterAuthResources(resources));
                     // 即使没有查到权限，也需要重新进一遍，来决定去 无权限页面 还是 404页面
                     next({
                         path: toPath,
@@ -95,7 +95,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
         }
     } else if (!$auth.isInit() && userInfo.UserId) {
         const resources = await $auth.getUserResources(appConfig.domainName);
-        addAuthRoutes(resources);
+        addAuthRoutes(filterAuthResources(resources));
     }
 
     next();
