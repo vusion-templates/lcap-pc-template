@@ -13,6 +13,28 @@ function findNoAuthView(routes) {
     }
 }
 
+const ROOT_PATH = '/';
+
+const getParentPath = (path) => path === ROOT_PATH ? null : path.substring(0, path.lastIndexOf('/')) || ROOT_PATH;
+
+export function filterAuthResources(resources) {
+    if (!Array.isArray(resources) || !resources.length)
+        return [];
+
+    const validPaths = resources.reduce((map, item) => {
+        map.set(item.resourceValue, 1);
+        return map;
+    }, new Map().set(ROOT_PATH, 1));
+
+    const isValidPath = (path) => {
+        let parentPath = getParentPath(path);
+        while (parentPath && validPaths.has(parentPath))
+            parentPath = getParentPath(parentPath);
+        return !parentPath;
+    };
+    return resources.filter((item) => isValidPath(item.resourceValue));
+}
+
 export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => async (to, from, next) => {
     const userInfo = Vue.prototype.$global.userInfo || {};
     const $auth = Vue.prototype.$auth;
@@ -54,7 +76,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
             } else {
                 try {
                     const resources = await $auth.getUserResources(appConfig.domainName);
-                    addAuthRoutes(resources);
+                    addAuthRoutes(filterAuthResources(resources));
                     // 即使没有查到权限，也需要重新进一遍，来决定去 无权限页面 还是 404页面
                     next({
                         path: toPath,
@@ -73,7 +95,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
         }
     } else if (!$auth.isInit() && userInfo.UserId) {
         const resources = await $auth.getUserResources(appConfig.domainName);
-        addAuthRoutes(resources);
+        addAuthRoutes(filterAuthResources(resources));
     }
 
     next();
