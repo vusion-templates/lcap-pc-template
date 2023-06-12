@@ -17,6 +17,11 @@ const ROOT_PATH = '/';
 
 const getParentPath = (path) => path === ROOT_PATH ? null : path.substring(0, path.lastIndexOf('/')) || ROOT_PATH;
 
+/**
+ * 过滤无权限页面（X2.22_0629调整），如子页面绑定了角色父页面未绑定，则子页面无法访问。
+ * 更多边界情况参考用例: tests\unit\global\routes\route.spec.js
+ * @param {*} resources
+ */
 export function filterAuthResources(resources) {
     if (!Array.isArray(resources) || !resources.length)
         return [];

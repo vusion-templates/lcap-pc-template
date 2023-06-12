@@ -50,7 +50,7 @@ describe('filterAuthResources', () => {
         expect(filtered).toHaveLength(0);
     });
 
-    test('demo3: do not have a father path in the list', () => {
+    test('demo4: do not have a father path in the list', () => {
         const resources = [
             { resourceValue: '/a/b/c' },
             { resourceValue: '/a/b' },
