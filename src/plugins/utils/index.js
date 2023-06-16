@@ -12,6 +12,9 @@ import {
     differenceInHours,
     differenceInMinutes,
     differenceInSeconds,
+    getDayOfYear, getWeekOfMonth, getQuarter, startOfWeek, getMonth, getWeek, getDate, startOfQuarter,
+    addSeconds, addMinutes, addHours, addQuarters, addYears, addWeeks,
+    eachDayOfInterval, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday,
 } from 'date-fns';
 import Vue from 'vue';
 
@@ -457,6 +460,61 @@ export const utils = {
     },
     SubDays(date = new Date(), amount = 1, converter = 'json') {
         return toValue(subDays(new Date(date), amount), converter);
+    },
+    GetDateCount(dateString, metric) {
+        const date = new Date(dateString);
+        const [metric1, metric2] = metric.split('-');
+        switch (metric1) {
+            case 'day':
+                switch (metric2) {
+                    case 'week': return differenceInDays(date, startOfWeek(date)) + 1;
+                    case 'month': return getDate(date);
+                    case 'quarter': return differenceInDays(date, startOfQuarter(date)) + 1;
+                    case 'year': return getDayOfYear(date);
+                }
+            case 'week':
+                switch (metric2) {
+                    case 'month': return getWeekOfMonth(date);
+                    case 'quarter': return getWeek(date, { start: startOfQuarter(date) });
+                    case 'year': return getWeek(date, { weekStartsOn: 1 });
+                }
+            case 'month':
+                switch (metric2) {
+                    case 'quarter': return getMonth(date) + 1 - (getQuarter(date) - 1) * 3;
+                    case 'year': return getMonth(date) + 1;
+                }
+            case 'quarter':
+                return getQuarter(date);
+            default:
+                return null;
+        }
+    },
+    AlterDateTime(dateString, option, count, unit) {
+        const date = new Date(dateString);
+        const amount = option === 'Increase' ? count : -count;
+        switch (unit) {
+            case 'second': return addSeconds(date, amount);
+            case 'minute': return addMinutes(date, amount);
+            case 'hour': return addHours(date, amount);
+            case 'day': return addDays(date, amount);
+            case 'week': return addWeeks(date, amount);
+            case 'month': return addMonths(date, amount);
+            case 'quarter': return addQuarters(date, amount);
+            case 'year': return addYears(date, amount);
+        }
+    },
+    GetSpecificDaysOfWeek(startDateString, endDateString, arr) {
+        const startDate = new Date(startDateString);
+        const endDate = new Date(endDateString);
+        const fns = [isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday];
+        const datesInRange = eachDayOfInterval({ start: startDate, end: endDate });
+        const isDays = fns.filter((_, index) => arr.includes((index + 1)));
+        const filteredDates = datesInRange.filter((day) => isDays.some((fn) => fn(day)));
+        if (startDateString.includes('T')) {
+            return filteredDates.map((date) => date.toJSON());
+        } else {
+            return filteredDates.map((date) => date.toJSON().replace(/T.+?Z/, ''));
+        }
     },
     FormatDate(value, formatter) {
         if (!value)
