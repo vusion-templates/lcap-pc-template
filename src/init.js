@@ -30,9 +30,13 @@ Vue.mixin(CloudUI.MPubSub);
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
     if (window.LcapMicro?.container) {
-        if (!document.head.contains(document.currentScript)
-            || document.currentScript.active === false)
+        if (document.currentScript
+            && (!document.head.contains(document.currentScript) || document.currentScript.active === false)
+        )
             return;
+
+        if (Vue.prototype.$auth?._map)
+            Vue.prototype.$auth._map = undefined;
     }
 
     window.appInfo = Object.assign(appConfig, platformConfig);
