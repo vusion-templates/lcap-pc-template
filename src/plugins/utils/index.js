@@ -475,7 +475,7 @@ export const utils = {
             case 'week':
                 switch (metric2) {
                     case 'month': return getWeekOfMonth(date);
-                    case 'quarter': return getWeek(date, { start: startOfQuarter(date) });
+                    case 'quarter': return getWeek(date) - getWeek(startOfQuarter(date)) + 1;
                     case 'year': return getWeek(date, { weekStartsOn: 1 });
                 }
             case 'month':
