@@ -29,7 +29,7 @@ export function filterAuthResources(resources) {
     const validPaths = resources.reduce((map, item) => {
         map.set(item.resourceValue, 1);
         return map;
-    }, new Map().set(ROOT_PATH, 1));
+    }, new Map([[ROOT_PATH, 1], [getBasePath(), 1]])); // 需注意，路由起始都具备basePath（PC&H5都有不固定起始路由）
 
     const isValidPath = (path) => {
         let parentPath = getParentPath(path);
