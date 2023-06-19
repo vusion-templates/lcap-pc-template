@@ -40,7 +40,7 @@ export function filterAuthResources(resources) {
     return resources.filter((item) => isValidPath(item.resourceValue));
 }
 
-export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => async (to, from, next) => {
+export const getAuthGuard = (router, routes, authResourcePaths, appConfig, baseResourcePaths) => async (to, from, next) => {
     const userInfo = Vue.prototype.$global.userInfo || {};
     const $auth = Vue.prototype.$auth;
     const redirectedFrom = parsePath(to.redirectedFrom);
@@ -52,6 +52,13 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
         }
         return false;
     });
+
+    function concatResourcesRoutes(resources, baseRoutes) {
+        return resources.concat(baseRoutes.map((route) => ({
+            resourceValue: route,
+            // 如果后续需要区分路由类型，这里也需要补充 resourceType
+        })));
+    }
 
     function addAuthRoutes(resources) {
         if (Array.isArray(resources) && resources.length) {
@@ -81,7 +88,8 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
             } else {
                 try {
                     const resources = await $auth.getUserResources(appConfig.domainName);
-                    addAuthRoutes(filterAuthResources(resources));
+                    const realResources = filterAuthResources(concatResourcesRoutes(resources, baseResourcePaths));
+                    addAuthRoutes(realResources);
                     // 即使没有查到权限，也需要重新进一遍，来决定去 无权限页面 还是 404页面
                     next({
                         path: toPath,
@@ -100,7 +108,8 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig) => as
         }
     } else if (!$auth.isInit() && userInfo.UserId) {
         const resources = await $auth.getUserResources(appConfig.domainName);
-        addAuthRoutes(filterAuthResources(resources));
+        const realResources = filterAuthResources(concatResourcesRoutes(resources, baseResourcePaths));
+        addAuthRoutes(realResources);
     }
 
     next();
