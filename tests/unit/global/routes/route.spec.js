@@ -1,6 +1,8 @@
 import { filterAuthResources } from '@/router/guards/auth';
 
 describe('filterAuthResources', () => {
+    window.appInfo = { basePath: '/' };
+
     test('should return an empty array if input is not an array or is empty', () => {
         expect(filterAuthResources(null)).toEqual([]);
         expect(filterAuthResources(undefined)).toEqual([]);
