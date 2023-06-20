@@ -35,8 +35,8 @@ export default {
                 instance.show('登录失效', '请重新登录');
             }
             localStorage.setItem('beforeLogin', JSON.stringify(location));
-            if (window.ICESTARK?.loginFn)
-                window.ICESTARK.loginFn();
+            if (window.LcapMicro?.loginFn)
+                window.LcapMicro.loginFn();
             else
                 location.href = '/login';
         }
@@ -47,8 +47,8 @@ export default {
                 instance.show('登录失效', '请重新登录');
             }
             localStorage.setItem('beforeLogin', JSON.stringify(location));
-            if (window.ICESTARK?.loginFn)
-                window.ICESTARK.loginFn();
+            if (window.LcapMicro?.loginFn)
+                window.LcapMicro.loginFn();
             else
                 location.href = '/login';
         }
