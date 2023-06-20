@@ -467,7 +467,7 @@ export const utils = {
         switch (metric1) {
             case 'day':
                 switch (metric2) {
-                    case 'week': return differenceInDays(date, startOfWeek(date)) + 1;
+                    case 'week': return differenceInDays(date, startOfWeek(date, { weekStartsOn: 1 })) + 1;
                     case 'month': return getDate(date);
                     case 'quarter': return differenceInDays(date, startOfQuarter(date)) + 1;
                     case 'year': return getDayOfYear(date);
