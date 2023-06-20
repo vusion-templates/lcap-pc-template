@@ -69,6 +69,7 @@ const httpError = {
 };
 
 export default function (service) {
+    console.log('postConfig', window.afterRouter);
     if (process.env.NODE_ENV === 'development') {
         service.preConfig.set('baseURL', (requestInfo, baseURL) => {
             if (!baseURL.startsWith('http')) {
@@ -76,7 +77,7 @@ export default function (service) {
             }
         });
     }
-
+    console.log('postConfig', window.afterRouter);
     service.postConfig.set('httpCode', httpCode);
     service.postConfig.set('httpError', httpError);
     service.postConfig.set('shortResponse', shortResponse);

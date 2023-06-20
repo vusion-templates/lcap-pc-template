@@ -14,7 +14,11 @@ import App from './App.vue';
 window.appVue = Vue;
 window.Vue = Vue;
 window.CloudUI = CloudUI;
-
+const fnList = ['preRequest', 'postRequest', 'beforeRouter', 'afterRouter'];
+const evalWrap = function (metaData, fnName) {
+    // eslint-disable-next-line no-eval
+    metaData && fnName && metaData?.frontendEvents[fnName] && eval(metaData.frontendEvents[fnName]);
+};
 Vue.use(VueI18n);
 Vue.i18n = new VueI18n({
     locale: localStorage.i18nLocale || 'zh-CN',
@@ -29,6 +33,13 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
+    console.log('appConfig: ', appConfig);
+    console.log('platformConfig: ', platformConfig);
+    console.log('routes: ', routes);
+    console.log('metaData: ', metaData);
+    // 应用初始化之前 不能访问应用中的任何逻辑
+    evalWrap.bind(window)(metaData, 'rendered');
+
     if (window.ICESTARK?.root) {
         if (!document.head.contains(document.currentScript)
             || document.currentScript.active === false)
@@ -78,7 +89,8 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     });
 
     const router = initRouter(baseRoutes);
-
+    const hasBeforeRouter = !!metaData?.frontendEvents?.beforeRouter;
+    const hasAfterRouter = !!metaData?.frontendEvents?.afterRouter;
     router.beforeEach(userInfoGuard);
     router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig));
     router.beforeEach(getTitleGuard(appConfig));
@@ -90,6 +102,41 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             locale: localStorage.i18nLocale || 'zh-CN',
         },
         ...App,
+    });
+
+    if (metaData && metaData.frontendEvents) {
+        for (let index = 0; index < fnList.length; index++) {
+            const fnName = fnList[index];
+            if (fnName && metaData.frontendEvents[fnName]) {
+                // eval(metaData.frontendEvents[fnName]);
+                evalWrap.bind(app)(metaData, fnName);
+                console.log(fnName, window[fnName]);
+                Vue.prototype[fnName] = window[fnName];
+            }
+        }
+    }
+    const beforeRouter = Vue.prototype.beforeRouter;
+    const afterRouter = Vue.prototype.afterRouter;
+    beforeRouter && router.beforeEach((route) => {
+        beforeRouter && beforeRouter(route);
+    });
+    // -----------------mock
+    // const fnName = 'afterRouter';
+    // metaData.frontendEvents = {
+    //     afterRouter: "window.afterRouter = async (event) => { \nawait (async () => {\n\nawait (this.$logics['app.logics.logic7']({\n                config: {\n                    download: false,\n                },\n                query: {},\n                headers: {},\n            path: {},\n                body: {\n}\n}))\nreturn;\n})();\n}\n",
+    // };
+    // evalWrap.bind(app)(metaData, fnName);
+    // Vue.prototype[fnName] = window[fnName];
+    // -----------------mock
+
+    // const afterRouterWrap = function (route) {
+    //     console.log('触发了 afterEach:22 ', this, window.$logics);
+    //     afterRouter && afterRouter.bind(app)(route);
+    // };
+    // const fn = afterRouterWrap.bind(app);
+    // afterRouter && router.afterEach(fn);
+    afterRouter && router.afterEach((route) => {
+        afterRouter && afterRouter(route);
     });
 
     if (window.ICESTARK?.root) {
