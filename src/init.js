@@ -7,7 +7,7 @@ import '@/assets/css/index.css';
 import * as Components from '@/components';
 import filters from '@/filters';
 import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin, UtilsPlugin } from '@/plugins';
-import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter } from '@/router';
+import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter, microFrontend } from '@/router';
 import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
 
@@ -40,10 +40,14 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     // 应用初始化之前 不能访问应用中的任何逻辑
     evalWrap.bind(window)(metaData, 'rendered');
 
-    if (window.ICESTARK?.root) {
-        if (!document.head.contains(document.currentScript)
-            || document.currentScript.active === false)
+    if (window.LcapMicro?.container) {
+        if (document.currentScript
+            && (!document.head.contains(document.currentScript) || document.currentScript.active === false)
+        )
             return;
+
+        if (Vue.prototype.$auth?._map)
+            Vue.prototype.$auth._map = undefined;
     }
 
     window.appInfo = Object.assign(appConfig, platformConfig);
@@ -94,6 +98,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     router.beforeEach(userInfoGuard);
     router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig));
     router.beforeEach(getTitleGuard(appConfig));
+    router.beforeEach(microFrontend);
 
     const app = new Vue({
         name: 'app',
@@ -139,8 +144,8 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         afterRouter && afterRouter(route);
     });
 
-    if (window.ICESTARK?.root) {
-        const container = window.ICESTARK.root;
+    if (window.LcapMicro?.container) {
+        const container = window.LcapMicro.container;
         container.innerHTML = '';
         app.$mount();
         container.appendChild(app.$el);
