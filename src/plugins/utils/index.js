@@ -722,8 +722,8 @@ export const utils = {
      */
     Round(value, mode) {
         const modeMap = {
-            TowardsZero: Decimal.ROUND_UP,
-            TowardsInfinity: Decimal.ROUND_DOWN,
+            TowardsZero: Decimal.ROUND_DOWN,
+            TowardsInfinity: Decimal.ROUND_UP,
             HalfUp: Decimal.ROUND_HALF_UP,
         };
         return new Decimal(value).toFixed(0, modeMap[mode]);
