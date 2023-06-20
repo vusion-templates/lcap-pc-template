@@ -80,7 +80,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     const router = initRouter(baseRoutes);
 
     router.beforeEach(userInfoGuard);
-    router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig));
+    router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, baseResourcePaths));
     router.beforeEach(getTitleGuard(appConfig));
 
     const app = new Vue({
