@@ -510,7 +510,7 @@ export const utils = {
         const datesInRange = eachDayOfInterval({ start: startDate, end: endDate });
         const isDays = fns.filter((_, index) => arr.includes((index + 1)));
         const filteredDates = datesInRange.filter((day) => isDays.some((fn) => fn(day)));
-        if (startDateString.includes('T')) {
+        if (typeof startDateString === 'object' || startDateString.includes('T')) {
             return filteredDates.map((date) => date.toJSON());
         } else {
             return filteredDates.map((date) => date.toJSON().replace(/T.+?Z/, ''));
