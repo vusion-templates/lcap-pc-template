@@ -464,6 +464,14 @@ export const utils = {
     GetDateCount(dateString, metric) {
         const date = new Date(dateString);
         const [metric1, metric2] = metric.split('-');
+        // 获取当年的最后一天的所在周会返回1，需要额外判断一下
+        function getCurrentWeek(value) {
+            let count = getWeek(value, { weekStartsOn: 1 });
+            if (value.getMonth() + 1 === 12 && count === 1) {
+                count = getWeek(addDays(value, -7), { weekStartsOn: 1 }) + 1;
+            }
+            return count;
+        }
         switch (metric1) {
             case 'day':
                 switch (metric2) {
@@ -475,8 +483,8 @@ export const utils = {
             case 'week':
                 switch (metric2) {
                     case 'month': return getWeekOfMonth(date);
-                    case 'quarter': return getWeek(date) - getWeek(startOfQuarter(date)) + 1;
-                    case 'year': return getWeek(date, { weekStartsOn: 1 });
+                    case 'quarter': return getCurrentWeek(date) - getWeek(startOfQuarter(date)) + 1;
+                    case 'year': return getCurrentWeek(date);
                 }
             case 'month':
                 switch (metric2) {
