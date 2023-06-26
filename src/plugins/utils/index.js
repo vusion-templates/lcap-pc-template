@@ -519,9 +519,9 @@ export const utils = {
         const isDays = fns.filter((_, index) => arr.includes((index + 1)));
         const filteredDates = datesInRange.filter((day) => isDays.some((fn) => fn(day)));
         if (typeof startDateString === 'object' || startDateString.includes('T')) {
-            return filteredDates.map((date) => date.toJSON());
+            return filteredDates.map((date) => format(date, 'yyyy-MM-dd HH:mm:ss'));
         } else {
-            return filteredDates.map((date) => date.toJSON().replace(/T.+?Z/, ''));
+            return filteredDates.map((date) => format(date, 'yyyy-MM-dd'));
         }
     },
     FormatDate(value, formatter) {
