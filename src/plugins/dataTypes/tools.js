@@ -581,7 +581,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                         const arr = moreThanMax ? keys : keys.slice(0, maxLen);
                         const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
-                        const arrStr = arr.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1)} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join('\n');
+                        const arrStr = arr.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1)} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join(',\n');
                         str = moreThanMax ? `{\n${arrStr}\n...\n}` : `{\n${arrStr}\n}`;
                     }
                 } else {
