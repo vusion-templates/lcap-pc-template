@@ -15,8 +15,6 @@ export default {
                             body.entity = pick(body.entity, body.properties);
                         if (body.entities)
                             body.entities = body.entities.map((entity) => pick(entity, body.properties));
-
-                        delete body.properties;
                     }
                     return info;
                 };

@@ -310,15 +310,15 @@ export default {
 
         Vue.prototype.$isInstanceOf = isInstanceOf;
 
-        const enumsMap = options.enumsMap || {};
-        function createEnum(items) {
-            const Enum = (key) => items[key];
-            Object.assign(Enum, items);
-            return Enum;
-        }
-        Object.keys(enumsMap).forEach((enumKey) => {
-            enumsMap[enumKey] = createEnum(enumsMap[enumKey] || {});
-        });
+        // const enumsMap = options.enumsMap || {};
+        // function createEnum(items) {
+        //     const Enum = (key) => items[key];
+        //     Object.assign(Enum, items); // 如果items里含有{name:'**'}，赋值会报错，页面白屏，所以这里屏蔽
+        //     return Enum;
+        // }
+        // Object.keys(enumsMap).forEach((enumKey) => {
+        //     enumsMap[enumKey] = createEnum(enumsMap[enumKey] || {});
+        // });
 
         function isLooseEqualFn(obj1, obj2, cache = new Map()) {
             // 检查对象是否相同
@@ -363,20 +363,26 @@ export default {
         // 判断两个对象是否相等，不需要引用完全一致
         Vue.prototype.$isLooseEqualFn = isLooseEqualFn;
 
+        const enumsMap = options.enumsMap || {};
         Vue.prototype.$enums = (key, value) => {
             if (!key || !value)
                 return '';
             if (enumsMap[key]) {
-                return enumsMap[key](value);
+                return enumsMap[key][value];
             } else {
                 return '';
             }
         };
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
-        function parseRequestDataType(root, prop, event, current) {
-            // eslint-disable-next-line no-eval
-            const value = eval(root[prop]);
+        function parseRequestDataType(root, _prop) {
+            let value;
+            try {
+                // eslint-disable-next-line no-eval
+                value = eval(root[_prop]);
+            } catch (err) {
+                value = root.value;
+            }
             const type = typeof value;
             // console.log('type:', type, value)
             if (type === 'number') {
@@ -407,7 +413,7 @@ export default {
         }
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
-        function resolveRequestData(root, event, current) {
+        function resolveRequestData(root) {
             if (!root)
                 return;
             // console.log(root.concept)
@@ -424,14 +430,14 @@ export default {
             } else if (root.concept === 'BooleanLiteral') {
                 root.value = root.value === 'true';
             } else if (root.concept === 'Identifier') {
-                parseRequestDataType.call(this, root, 'expression', event, current);
+                parseRequestDataType.call(this, root, 'expression');
             } else if (root.concept === 'MemberExpression') {
                 if (root.expression) {
-                    parseRequestDataType.call(this, root, 'expression', event, current);
+                    parseRequestDataType.call(this, root, 'expression');
                 }
             }
-            resolveRequestData.call(this, root.left, event, current);
-            resolveRequestData.call(this, root.right, event, current);
+            resolveRequestData.call(this, root.left);
+            resolveRequestData.call(this, root.right);
             return root;
         }
 

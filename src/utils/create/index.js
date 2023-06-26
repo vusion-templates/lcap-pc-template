@@ -114,15 +114,26 @@ addConfigs(service);
 
 // 调整请求路径
 const adjustPathWithSysPrefixPath = (apiSchemaList) => {
-    const sysPrefixPath = window.appInfo?.sysPrefixPath;
-    if (sysPrefixPath && apiSchemaList) {
+    const newApiSchemaMap = {};
+    if (apiSchemaList) {
         for (const key in apiSchemaList) {
-            const path = apiSchemaList[key]?.url?.path;
-            if (path && path.startsWith('/')) {
-                apiSchemaList[key].url.path = sysPrefixPath + path;
+            if (!newApiSchemaMap[key]) {
+                const { url } = apiSchemaList[key] || {};
+                newApiSchemaMap[key] = {
+                    url: {
+                        ...url,
+                    },
+                };
+            }
+            const newApiSchema = newApiSchemaMap[key];
+            const path = newApiSchema?.url?.path;
+            const sysPrefixPath = window.appInfo?.sysPrefixPath;
+            if (path && path.startsWith('/') && sysPrefixPath) {
+                newApiSchema.url.path = sysPrefixPath + path;
             }
         }
     }
+    return newApiSchemaMap;
 };
 
 export const createService = function createService(apiSchemaList, serviceConfig, dynamicServices) {
@@ -134,8 +145,8 @@ export const createService = function createService(apiSchemaList, serviceConfig
         shortResponse: true,
     });
     serviceConfig = fixServiceConfig;
-    adjustPathWithSysPrefixPath(apiSchemaList);
-    return service.generator(apiSchemaList, dynamicServices, serviceConfig);
+    const newApiSchemaMap = adjustPathWithSysPrefixPath(apiSchemaList);
+    return service.generator(newApiSchemaMap, dynamicServices, serviceConfig);
 };
 
 export const createLogicService = function createLogicService(apiSchemaList, serviceConfig, dynamicServices) {
@@ -148,6 +159,6 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
         concept: 'Logic',
     });
     serviceConfig = fixServiceConfig;
-    adjustPathWithSysPrefixPath(apiSchemaList);
-    return service.generator(apiSchemaList, dynamicServices, serviceConfig);
+    const newApiSchemaMap = adjustPathWithSysPrefixPath(apiSchemaList);
+    return service.generator(newApiSchemaMap, dynamicServices, serviceConfig);
 };
