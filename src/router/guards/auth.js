@@ -56,6 +56,7 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig, baseR
     function concatResourcesRoutes(resources, baseRoutes) {
         return resources.concat(baseRoutes.map((route) => ({
             resourceValue: route,
+            resourceType: 'page',
             // 如果后续需要区分路由类型，这里也需要补充 resourceType
         })));
     }

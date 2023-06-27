@@ -12,7 +12,7 @@ module.exports = function (app) {
         res.json([
             {
                 "resourceValue": "/permission_center/addRoleUser",
-                "resourceType": "ui"
+                "resourceType": "page"
             }
         ]);
     });

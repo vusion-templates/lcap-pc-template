@@ -75,7 +75,7 @@ export default {
                 // 初始化权限项
                 this._map = new Map();
                 if (Array.isArray(result)) {
-                    resources = result.filter((resource) => resource?.resourceType === 'ui');
+                    resources = result.filter((resource) => resource?.resourceType === 'page');
                     resources.forEach((resource) => this._map.set(resource.resourceValue, resource));
                 }
                 return resources;
