@@ -37,9 +37,12 @@ export default {
         Vue.prototype.$genInitFromSchema = genInitFromSchema;
 
         const frontendVariables = {};
+        const localCacheVariableSet = new Set(); // 本地存储的全局变量集合
+
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
-                const { name, typeAnnotation, defaultValue } = frontendVariable;
+                const { name, typeAnnotation, defaultValue, localCache } = frontendVariable;
+                localCache && localCacheVariableSet.add(name); // 本地存储的全局变量集合
                 frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
             });
         }
@@ -306,6 +309,7 @@ export default {
             },
         });
 
+        Vue.prototype.$localCacheVariableSet = localCacheVariableSet;
         Vue.prototype.$global = $global;
 
         Vue.prototype.$isInstanceOf = isInstanceOf;
