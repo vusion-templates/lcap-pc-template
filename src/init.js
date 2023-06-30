@@ -7,7 +7,7 @@ import '@/assets/css/index.css';
 import * as Components from '@/components';
 import filters from '@/filters';
 import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin, UtilsPlugin } from '@/plugins';
-import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter } from '@/router';
+import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter, microFrontend } from '@/router';
 import { filterRoutes } from '@/utils/route';
 import App from './App.vue';
 
@@ -29,10 +29,14 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
-    if (window.ICESTARK?.root) {
-        if (!document.head.contains(document.currentScript)
-            || document.currentScript.active === false)
+    if (window.LcapMicro?.container) {
+        if (document.currentScript
+            && (!document.head.contains(document.currentScript) || document.currentScript.active === false)
+        )
             return;
+
+        if (Vue.prototype.$auth?._map)
+            Vue.prototype.$auth._map = undefined;
     }
 
     window.appInfo = Object.assign(appConfig, platformConfig);
@@ -80,8 +84,9 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     const router = initRouter(baseRoutes);
 
     router.beforeEach(userInfoGuard);
-    router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig));
+    router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, baseResourcePaths));
     router.beforeEach(getTitleGuard(appConfig));
+    router.beforeEach(microFrontend);
 
     const app = new Vue({
         name: 'app',
@@ -92,8 +97,8 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         ...App,
     });
 
-    if (window.ICESTARK?.root) {
-        const container = window.ICESTARK.root;
+    if (window.LcapMicro?.container) {
+        const container = window.LcapMicro.container;
         container.innerHTML = '';
         app.$mount();
         container.appendChild(app.$el);

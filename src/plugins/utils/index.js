@@ -12,11 +12,14 @@ import {
     differenceInHours,
     differenceInMinutes,
     differenceInSeconds,
+    getDayOfYear, getWeekOfMonth, getQuarter, startOfWeek, getMonth, getWeek, getDate, startOfQuarter,
+    addSeconds, addMinutes, addHours, addQuarters, addYears, addWeeks,
+    eachDayOfInterval, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday,
 } from 'date-fns';
 import Vue from 'vue';
 
 import { toString, fromString, toastAndThrowError } from '../dataTypes/tools';
-
+import Decimal from 'decimal.js';
 let enumsMap = {};
 
 function toValue(date, converter) {
@@ -458,6 +461,69 @@ export const utils = {
     SubDays(date = new Date(), amount = 1, converter = 'json') {
         return toValue(subDays(new Date(date), amount), converter);
     },
+    GetDateCount(dateString, metric) {
+        const date = new Date(dateString);
+        const [metric1, metric2] = metric.split('-');
+        // 获取当年的最后一天的所在周会返回1，需要额外判断一下
+        function getCurrentWeek(value) {
+            let count = getWeek(value, { weekStartsOn: 1 });
+            if (value.getMonth() + 1 === 12 && count === 1) {
+                count = getWeek(addDays(value, -7), { weekStartsOn: 1 }) + 1;
+            }
+            return count;
+        }
+        switch (metric1) {
+            case 'day':
+                switch (metric2) {
+                    case 'week': return differenceInDays(date, startOfWeek(date, { weekStartsOn: 1 })) + 1;
+                    case 'month': return getDate(date);
+                    case 'quarter': return differenceInDays(date, startOfQuarter(date)) + 1;
+                    case 'year': return getDayOfYear(date);
+                }
+            case 'week':
+                switch (metric2) {
+                    case 'month': return getWeekOfMonth(date);
+                    case 'quarter': return getCurrentWeek(date) - getWeek(startOfQuarter(date)) + 1;
+                    case 'year': return getCurrentWeek(date);
+                }
+            case 'month':
+                switch (metric2) {
+                    case 'quarter': return getMonth(date) + 1 - (getQuarter(date) - 1) * 3;
+                    case 'year': return getMonth(date) + 1;
+                }
+            case 'quarter':
+                return getQuarter(date);
+            default:
+                return null;
+        }
+    },
+    AlterDateTime(dateString, option, count, unit) {
+        const date = new Date(dateString);
+        const amount = option === 'Increase' ? count : -count;
+        switch (unit) {
+            case 'second': return addSeconds(date, amount);
+            case 'minute': return addMinutes(date, amount);
+            case 'hour': return addHours(date, amount);
+            case 'day': return addDays(date, amount);
+            case 'week': return addWeeks(date, amount);
+            case 'month': return addMonths(date, amount);
+            case 'quarter': return addQuarters(date, amount);
+            case 'year': return addYears(date, amount);
+        }
+    },
+    GetSpecificDaysOfWeek(startDateString, endDateString, arr) {
+        const startDate = new Date(startDateString);
+        const endDate = new Date(endDateString);
+        const fns = [isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday];
+        const datesInRange = eachDayOfInterval({ start: startDate, end: endDate });
+        const isDays = fns.filter((_, index) => arr.includes((index + 1)));
+        const filteredDates = datesInRange.filter((day) => isDays.some((fn) => fn(day)));
+        if (typeof startDateString === 'object' || startDateString.includes('T')) {
+            return filteredDates.map((date) => format(date, 'yyyy-MM-dd HH:mm:ss'));
+        } else {
+            return filteredDates.map((date) => format(date, 'yyyy-MM-dd'));
+        }
+    },
     FormatDate(value, formatter) {
         if (!value)
             return '-';
@@ -714,6 +780,19 @@ export const utils = {
      */
     CreateListPage(list, total) {
         return { list, total };
+    },
+    /**
+     * @param {number} value 内容
+     * @param {string} mode 方式
+     * @returns {number} 返回值
+     */
+    Round(value, mode) {
+        const modeMap = {
+            TowardsZero: Decimal.ROUND_DOWN,
+            TowardsInfinity: Decimal.ROUND_UP,
+            HalfUp: Decimal.ROUND_HALF_UP,
+        };
+        return new Decimal(value).toFixed(0, modeMap[mode]);
     },
 };
 
