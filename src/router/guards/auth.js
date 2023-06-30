@@ -7,7 +7,7 @@ import { getBasePath } from '@/utils/encodeUrl';
  * 是否有无权限页面
  * @param {*} routes
  */
-function findNoAuthView(routes) {
+export function findNoAuthView(routes) {
     if (Array.isArray(routes)) {
         return routes.find((route) => route?.path === `${getBasePath()}/noAuth`);
     }
@@ -39,7 +39,6 @@ export function filterAuthResources(resources) {
     };
     return resources.filter((item) => isValidPath(item.resourceValue));
 }
-
 export const getAuthGuard = (router, routes, authResourcePaths, appConfig, baseResourcePaths) => async (to, from, next) => {
     const userInfo = Vue.prototype.$global.userInfo || {};
     const $auth = Vue.prototype.$auth;

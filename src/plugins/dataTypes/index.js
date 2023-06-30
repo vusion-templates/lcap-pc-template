@@ -35,6 +35,7 @@ export default {
          * @param {*} schema 是前端用的 refSchema
          */
         Vue.prototype.$genInitFromSchema = genInitFromSchema;
+        window.$genInitFromSchema = genInitFromSchema;
 
         const frontendVariables = {};
         if (Array.isArray(options && options.frontendVariables)) {
@@ -307,6 +308,7 @@ export default {
         });
 
         Vue.prototype.$global = $global;
+        window.$global = $global;
 
         Vue.prototype.$isInstanceOf = isInstanceOf;
 
@@ -359,9 +361,6 @@ export default {
             }
             return true;
         }
-
-        // 判断两个对象是否相等，不需要引用完全一致
-        Vue.prototype.$isLooseEqualFn = isLooseEqualFn;
 
         const enumsMap = options.enumsMap || {};
         Vue.prototype.$enums = (key, value) => {
