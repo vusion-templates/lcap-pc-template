@@ -7,14 +7,16 @@ import '@/assets/css/index.css';
 import * as Components from '@/components';
 import filters from '@/filters';
 import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin, UtilsPlugin } from '@/plugins';
-import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter, microFrontend } from '@/router';
-import { filterRoutes } from '@/utils/route';
+import { getTitleGuard, initRouter, microFrontend } from '@/router';
 import App from './App.vue';
+import { filterRoutes, parsePath } from '@/utils/route';
+import { getBasePath } from '@/utils/encodeUrl';
+import { filterAuthResources, findNoAuthView } from '@/router/guards/auth';
 
 window.appVue = Vue;
 window.Vue = Vue;
 window.CloudUI = CloudUI;
-const fnList = ['preRequest', 'postRequest', 'beforeRouter', 'afterRouter'];
+const fnList = ['afterRouter'];
 const evalWrap = function (metaData, fnName) {
     // eslint-disable-next-line no-eval
     metaData && fnName && metaData?.frontendEvents[fnName] && eval(metaData.frontendEvents[fnName]);
@@ -33,13 +35,15 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
-    console.log('appConfig: ', appConfig);
-    console.log('platformConfig: ', platformConfig);
-    console.log('routes: ', routes);
-    console.log('metaData: ', metaData);
+    // console.log('appConfig: ', appConfig);
+    // console.log('platformConfig: ', platformConfig);
+    // console.log('routes: ', routes);
+    // console.log('metaData: ', metaData);
     // 应用初始化之前 不能访问应用中的任何逻辑
     evalWrap.bind(window)(metaData, 'rendered');
-
+    ['preRequest', 'postRequest'].forEach((fnName) => {
+        evalWrap.bind(window)(metaData, fnName);
+    });
     if (window.LcapMicro?.container) {
         if (document.currentScript
             && (!document.head.contains(document.currentScript) || document.currentScript.active === false)
@@ -93,10 +97,31 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     });
 
     const router = initRouter(baseRoutes);
-    const hasBeforeRouter = !!metaData?.frontendEvents?.beforeRouter;
-    const hasAfterRouter = !!metaData?.frontendEvents?.afterRouter;
-    router.beforeEach(userInfoGuard);
-    router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig));
+    // const hasBeforeRouter = !!metaData?.frontendEvents?.beforeRouter;
+    // const hasAfterRouter = !!metaData?.frontendEvents?.afterRouter;
+    // 修改策略： 由于目前是所有页面都会调用 getuser接口 单列一个事件没意义： 所以把此事件合并到 authGuard
+    // 2 合并之后 不在ide里展示当前实现的逻辑 处理方式类似 依赖库的覆写逻辑： 默认js、java实现 如果用户编写nasl覆盖则使用nasl实现
+    const fnName = 'beforeRouter';
+    if (fnName && metaData.frontendEvents[fnName]) {
+        evalWrap.bind(window)(metaData, fnName);
+        console.log(fnName, window[fnName]);
+        Vue.prototype[fnName] = window[fnName];
+    }
+    const beforeRouter = Vue.prototype.beforeRouter;
+    const getAuthGuard = (router, routes, authResourcePaths, appConfig, beforeRouter) => async (to, from, next) => {
+        try {
+            if (beforeRouter) {
+                const event = {
+                    router, routes, authResourcePaths, appConfig, beforeRouter,
+                    to, from, next, parsePath, getBasePath, filterAuthResources, findNoAuthView, filterRoutes,
+                };
+                console.log('自定义beforeRouter: ', event);
+                await beforeRouter(event);
+            }
+        } catch (err) { }
+        next();
+    };
+    beforeRouter && router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, window.beforeRouter));
     router.beforeEach(getTitleGuard(appConfig));
     router.beforeEach(microFrontend);
 
@@ -113,35 +138,20 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         for (let index = 0; index < fnList.length; index++) {
             const fnName = fnList[index];
             if (fnName && metaData.frontendEvents[fnName]) {
-                // eval(metaData.frontendEvents[fnName]);
                 evalWrap.bind(app)(metaData, fnName);
                 console.log(fnName, window[fnName]);
                 Vue.prototype[fnName] = window[fnName];
             }
         }
     }
-    const beforeRouter = Vue.prototype.beforeRouter;
     const afterRouter = Vue.prototype.afterRouter;
-    beforeRouter && router.beforeEach((route) => {
-        beforeRouter && beforeRouter(route);
-    });
-    // -----------------mock
-    // const fnName = 'afterRouter';
-    // metaData.frontendEvents = {
-    //     afterRouter: "window.afterRouter = async (event) => { \nawait (async () => {\n\nawait (this.$logics['app.logics.logic7']({\n                config: {\n                    download: false,\n                },\n                query: {},\n                headers: {},\n            path: {},\n                body: {\n}\n}))\nreturn;\n})();\n}\n",
-    // };
-    // evalWrap.bind(app)(metaData, fnName);
-    // Vue.prototype[fnName] = window[fnName];
-    // -----------------mock
 
-    // const afterRouterWrap = function (route) {
-    //     console.log('触发了 afterEach:22 ', this, window.$logics);
-    //     afterRouter && afterRouter.bind(app)(route);
-    // };
-    // const fn = afterRouterWrap.bind(app);
-    // afterRouter && router.afterEach(fn);
-    afterRouter && router.afterEach((route) => {
-        afterRouter && afterRouter(route);
+    afterRouter && router.afterEach(async (to, from, next) => {
+        try {
+            if (afterRouter) {
+                await afterRouter(to, from);
+            }
+        } catch (err) { }
     });
 
     if (window.LcapMicro?.container) {
