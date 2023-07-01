@@ -106,5 +106,17 @@
             "path": "/api/system/process/getRejectableTaskDefinitionList",
             "method": "post"
         }
+    },
+    "setProcessDefinitionState": {
+        "url": {
+            "path": "/api/system/process/setProcessDefinitionState",
+            "method": "post"
+        }
+    },
+    "updateTaskDefinitionStrategy": {
+        "url": {
+            "path": "/api/system/process/updateTaskDefinitionStrategy",
+            "method": "post"
+        }
     }
 }

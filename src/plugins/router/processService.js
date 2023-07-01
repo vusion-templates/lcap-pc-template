@@ -158,4 +158,20 @@ export const porcessPorts = {
         });
         return res;
     },
+    async setProcessDefinitionState(query) {
+        const res = await processInitService().setProcessDefinitionState({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async updateTaskDefinitionStrategy(query) {
+        const res = await processInitService().updateTaskDefinitionStrategy({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
 };
