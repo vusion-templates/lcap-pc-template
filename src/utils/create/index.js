@@ -3,7 +3,9 @@ import Service from 'request-pre';
 import { stringify } from 'qs';
 
 import cookie from '@/utils/cookie';
-import addConfigs from './add.configs';
+import { addConfigs, shortResponse } from './add.configs';
+import { instance } from './errHandles';
+
 import { getFilenameFromContentDispositionHeader } from './tools';
 import paramsSerializer from './paramsSerializer';
 import { formatMicroFrontUrl } from '@/plugins/router/microFrontUrl';
@@ -15,6 +17,31 @@ const formatContentType = function (contentType, data) {
         },
     };
     return map[contentType] ? map[contentType](data) : data;
+};
+
+const parseCookie = (str) =>
+    str
+        .split(';')
+        .map((v) => v.split('='))
+        .reduce((acc, v) => {
+            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            return acc;
+        }, {});
+const foramtCookie = (cookieStr) => {
+    const obj = parseCookie(cookieStr);
+    const result = {};
+    Object.keys(obj).forEach((key) => {
+        result[key] = {
+            name: key,
+            value: obj[key],
+            domain: '', // 前端只能拿到k v 其他字段补齐即可
+            cookiePath: '',
+            sameSite: '',
+            httpOnly: '',
+            secure: '',
+            maxAge: '',
+        };
+    });
 };
 
 /**
@@ -110,7 +137,6 @@ const requester = function (requestInfo) {
 };
 
 const service = new Service(requester);
-addConfigs(service);
 
 // 调整请求路径
 const adjustPathWithSysPrefixPath = (apiSchemaList) => {
@@ -137,6 +163,7 @@ const adjustPathWithSysPrefixPath = (apiSchemaList) => {
 };
 
 export const createService = function createService(apiSchemaList, serviceConfig, dynamicServices) {
+    addConfigs(service);
     const fixServiceConfig = serviceConfig || {};
     fixServiceConfig.config = fixServiceConfig.config || {};
     Object.assign(fixServiceConfig.config, {
@@ -153,12 +180,142 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
     const fixServiceConfig = serviceConfig || {};
     fixServiceConfig.config = fixServiceConfig.config || {};
     Object.assign(fixServiceConfig.config, {
-        httpCode: true,
-        httpError: true,
+        // httpCode: true,
+        // httpError: true,
         shortResponse: true,
         concept: 'Logic',
     });
     serviceConfig = fixServiceConfig;
     const newApiSchemaMap = adjustPathWithSysPrefixPath(apiSchemaList);
+    if (window.preRequest) {
+        service.preConfig.set('preRequest', (requestInfo, preData) => {
+            const HttpRequest = {
+                requestURI: requestInfo.url.path,
+                remoteIp: '',
+                requestMethod: requestInfo.url.method,
+                body: JSON.stringify(requestInfo.url.body),
+                headers: requestInfo.url.headers,
+                querys: JSON.stringify(requestInfo.url.query),
+                cookies: foramtCookie(document.cookie),
+            };
+
+            window.preRequest && window.preRequest(HttpRequest, preData);
+        });
+        serviceConfig.config.preRequest = true;
+    }
+    if (window.postRequest) {
+        service.postConfig.set('postRequest', {
+            resolve(response, params, requestInfo) {
+                if (!response) {
+                    return Promise.reject();
+                }
+                const status = 'success';// 通过传入状态将两个钩子写在一个函数里
+                // 线看下写一个钩子行不行  不行的化需要 通过传参把 nasl 当两个函数用 创建两个钩子
+                // 分开的好处： 可以让success 抛出异常给error? 好像也没有这个必要
+                console.log('自定义接口请求后事件 success: ', response);
+                const { config } = requestInfo;
+                const serviceType = config?.serviceType;
+                if (serviceType && serviceType === 'external') {
+                    return response;
+                }
+                // const data = response.data;
+                // const code = data.code || data.Code;
+                // if ((code === undefined) || (code === 'Success') || (code + '').startsWith('2')) {
+                //     return response;
+                // }
+                // 这里是200return responese 给下一个  else reject 给下一个
+                // 需要改写为一个函数里 处理这两种情况 : 不行错误是强制写在另一个钩子里的
+
+                const HttpResponse = {
+                    status: response.status + '',
+                    body: JSON.stringify(response.data),
+                    headers: response.headers,
+                    cookies: foramtCookie(document.cookie),
+                };
+                window.postRequest && window.postRequest(HttpResponse, requestInfo, status);
+                // 接受出参： result
+                const result = {
+                    status: 'reject',
+                };
+                return response;
+                // if (result.status === 'reject') {
+                //     // const errHandle = {
+                //     //     ...result.errhandle,
+                //     // };
+                // } else if (result.status === 'resolve') {
+                // }
+
+                // return Promise.reject({
+                //     code,
+                //     msg: data.msg || data.Message,
+                // });
+            },
+        });
+        service.postConfig.set('postRequestError', {
+            reject(response, params, requestInfo) {
+                console.log('自定义接口请求后事件 fail: ', response);
+                response.Code = response.code || response.status;
+                const status = 'error';
+                const err = response;
+                const { config } = requestInfo;
+                if (err === 'expired request') {
+                    throw err;
+                }
+                if (!err.response) {
+                    if (!config.noErrorTip) {
+                        instance.show('系统错误，请查看日志！');
+                        return;
+                    }
+                }
+                if (window.LcapMicro?.loginFn) {
+                    if (err.Code === 401 && err.Message === 'token.is.invalid') {
+                        window.LcapMicro.loginFn();
+                        return;
+                    }
+                    if (err.Code === 'InvalidToken' && err.Message === 'Token is invalid') {
+                        window.LcapMicro.loginFn();
+                        return;
+                    }
+                }
+                if (err.Code === 501 && err.Message === 'abort') {
+                    throw Error('程序中止');
+                }
+                const HttpResponse = {
+                    status: response.response.status + '',
+                    body: JSON.stringify(response.response.data),
+                    headers: response.response.headers,
+                    cookies: foramtCookie(document.cookie),
+                };
+                window.postRequest && window.postRequest(HttpResponse, requestInfo, status);
+                throw err;
+            },
+        });
+        serviceConfig.config = {
+            ...serviceConfig.config,
+            priority: {
+                ...(serviceConfig.config.priority ? serviceConfig.config.priority : {}),
+                postRequest: 10,
+                postRequestError: 10,
+            },
+        };
+        serviceConfig.config.postRequest = true;
+        serviceConfig.config.postRequestError = true;
+    }
+    service.postConfig.set('lcapLocation', (response, params, requestInfo) => {
+        const lcapLocation = response?.headers['lcap-location'];
+        if (lcapLocation) {
+            location.href = lcapLocation;
+        }
+        return response;
+    });
+    serviceConfig.config = {
+        ...serviceConfig.config,
+        priority: {
+            ...(serviceConfig.config.priority ? serviceConfig.config.priority : {}),
+            lcapLocation: 1,
+        },
+    };
+    serviceConfig.config.lcapLocation = true;
+    service.postConfig.set('shortResponse', shortResponse);
     return service.generator(newApiSchemaMap, dynamicServices, serviceConfig);
 };

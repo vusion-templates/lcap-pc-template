@@ -800,6 +800,7 @@ export default {
     install(Vue, options) {
         utils.Vue = Vue;
         Vue.prototype.$utils = utils;
+        window.$utils = utils;
         enumsMap = options.enumsMap;
     },
 };
