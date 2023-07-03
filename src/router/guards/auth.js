@@ -55,22 +55,6 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig, befor
             });
         }
     }
-    console.log('getAuthGuard 存在: ', beforeRouter);
-
-    if (beforeRouter) {
-        // 设计此函数内 调用getuser getuserresources 后直接返回?
-        const result = beforeRouter(to, from, next);
-        // 可选: 是通过代码块写在ide里 还是约定返回值template来处理 ?
-        if (result.status === 'resolve') {
-            next();
-        }
-        if (result.status === 'reject') {
-            // next()
-        }
-    } else {
-        // todo
-        await Vue.prototype.$auth.getUserInfo();
-    }
 
     const userInfo = Vue.prototype.$global.userInfo || {};
     const $auth = Vue.prototype.$auth;
@@ -85,19 +69,8 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig, befor
     });
 
     const noAuthView = findNoAuthView(routes);
-    // if (下个页面需要登录) {
-    //     if (权限表未初始化) {
-    //         if (未登录) { 跳转登录页; } else { 调用getUserResources接口并初始化权限路由; 重进页面一次; }
-    //         // 自定义 notfond 无权限
-    //         //
-    //     } else if (下个页面是notfond) { 直接跳转notfond; }
-    // } elseif(页面不需要登录 && 权限表未初始化 && 用户已登录);
-    console.log('authPath ----------------: ', authPath);
 
     if (authPath) {
-        if (beforeRouter) {
-            beforeRouter(to, from, next);
-        }
         if (!$auth.isInit()) {
             if (!userInfo.UserId) {
                 localStorage.setItem('beforeLogin', JSON.stringify(location));
@@ -105,7 +78,6 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig, befor
             } else {
                 try {
                     const resources = await $auth.getUserResources(appConfig.domainName);
-                    // ----------------------------------------------------
                     addAuthRoutes(filterAuthResources(resources));
                     // 即使没有查到权限，也需要重新进一遍，来决定去 无权限页面 还是 404页面
                     next({
