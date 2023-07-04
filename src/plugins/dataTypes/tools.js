@@ -597,27 +597,16 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
                 collection.add(variable);
 
                 if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
-                    const maxLen = 10;
                     if (typeName === 'List') {
-                        const moreThanMax = variable.length > maxLen;
-                        const arr = moreThanMax ? variable.slice(0, maxLen) : variable;
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
-                        let arrStr = '';
-                        arr.forEach((varItem, idx) => {
-                            arrStr += `${indent(tabSize + 1)}${toString(varItem, itemTypeKey, tabSize + 1, collection)}`;
-                            if (idx < arr.length - 1) {
-                                arrStr += `,\n`;
-                            }
-                        });
-                        str = moreThanMax ? `[\n${arrStr}, ...\n${indent(tabSize)}]` : `[\n${arrStr}\n${indent(tabSize)}]`;
+                        const arrStr = variable.map((varItem) => `${indent(tabSize + 1)}${toString(varItem, itemTypeKey, tabSize + 1, collection)}`).join(',\n');
+                        str = `[\n${arrStr}\n${indent(tabSize)}]`;
                     } else if (typeName === 'Map') {
                         const keys = Object.keys(variable);
-                        const moreThanMax = keys.length > maxLen;
-                        const arr = moreThanMax ? keys : keys.slice(0, maxLen);
                         const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
-                        const arrStr = arr.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1, collection)} -> ${toString(variable[key], itemTypeKey, tabSize + 1, collection)}`).join(',\n');
-                        str = moreThanMax ? `{\n${arrStr}\n...\n}` : `{\n${arrStr}\n}`;
+                        const arrStr = keys.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1, collection)} -> ${toString(variable[key], itemTypeKey, tabSize + 1, collection)}`).join(',\n');
+                        str = `{\n${arrStr}\n${indent(tabSize)}}`;
                     }
                 } else {
                     // 处理一些范型数据结构的情况
