@@ -144,11 +144,12 @@ const adjustPathWithSysPrefixPath = (apiSchemaList) => {
     if (apiSchemaList) {
         for (const key in apiSchemaList) {
             if (!newApiSchemaMap[key]) {
-                const { url } = apiSchemaList[key] || {};
+                const { url, ...others } = apiSchemaList[key] || {};
                 newApiSchemaMap[key] = {
                     url: {
                         ...url,
                     },
+                    ...others,
                 };
             }
             const newApiSchema = newApiSchemaMap[key];

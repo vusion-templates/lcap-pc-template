@@ -1,132 +1,134 @@
 {
-    "name": "lcap-pc-template",
-    "version": "0.5.0",
-    "description": "base on vue cloud-ui.vusion",
-    "scripts": {
-        "dev": "vue-cli-service serve",
-        "serve": "npm run dev",
-        "check": "node bin/ggpull && node bin/check-deps",
-        "build": "vue-cli-service build --apply-theme",
-        "build:stage": "vue-cli-service build --mode staging",
-        "build:site": "vue-cli-service build  --apply-theme --mode site",
-        "lint": "npx eslint",
-        "lint:fix": "npm run lint -- \"./src/**/*.{js,vue}\" --fix",
-        "dll": "npx webpack --config webpack.dll.config.js --env.NODE_ENV production && npx webpack --config webpack.dll.config.js --env.NODE_ENV development",
-        "test:unit": "vue-cli-service test:unit",
-        "test:unit:watch": "npm run test:unit -- --watch",
-        "ui": "npx vue ui",
-        "manage": "plop",
-        "screenshot": "vusion screenshot --server public/index.html -o screenshots/0.png -w 1440 -h 900 && vusion screenshot --server public/index.html#/demo/list/basic -o screenshots/1.png -w 1440 -h 900 -d 200",
-        "build:designer": "npm run check && cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js",
-        "deploy:dev": "lcap deploy ./public --platform http://defaulttenant.lcap.dev.env.com",
-        "deploy:test": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.test.com",
-        "deploy:pre": "lcap deploy ./public --platform http://defaulttenant.lcap.hadri.163yun.com",
-        "deploy:online": "lcap deploy ./public --platform http://netease-template.lcap.163yun.com",
-        "deploy:online-saas": "lcap deploy ./public --platform http://defaulttenant.lcap.qz.163yun.com",
-        "postinstall": "node node_modules/vusion-install/index.js",
-        "prepublishOnly": "cp .gitignore _.gitignore && npm run build:designer",
-        "postpublish": "rm _.gitignore"
-    },
-    "keywords": [
-        "vue",
-        "admin",
-        "cloud-ui",
-        "template"
-    ],
-    "template": {
-        "name": "cloud-admin-template",
-        "version": "0.8.x",
-        "inited": true
-    },
-    "author": "zhangsanshi5566@gmail.com",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/vusion-templates/cloud-admin-template.git"
-    },
-    "bugs": {
-        "url": "https://github.com/vusion-templates/cloud-admin-template/issues"
-    },
-    "homepage": "https://vusion-templates.github.io/cloud-admin-template",
-    "license": "MIT",
-    "devDependencies": {
-        "@babel/cli": "^7.10.1",
-        "@babel/core": "^7.10.1",
-        "@babel/plugin-transform-strict-mode": "^7.10.1",
-        "@vue/babel-preset-app": "^4.4.1",
-        "@vue/cli": "^4.4.1",
-        "@vue/cli-plugin-babel": "^4.4.1",
-        "@vue/cli-plugin-unit-jest": "^4.4.1",
-        "@vue/cli-service": "^4.4.1",
-        "@vue/test-utils": "1.0.2",
-        "@vusion/mock": "^0.1.1",
-        "@vusion/routes-loader": "^0.4.0",
-        "add-asset-html-webpack-plugin": "^3.1.3",
-        "babel-core": "^7.0.0-bridge.0",
-        "babel-eslint": "^10.1.0",
-        "babel-jest": "^23.6.0",
-        "chalk": "^3.0.0",
-        "cloud-admin-template-sdk": "^0.4.14",
-        "copy-webpack-plugin": "^5.0.4",
-        "core-js": "^3.6.5",
-        "cross-env": "^7.0.2",
-        "eslint": "^6.5.1",
-        "eslint-config-vusion": "^3.0.2",
-        "fs-extra": "^9.0.0",
-        "html-webpack-plugin": "^3.2.0",
-        "husky": "^3.0.5",
-        "inquirer-directory": "^2.2.0",
-        "javascript-stringify": "^2.0.1",
-        "lint-staged": "^9.2.5",
-        "plop": "^2.5.3",
-        "postcss-nested": "^4.1.2",
-        "raw-loader": "^3.1.0",
-        "shelljs": "^0.8.4",
-        "shx": "^0.3.2",
-        "underscore-template-loader": "^1.0.0",
-        "vue-cli-plugin-cloud-admin": "^0.1.3",
-        "vue-cli-plugin-vusion": "0.13.2",
-        "vusion-install": "^0.12.8",
-        "webpack": "^4.40.2",
-        "webpack-cli": "^3.3.9"
-    },
-    "dependencies": {
-        "@vusion/utils": "^0.4.10",
-        "axios": "^0.19.0",
-        "babel-polyfill": "^6.26.0",
-        "cloud-ui.vusion": "^0.14.1",
-        "crypto-js": "^4.1.1",
-        "date-fns": "^2.6.0",
-        "decimal.js": "^10.4.1",
-        "event-hooks-webpack-plugin": "^2.1.6",
-        "i-material-design.vue": "^5.1.0",
-        "lodash": "^4.17.15",
-        "qs": "^6.8.0",
-        "request-pre": "^0.4.3",
-        "uuid": "^7.0.3",
-        "vue": "^2.6.12",
-        "vue-i18n": "^8.28.2",
-        "vue-router": "^3.1.2",
-        "vue-template-compiler": "^2.6.12"
-    },
-    "forceUpdate": {
-        "@vusion/utils": true,
-        "request-pre": true,
-        "cloud-admin-template-sdk": true,
-        "vue-cli-plugin-vusion": true
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "lint-staged"
-        }
-    },
-    "lint-staged": {
-        "*.{js,vue}": [
-            "npm run lint -- --fix",
-            "git add"
-        ]
-    },
-    "ui": {
-        "name": "cloud-ui.vusion",
-        "version": "0.11.24"
+  "name": "lcap-pc-template",
+  "version": "0.4.35",
+  "description": "base on vue cloud-ui.vusion",
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "serve": "npm run dev",
+    "check": "node bin/ggpull && node bin/check-deps",
+    "build": "vue-cli-service build --apply-theme",
+    "build:stage": "vue-cli-service build --mode staging",
+    "build:site": "vue-cli-service build  --apply-theme --mode site",
+    "lint": "npx eslint",
+    "lint:fix": "npm run lint -- \"./src/**/*.{js,vue}\" --fix",
+    "dll": "npx webpack --config webpack.dll.config.js --env.NODE_ENV production && npx webpack --config webpack.dll.config.js --env.NODE_ENV development",
+    "test:unit": "vue-cli-service test:unit",
+    "test:unit:watch": "npm run test:unit -- --watch",
+    "ui": "npx vue ui",
+    "manage": "plop",
+    "screenshot": "vusion screenshot --server public/index.html -o screenshots/0.png -w 1440 -h 900 && vusion screenshot --server public/index.html#/demo/list/basic -o screenshots/1.png -w 1440 -h 900 -d 200",
+    "watch:designer-local": "node ./bin/local-designer-build.js",
+    "build:designer-local": "cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js",
+    "build:designer": "npm run check && cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js",
+    "deploy:dev": "lcap deploy ./public --platform http://defaulttenant.lcap.dev.env.com",
+    "deploy:test": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.test.com",
+    "deploy:pre": "lcap deploy ./public --platform http://defaulttenant.lcap.hadri.163yun.com",
+    "deploy:online": "lcap deploy ./public --platform http://netease-template.lcap.163yun.com",
+    "deploy:online-saas": "lcap deploy ./public --platform http://defaulttenant.lcap.qz.163yun.com",
+    "postinstall": "node node_modules/vusion-install/index.js",
+    "prepublishOnly": "cp .gitignore _.gitignore && npm run build:designer",
+    "postpublish": "rm _.gitignore"
+  },
+  "keywords": [
+    "vue",
+    "admin",
+    "cloud-ui",
+    "template"
+  ],
+  "template": {
+    "name": "cloud-admin-template",
+    "version": "0.8.x",
+    "inited": true
+  },
+  "author": "zhangsanshi5566@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vusion-templates/cloud-admin-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vusion-templates/cloud-admin-template/issues"
+  },
+  "homepage": "https://vusion-templates.github.io/cloud-admin-template",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.1",
+    "@babel/plugin-transform-strict-mode": "^7.10.1",
+    "@vue/babel-preset-app": "^4.4.1",
+    "@vue/cli": "^4.4.1",
+    "@vue/cli-plugin-babel": "^4.4.1",
+    "@vue/cli-plugin-unit-jest": "^4.4.1",
+    "@vue/cli-service": "^4.4.1",
+    "@vue/test-utils": "1.0.2",
+    "@vusion/mock": "^0.1.1",
+    "@vusion/routes-loader": "^0.4.0",
+    "add-asset-html-webpack-plugin": "^3.1.3",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^23.6.0",
+    "chalk": "^3.0.0",
+    "cloud-admin-template-sdk": "^0.4.14",
+    "copy-webpack-plugin": "^5.0.4",
+    "core-js": "^3.6.5",
+    "cross-env": "^7.0.2",
+    "eslint": "^6.5.1",
+    "eslint-config-vusion": "^3.0.2",
+    "fs-extra": "^9.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "husky": "^3.0.5",
+    "inquirer-directory": "^2.2.0",
+    "javascript-stringify": "^2.0.1",
+    "lint-staged": "^9.2.5",
+    "plop": "^2.5.3",
+    "postcss-nested": "^4.1.2",
+    "raw-loader": "^3.1.0",
+    "shelljs": "^0.8.4",
+    "shx": "^0.3.2",
+    "underscore-template-loader": "^1.0.0",
+    "vue-cli-plugin-cloud-admin": "^0.1.3",
+    "vue-cli-plugin-vusion": "0.13.2",
+    "vusion-install": "^0.12.8",
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.9"
+  },
+  "dependencies": {
+    "@vusion/utils": "^0.4.10",
+    "axios": "^0.19.0",
+    "babel-polyfill": "^6.26.0",
+    "cloud-ui.vusion": "^0.14.1",
+    "crypto-js": "^4.1.1",
+    "date-fns": "^2.6.0",
+    "decimal.js": "^10.4.1",
+    "event-hooks-webpack-plugin": "^2.1.6",
+    "i-material-design.vue": "^5.1.0",
+    "lodash": "^4.17.15",
+    "qs": "^6.8.0",
+    "request-pre": "^0.4.3",
+    "uuid": "^7.0.3",
+    "vue": "^2.6.12",
+    "vue-i18n": "^8.28.2",
+    "vue-router": "^3.1.2",
+    "vue-template-compiler": "^2.6.12"
+  },
+  "forceUpdate": {
+    "@vusion/utils": true,
+    "request-pre": true,
+    "cloud-admin-template-sdk": true,
+    "vue-cli-plugin-vusion": true
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
     }
+  },
+  "lint-staged": {
+    "*.{js,vue}": [
+      "npm run lint -- --fix",
+      "git add"
+    ]
+  },
+  "ui": {
+    "name": "cloud-ui.vusion",
+    "version": "0.11.24"
+  }
 }
