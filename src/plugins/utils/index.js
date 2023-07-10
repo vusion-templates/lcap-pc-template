@@ -20,6 +20,7 @@ import Vue from 'vue';
 
 import { toString, fromString, toastAndThrowError } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
+import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync}  from './helper'
 let enumsMap = {};
 
 function toValue(date, converter) {
@@ -261,6 +262,31 @@ export const utils = {
             }
         }
     },
+    ListSortAsync(arr, callback, sort) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                sortAsync(arr, (a, b) => {
+                    const valueA = callback(a);
+                    const valueB = callback(b);
+                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
+                        return resolve(1);
+                    } else {
+                        if (valueA >= valueB) {
+                            if (sort) {
+                                return resolve(1);
+                            }
+                            return resolve(-1);
+                        } else {
+                            if (sort) {
+                                return resolve(-1)
+                            }
+                            return resolve(1);
+                        }
+                    }
+                })
+            } 
+        }
+    },
     ListFind(arr, by) {
         if (Array.isArray(arr)) {
             if (typeof by === 'function') {
@@ -270,10 +296,10 @@ export const utils = {
         }
     },
     ListFindAsync(arr, by) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (Array.isArray(arr)) {
                 if (typeof by === 'function') {
-                    const value = arr.find(by);
+                    const value = await findAsync(arr, by);
                     resolve((typeof value === 'undefined') ? null : value);
                 } else {
                     reject(new Error('Invalid argument: by is not a function'));
@@ -294,7 +320,7 @@ export const utils = {
             if (!Array.isArray(arr) || typeof by !== 'function') {
                 return reject(null);
             }
-            return resolve(arr.filter(by));
+            return resolve(filterAsync(arr, by));
         });
     },
     ListFindIndex(arr, callback) {
@@ -305,10 +331,10 @@ export const utils = {
         }
     },
     ListFindIndexAsync(arr, callback) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (Array.isArray(arr)) {
                 if (typeof callback === 'function') {
-                    return resolve(arr.findIndex(callback));
+                    return resolve(await findIndexAsync(arr, callback));
                 } else {
                     reject(new Error('Invalid argument: callback is not a function'));
                 }
@@ -388,7 +414,7 @@ export const utils = {
     },
     ListDistinctByAsync(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!Array.isArray(arr) || typeof getVal !== 'function') {
                 return reject(null);
             }
@@ -399,7 +425,7 @@ export const utils = {
             const res = [];
             const vis = new Set();
             for (const item of arr) {
-                const hash = getVal(item);
+                const hash = await getVal(item);
                 if (!vis.has(hash)) {
                     vis.add(hash);
                     res.push(item);
@@ -430,7 +456,7 @@ export const utils = {
     },
     ListGroupByAsync(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!arr || typeof getVal !== 'function') {
                 return reject(null);
             }
@@ -438,15 +464,16 @@ export const utils = {
                 return resolve(arr);
             }
             const res = {};
-            arr.forEach((e) => {
-                const val = getVal(e);
-                if (res[val]) {
+            for (let i = 0; i < arr.length; i++) {
+                const e = arr[i];
+                const val = await getVal(e);
+                if (Array.isArray(res[val])) {
                     // res.get(val) 是一个 array
                     res[val].push(e);
                 } else {
                     res[val] = [e];
                 }
-            });
+            }
             return resolve(res);
         });
     },
@@ -507,13 +534,13 @@ export const utils = {
         return res;
     },
     MapFilterAsync(map, by) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!isObject(map) || typeof by !== 'function') {
                 return reject(null);
             }
             const res = {};
             for (const [k, v] of Object.entries(map)) {
-                if (by(k, v)) {
+                if (await by(k, v)) {
                     res[k] = v;
                 }
             }
@@ -531,13 +558,13 @@ export const utils = {
         return res;
     },
     MapTransformAsync(map, toKey, toValue) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
                 return reject(null);
             }
             const res = {};
             for (const [k, v] of Object.entries(map)) {
-                res[toKey(k, v)] = toValue(k, v);
+                res[await toKey(k, v)] = await toValue(k, v);
             }
             return resolve(res);
         });
@@ -557,15 +584,16 @@ export const utils = {
         return res;
     },
     ListToMapAsync(arr, toKey, toValue) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!Array.isArray(arr) || typeof toKey !== 'function' || typeof toValue !== 'function') {
                 return reject(null);
             }
             const res = {};
             for (let i = arr.length - 1; i >= 0; i--) {
                 const e = arr[i];
-                if (toKey(e) !== undefined) {
-                    res[toKey(e)] = toValue(e);
+                const key = await toKey(e);
+                if (key !== undefined) {
+                    res[key] = await toValue(e);
                 }
             }
 
