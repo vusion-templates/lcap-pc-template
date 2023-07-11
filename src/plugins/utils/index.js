@@ -170,7 +170,7 @@ export const utils = {
     ListLast(arr) {
         if (!Array.isArray(arr) || arr.length === 0) {
             return null;
-        } else {
+        } else {　
             return arr[arr.length - 1];
         }
     },
@@ -188,14 +188,12 @@ export const utils = {
             return null;
         }
     },
-    ListTransformAsync(arr, trans) {
-        return new Promise((resolve, reject) => {
-            if (Array.isArray(arr)) {
-                return resolve(arr.map((elem) => trans(elem)));
-            } else {
-                return reject(null);
-            }
-        });
+    async ListTransformAsync(arr, trans) {
+        if (Array.isArray(arr)) {
+            return await mapAsync(arr, (elem) => trans(elem))
+        } else {
+            return null
+        }
     },
     ListSum(arr) {
         if (Array.isArray(arr) && arr.length > 0) {
@@ -262,25 +260,25 @@ export const utils = {
             }
         }
     },
-    ListSortAsync(arr, callback, sort) {
+    async ListSortAsync(arr, callback, sort) {
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                sortAsync(arr, (a, b) => {
-                    const valueA = callback(a);
-                    const valueB = callback(b);
+                sortAsync(arr, async (a, b) => {
+                    const valueA = await callback(a);
+                    const valueB = await callback(b);
                     if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
-                        return resolve(1);
+                        return 1
                     } else {
                         if (valueA >= valueB) {
                             if (sort) {
-                                return resolve(1);
+                                return 1
                             }
-                            return resolve(-1);
+                            return -1
                         } else {
                             if (sort) {
-                                return resolve(-1)
+                                return -1
                             }
-                            return resolve(1);
+                            return 1
                         }
                     }
                 })
@@ -295,19 +293,13 @@ export const utils = {
             }
         }
     },
-    ListFindAsync(arr, by) {
-        return new Promise(async (resolve, reject) => {
-            if (Array.isArray(arr)) {
-                if (typeof by === 'function') {
-                    const value = await findAsync(arr, by);
-                    resolve((typeof value === 'undefined') ? null : value);
-                } else {
-                    reject(new Error('Invalid argument: by is not a function'));
-                }
-            } else {
-                reject(new Error('Invalid argument: arr is not an array'));
-            }
-        });
+    async ListFindAsync(arr, by) {
+        if (Array.isArray(arr)) {
+            if (typeof by === 'function') {
+                const value = await findAsync(arr, by);
+                return (typeof value === 'undefined') ? null : value;
+            } 
+        }
     },
     ListFilter(arr, by) {
         if (!Array.isArray(arr) || typeof by !== 'function') {
@@ -315,13 +307,11 @@ export const utils = {
         }
         return arr.filter(by);
     },
-    ListFilterAsync(arr, by) {
-        return new Promise((resolve, reject) => {
-            if (!Array.isArray(arr) || typeof by !== 'function') {
-                return reject(null);
-            }
-            return resolve(filterAsync(arr, by));
-        });
+    async ListFilterAsync(arr, by) {
+        if (!Array.isArray(arr) || typeof by !== 'function') {
+            return null
+        }
+        return await filterAsync(arr, by)
     },
     ListFindIndex(arr, callback) {
         if (Array.isArray(arr)) {
@@ -330,18 +320,12 @@ export const utils = {
             }
         }
     },
-    ListFindIndexAsync(arr, callback) {
-        return new Promise(async (resolve, reject) => {
-            if (Array.isArray(arr)) {
-                if (typeof callback === 'function') {
-                    return resolve(await findIndexAsync(arr, callback));
-                } else {
-                    reject(new Error('Invalid argument: callback is not a function'));
-                }
-            } else {
-                reject(new Error('Invalid argument: arr is not an array'));
+    async ListFindIndexAsync(arr, callback) {
+        if (Array.isArray(arr)) {
+            if (typeof callback === 'function') {
+                return await findIndexAsync(arr, callback)
             }
-        });
+        }
     },
     ListSlice(arr, start, end) {
         if (isArrayOutBounds(arr, start) && isArrayOutBounds(arr, end)) {
@@ -412,27 +396,25 @@ export const utils = {
         }
         return res;
     },
-    ListDistinctByAsync(arr, getVal) {
+    async ListDistinctByAsync(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        return new Promise(async (resolve, reject) => {
-            if (!Array.isArray(arr) || typeof getVal !== 'function') {
-                return reject(null);
-            }
-            if (arr.length === 0) {
-                return resolve(arr);
-            }
+        if (!Array.isArray(arr) || typeof getVal !== 'function') {
+            return null
+        }
+        if (arr.length === 0) {
+            return arr
+        }
 
-            const res = [];
-            const vis = new Set();
-            for (const item of arr) {
-                const hash = await getVal(item);
-                if (!vis.has(hash)) {
-                    vis.add(hash);
-                    res.push(item);
-                }
+        const res = [];
+        const vis = new Set();
+        for (const item of arr) {
+            const hash = await getVal(item);
+            if (!vis.has(hash)) {
+                vis.add(hash);
+                res.push(item);
             }
-            return resolve(res);
-        });
+        }
+        return res
     },
     ListGroupBy(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
@@ -454,28 +436,26 @@ export const utils = {
         });
         return res;
     },
-    ListGroupByAsync(arr, getVal) {
+   async ListGroupByAsync(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        return new Promise(async (resolve, reject) => {
-            if (!arr || typeof getVal !== 'function') {
-                return reject(null);
+        if (!arr || typeof getVal !== 'function') {
+            return null;
+        }
+        if (arr.length === 0) {
+            return arr
+        }
+        const res = {};
+        for (let i = 0; i < arr.length; i++) {
+            const e = arr[i];
+            const val = await getVal(e);
+            if (Array.isArray(res[val])) {
+                // res.get(val) 是一个 array
+                res[val].push(e);
+            } else {
+                res[val] = [e];
             }
-            if (arr.length === 0) {
-                return resolve(arr);
-            }
-            const res = {};
-            for (let i = 0; i < arr.length; i++) {
-                const e = arr[i];
-                const val = await getVal(e);
-                if (Array.isArray(res[val])) {
-                    // res.get(val) 是一个 array
-                    res[val].push(e);
-                } else {
-                    res[val] = [e];
-                }
-            }
-            return resolve(res);
-        });
+        }
+        return res
     },
     MapGet(map, key) {
         if (isObject(map)) {
@@ -533,19 +513,17 @@ export const utils = {
         }
         return res;
     },
-    MapFilterAsync(map, by) {
-        return new Promise(async (resolve, reject) => {
-            if (!isObject(map) || typeof by !== 'function') {
-                return reject(null);
+    async MapFilterAsync(map, by) {
+        if (!isObject(map) || typeof by !== 'function') {
+            return null;
+        }
+        const res = {};
+        for (const [k, v] of Object.entries(map)) {
+            if (await by(k, v)) {
+                res[k] = v;
             }
-            const res = {};
-            for (const [k, v] of Object.entries(map)) {
-                if (await by(k, v)) {
-                    res[k] = v;
-                }
-            }
-            return resolve(res);
-        });
+        }
+        return res
     },
     MapTransform(map, toKey, toValue) {
         if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
@@ -557,17 +535,15 @@ export const utils = {
         }
         return res;
     },
-    MapTransformAsync(map, toKey, toValue) {
-        return new Promise(async (resolve, reject) => {
-            if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
-                return reject(null);
-            }
-            const res = {};
-            for (const [k, v] of Object.entries(map)) {
-                res[await toKey(k, v)] = await toValue(k, v);
-            }
-            return resolve(res);
-        });
+    async MapTransformAsync(map, toKey, toValue) {
+        if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
+            return null
+        }
+        const res = {};
+        for (const [k, v] of Object.entries(map)) {
+            res[await toKey(k, v)] = await toValue(k, v);
+        }
+        return res;
     },
     ListToMap(arr, toKey, toValue) {
         if (!Array.isArray(arr) || typeof toKey !== 'function' || typeof toValue !== 'function') {
@@ -583,22 +559,19 @@ export const utils = {
 
         return res;
     },
-    ListToMapAsync(arr, toKey, toValue) {
-        return new Promise(async (resolve, reject) => {
-            if (!Array.isArray(arr) || typeof toKey !== 'function' || typeof toValue !== 'function') {
-                return reject(null);
+    async ListToMapAsync(arr, toKey, toValue) {
+        if (!Array.isArray(arr) || typeof toKey !== 'function' || typeof toValue !== 'function') {
+            return null;
+        }
+        const res = {};
+        for (let i = arr.length - 1; i >= 0; i--) {
+            const e = arr[i];
+            const key = await toKey(e);
+            if (key !== undefined) {
+                res[key] = await toValue(e);
             }
-            const res = {};
-            for (let i = arr.length - 1; i >= 0; i--) {
-                const e = arr[i];
-                const key = await toKey(e);
-                if (key !== undefined) {
-                    res[key] = await toValue(e);
-                }
-            }
-
-            return resolve(res);
-        });
+        }
+        return res
     },
     CurrDate() {
         return new Date().toJSON().replace(/T.+?Z/, '');
