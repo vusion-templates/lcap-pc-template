@@ -18,7 +18,7 @@ import {
 } from 'date-fns';
 import Vue from 'vue';
 
-import { toString, fromString, toastAndThrowError } from '../dataTypes/tools';
+import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync}  from './helper'
 let enumsMap = {};
@@ -924,6 +924,46 @@ export const utils = {
             HalfUp: Decimal.ROUND_HALF_UP,
         };
         return new Decimal(value).toFixed(0, modeMap[mode]);
+    },
+    /**
+     * 空值判断（与）
+     * @param {Object[]} values 值
+     * @returns {boolean} 返回值
+     */
+    HasValue(...values) {
+        const hasValue = (value, typeKey) => {
+            const typeDefinition = typeDefinitionMap[typeKey] || {};
+
+            if (['nasl.core.Null'].includes(value) || value === undefined || value === null) {
+                return false;
+            } else if (isDefString(typeKey) || typeof value === 'string') {
+                return value.trim() !== '';
+            } else if (isDefNumber(typeKey) || typeof value === 'number') {
+                return !isNaN(value);
+            } else if (isDefList(typeDefinition) || Array.isArray(value)) {
+                return value && value.length > 0;
+            } else if (isDefMap(typeDefinition)) {
+                return Object.keys(value).length > 0;
+            } else { // structure/entity
+                return !Object.keys(value).every((key) => {
+                    const v = value[key];
+                    return v === null || v === undefined;
+                });
+            }
+        };
+
+        let isValid = true;
+
+        for (let i = 0; i < values.length; i += 1) {
+            const { value, type } = values[i];
+
+            if (!hasValue(value, type)) {
+                isValid = false;
+                break;
+            }
+        }
+
+        return isValid;
     },
 };
 
