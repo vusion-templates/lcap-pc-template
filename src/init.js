@@ -12,7 +12,7 @@ import App from './App.vue';
 import { filterRoutes, parsePath } from '@/utils/route';
 import { getBasePath } from '@/utils/encodeUrl';
 import { filterAuthResources, findNoAuthView } from '@/router/guards/auth';
-
+import { instance } from '@/utils/create/errHandles';
 window.appVue = Vue;
 window.Vue = Vue;
 window.CloudUI = CloudUI;
@@ -83,6 +83,12 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             console.error(err);
         }
     };
+    if (window?.rendered) {
+        if (!window?.$toast) {
+            window.$toast = instance;
+        }
+        window.rendered();
+    }
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
     const authResourcePaths = platformConfig.authResourcePaths || [];
     const baseRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
@@ -100,7 +106,6 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     const fnName = 'beforeRouter';
     if (fnName && metaData.frontendEvents[fnName]) {
         evalWrap.bind(window)(metaData, fnName);
-        console.log(fnName, window[fnName]);
         Vue.prototype[fnName] = window[fnName];
     }
     const beforeRouter = Vue.prototype.beforeRouter;
@@ -135,7 +140,6 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             const fnName = fnList[index];
             if (fnName && metaData.frontendEvents[fnName]) {
                 evalWrap.bind(app)(metaData, fnName);
-                console.log(fnName, window[fnName]);
                 Vue.prototype[fnName] = window[fnName];
             }
         }
