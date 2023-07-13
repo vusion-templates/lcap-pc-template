@@ -35,10 +35,6 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
-    // console.log('appConfig: ', appConfig);
-    // console.log('platformConfig: ', platformConfig);
-    // console.log('routes: ', routes);
-    // console.log('metaData: ', metaData);
     // 应用初始化之前 不能访问应用中的任何逻辑
     evalWrap.bind(window)(metaData, 'rendered');
     ['preRequest', 'postRequest'].forEach((fnName) => {
@@ -116,7 +112,6 @@ const init = (appConfig, platformConfig, routes, metaData) => {
                     router, routes, authResourcePaths, appConfig, beforeRouter,
                     to, from, next, parsePath, getBasePath, filterAuthResources, findNoAuthView, filterRoutes,
                 };
-                console.log('自定义beforeRouter: ', event);
                 await beforeRouter(event);
             }
         } catch (err) { }
