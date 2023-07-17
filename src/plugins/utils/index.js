@@ -20,6 +20,7 @@ import Vue from 'vue';
 
 import { toString, fromString, toastAndThrowError } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
+
 let enumsMap = {};
 
 function toValue(date, converter) {
