@@ -936,6 +936,8 @@ export const utils = {
 
             if (['nasl.core.Null'].includes(value) || value === undefined || value === null) {
                 return false;
+            } else if (['nasl.core.Boolean'].includes(value) || value === true || value === false) {
+                return true;
             } else if (isDefString(typeKey) || typeof value === 'string') {
                 return value.trim() !== '';
             } else if (isDefNumber(typeKey) || typeof value === 'number') {
