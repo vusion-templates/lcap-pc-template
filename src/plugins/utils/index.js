@@ -20,7 +20,7 @@ import Vue from 'vue';
 
 import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
-import { findAsync, mapAsync, filterAsync, findIndexAsync, quickSortAsync } from './helper';
+import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
 let enumsMap = {};
 
 function toValue(date, converter) {
@@ -170,7 +170,7 @@ export const utils = {
     ListLast(arr) {
         if (!Array.isArray(arr) || arr.length === 0) {
             return null;
-        } else {　
+        } else {
             return arr[arr.length - 1];
         }
     },
@@ -261,27 +261,26 @@ export const utils = {
         }
     },
     async ListSortAsync(arr, callback, sort) {
+        const sortRule = (valueA, valueB) => {
+            if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
+                return 1;
+            } else {
+                if (valueA >= valueB) {
+                    if (sort) {
+                        return 1;
+                    }
+                    return -1;
+                } else {
+                    if (sort) {
+                        return -1;
+                    }
+                    return 1;
+                }
+            }
+        };
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                quickSortAsync(arr, async (a, b) => {
-                    const valueA = await callback(a);
-                    const valueB = await callback(b);
-                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
-                        return 1;
-                    } else {
-                        if (valueA >= valueB) {
-                            if (sort) {
-                                return 1;
-                            }
-                            return -1;
-                        } else {
-                            if (sort) {
-                                return -1;
-                            }
-                            return 1;
-                        }
-                    }
-                });
+                return await sortAsync(arr, sortRule)(callback);
             }
         }
     },
