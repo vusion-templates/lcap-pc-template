@@ -81,6 +81,7 @@ export default {
                 return resources;
             });
         } else {
+            // 这个是非下沉应用，调用的是Nuims的接口，此处需非常注意Resource大小写情况，开发时需关注相关测试用例是否覆盖
             userResourcesPromise = this.authService.GetUserResources({
                 headers: getBaseHeaders(),
                 query: {
@@ -91,7 +92,7 @@ export default {
                 },
             }).then((res) => {
                 this._map = new Map();
-                const result = res?.Data?.items || [];
+                const result = res?.Data?.items.map((item) => ({ ...item, resourceType: item.ResourceType, resourceValue: item.ResourceValue })) || []; // 兼容大小写写法，留存大写，避免影响其他隐藏逻辑
                 const resources = result.filter((resource) => resource?.ResourceType === 'ui');
                 // 初始化权限项
                 resources.forEach((resource) => this._map.set(resource?.ResourceValue, resource));
