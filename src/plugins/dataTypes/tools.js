@@ -11,7 +11,7 @@ function tryJSONParse(str) {
     return result;
 }
 
-const typeDefinitionMap = new Map();
+export const typeDefinitionMap = new Map();
 const typeMap = new Map();
 
 // 生成typeKey
@@ -303,7 +303,7 @@ const isDefPrimitive = (typeKey) => [
 ].includes(typeKey);
 
 // 类型定义是否属于字符串大类
-const isDefString = (typeKey) => [
+export const isDefString = (typeKey) => [
     'nasl.core.String',
     'nasl.core.Text',
     'nasl.core.Binary',
@@ -314,7 +314,7 @@ const isDefString = (typeKey) => [
 ].includes(typeKey);
 
 // 类型定义是否属于数字大类
-const isDefNumber = (typeKey) => [
+export const isDefNumber = (typeKey) => [
     'nasl.core.Integer',
     'nasl.core.Long',
     'nasl.core.Double',
@@ -322,13 +322,13 @@ const isDefNumber = (typeKey) => [
 ].includes(typeKey);
 
 // 类型定义是否属于数组
-const isDefList = (typeDefinition) => {
+export const isDefList = (typeDefinition) => {
     const { typeKind, typeNamespace, typeName } = typeDefinition || {};
     return typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List';
 };
 
 // 类型定义是否属于Map
-const isDefMap = (typeDefinition) => {
+export const isDefMap = (typeDefinition) => {
     const { typeKind, typeNamespace, typeName } = typeDefinition || {};
     return typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'Map';
 };
@@ -469,9 +469,10 @@ function indent(tabSize) {
  * @param {*} variable
  * @param {*} typeKey
  * @param {*} tabSize
+ * @param {Set} collection 收集的已处理的对象
  * @returns
  */
-export const toString = (variable, typeKey, tabSize = 0) => {
+export const toString = (variable, typeKey, tabSize = 0, collection = new Set()) => {
     if (variable instanceof Error) {
         return variable;
     }
@@ -557,7 +558,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
             if (Array.isArray(typeArguments) && typeArguments.length) {
                 const typeArg = typeArguments.find((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
                 if (typeArg) {
-                    str = toString(variable, genSortedTypeKey(typeArg), tabSize);
+                    str = toString(variable, genSortedTypeKey(typeArg), tabSize, collection);
                 }
             }
         } else if (concept === 'Enum') {
@@ -566,7 +567,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                 str = enumItem?.label;
             }
         } else if (['TypeAnnotation', 'Structure', 'Entity'].includes(concept)) { // 复合类型
-            if (tabSize > 0) {
+            if (collection.has(variable)) {
                 str = '';
                 if (isDefList(typeDefinition)) {
                     if (variable.length > 0) {
@@ -593,22 +594,19 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                     }
                 }
             } else {
+                collection.add(variable);
+
                 if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
-                    const maxLen = 10;
                     if (typeName === 'List') {
-                        const moreThanMax = variable.length > maxLen;
-                        const arr = moreThanMax ? variable.slice(0, maxLen) : variable;
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
-                        const arrStr = arr.map((varItem) => toString(varItem, itemTypeKey, tabSize + 1)).join(', ');
-                        str = moreThanMax ? `[${arrStr}, ...]` : `[${arrStr}]`;
+                        const arrStr = variable.map((varItem) => `${indent(tabSize + 1)}${toString(varItem, itemTypeKey, tabSize + 1, collection)}`).join(',\n');
+                        str = `[\n${arrStr}\n${indent(tabSize)}]`;
                     } else if (typeName === 'Map') {
                         const keys = Object.keys(variable);
-                        const moreThanMax = keys.length > maxLen;
-                        const arr = moreThanMax ? keys : keys.slice(0, maxLen);
                         const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
-                        const arrStr = arr.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1)} -> ${toString(variable[key], itemTypeKey, tabSize + 1)}`).join(',\n');
-                        str = moreThanMax ? `{\n${arrStr}\n...\n}` : `{\n${arrStr}\n}`;
+                        const arrStr = keys.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1, collection)} -> ${toString(variable[key], itemTypeKey, tabSize + 1, collection)}`).join(',\n');
+                        str = `{\n${arrStr}\n${indent(tabSize)}}`;
                     }
                 } else {
                     // 处理一些范型数据结构的情况
@@ -639,7 +637,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                             }
                         }
                     }
-                    let code = `${indent(tabSize)}`;
+                    let code = '';
                     if (name) {
                         code += `${name} `;
                     }
@@ -649,7 +647,7 @@ export const toString = (variable, typeKey, tabSize = 0) => {
                             const { name: propName, typeAnnotation: propTypeAnnotation } = property || {};
                             const propVal = variable[propName];
                             const propTypeKey = genSortedTypeKey(propTypeAnnotation);
-                            const propValStr = toString(propVal, propTypeKey, tabSize + 1);
+                            const propValStr = toString(propVal, propTypeKey, tabSize + 1, collection);
                             return `${indent(tabSize + 1)}${propName}: ${propValStr}`;
                         }).join(',\n');
                     }
@@ -661,14 +659,16 @@ export const toString = (variable, typeKey, tabSize = 0) => {
     }
     if (str === '') {
         if (Object.prototype.toString.call(variable) === '[object Object]') {
-            if (tabSize > 0) {
+            if (collection.has(variable)) {
                 str = '{...}';
             } else {
+                collection.add(variable);
+
                 str = `{\n`;
                 const propStr = [];
                 for (const key in variable) {
                     const propVal = variable[key];
-                    const propValStr = toString(propVal, undefined, tabSize + 1);
+                    const propValStr = toString(propVal, undefined, tabSize + 1, collection);
                     propStr.push(`${indent(tabSize + 1)}${key}: ${propValStr}`);
                 }
                 str += propStr.join(',\n');
