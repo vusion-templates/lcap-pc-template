@@ -92,8 +92,12 @@ export default {
                 },
             }).then((res) => {
                 this._map = new Map();
-                const result = res?.Data?.items.map((item) => ({ ...item, resourceType: item.ResourceType, resourceValue: item.ResourceValue })) || []; // 兼容大小写写法，留存大写，避免影响其他隐藏逻辑
-                const resources = result.filter((resource) => resource?.ResourceType === 'ui');
+                const resources = res.Data.items.reduce((acc, { ResourceType, ResourceValue, ...item }) => {
+                    if (ResourceType === 'ui') {
+                        acc.push({ ...item, ResourceType, ResourceValue, resourceType: ResourceType, resourceValue: ResourceValue }); // 兼容大小写写法，留存大写，避免影响其他隐藏逻辑
+                    }
+                    return acc;
+                }, []);
                 // 初始化权限项
                 resources.forEach((resource) => this._map.set(resource?.ResourceValue, resource));
                 return resources;
