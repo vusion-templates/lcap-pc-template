@@ -783,7 +783,7 @@ export const utils = {
      * @param {dateTime2} 时间
      * @param {calcType} 计算类型：年(y)、季度(q)、月(M)、星期(w)、天数(d)、小时数(h)、分钟数(m)、秒数(s)
     */
-    DateDiff(dateTime1, dateTime2, calcType) {
+    DateDiff(dateTime1, dateTime2, calcType, isAbs = true) {
         if (!dateTime1 || !dateTime2)
             return;
         // Time
@@ -807,7 +807,8 @@ export const utils = {
         if (!map[calcType])
             return;
         const method = map[calcType];
-        return Math.abs(method(new Date(dateTime2), new Date(dateTime1)));
+        const diffRes = method(new Date(dateTime2), new Date(dateTime1));
+        return isAbs ? Math.abs(diffRes) : diffRes;
     },
     /**
      * 字符串查找
