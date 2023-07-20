@@ -26,7 +26,7 @@ export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
 
-        initApplicationConstructor(dataTypesMap);
+        initApplicationConstructor(dataTypesMap, Vue);
 
         const genInitFromSchema = (typeKey, defaultValue, level) => genInitData(typeKey, defaultValue, level);
 
