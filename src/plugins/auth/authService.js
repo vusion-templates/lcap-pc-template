@@ -44,12 +44,14 @@ export default {
                 });
             }
             userInfoPromise = userInfoPromise.then((result) => {
-                const userInfo = result.Data;
-                if (!userInfo.UserId && userInfo.userId) {
+                const userInfo = result?.Data;
+                if (!userInfo?.UserId && userInfo?.userId) {
                     userInfo.UserId = userInfo.userId;
                     userInfo.UserName = userInfo.userName;
                 }
                 const $global = Vue.prototype.$global || {};
+                const frontendVariables = Vue.prototype.$global.frontendVariables || {};
+                frontendVariables.userInfo = userInfo;
                 $global.userInfo = userInfo;
                 return userInfo;
             }).catch((e) => {

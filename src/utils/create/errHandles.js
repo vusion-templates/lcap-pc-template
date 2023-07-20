@@ -3,7 +3,7 @@ import Vue from 'vue';
 import SToast from '@/components/s-toast.vue';
 
 const Ctr = Vue.component('s-toast', SToast);
-const instance = new Ctr();
+export const instance = new Ctr();
 const getErrMessage = (err) => err.msg || err.Message || '系统错误，请查看日志！';
 const getErrStrack = (err) => err.StackTrace || '系统错误，请查看日志！';
 
@@ -31,26 +31,28 @@ export default {
     },
     401({ config }, err = {}) {
         if (err.Code === 401 && err.Message === 'token.is.invalid') {
-            if (!config.noErrorTip) {
-                instance.show('登录失效', '请重新登录');
-            }
-            localStorage.setItem('beforeLogin', JSON.stringify(location));
-            if (window.LcapMicro?.loginFn)
+            if (window.LcapMicro?.loginFn) {
                 window.LcapMicro.loginFn();
-            else
-                location.href = '/login';
+                return;
+            }
+        }
+        if (err.Code === 401 && err.Message === 'token.is.invalid') {
+            location.href = '/login';
         }
     },
     403({ config }, err = {}) {
+        if (err.Code === 'InvalidToken' && err.Message === 'Token is invalid') {
+            if (window.LcapMicro?.loginFn) {
+                window.LcapMicro.loginFn();
+                return;
+            }
+        }
         if (err.Code === 'InvalidToken' && err.Message === 'Token is invalid') {
             if (!config.noErrorTip) {
                 instance.show('登录失效', '请重新登录');
             }
             localStorage.setItem('beforeLogin', JSON.stringify(location));
-            if (window.LcapMicro?.loginFn)
-                window.LcapMicro.loginFn();
-            else
-                location.href = '/login';
+            location.href = '/login';
         }
     },
     remoteError({ config }, err) {

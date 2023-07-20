@@ -7,14 +7,20 @@ import '@/assets/css/index.css';
 import * as Components from '@/components';
 import filters from '@/filters';
 import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin, UtilsPlugin } from '@/plugins';
-import { userInfoGuard, getAuthGuard, getTitleGuard, initRouter, microFrontend } from '@/router';
-import { filterRoutes } from '@/utils/route';
+import { getTitleGuard, initRouter, microFrontend } from '@/router';
 import App from './App.vue';
-
+import { filterRoutes, parsePath } from '@/utils/route';
+import { getBasePath } from '@/utils/encodeUrl';
+import { filterAuthResources, findNoAuthView } from '@/router/guards/auth';
+import { instance } from '@/utils/create/errHandles';
 window.appVue = Vue;
 window.Vue = Vue;
 window.CloudUI = CloudUI;
-
+const fnList = ['afterRouter'];
+const evalWrap = function (metaData, fnName) {
+    // eslint-disable-next-line no-eval
+    metaData && fnName && metaData?.frontendEvents[fnName] && eval(metaData.frontendEvents[fnName]);
+};
 Vue.use(VueI18n);
 Vue.i18n = new VueI18n({
     locale: localStorage.i18nLocale || 'zh-CN',
@@ -29,6 +35,11 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
+    // 应用初始化之前 不能访问应用中的任何逻辑
+    evalWrap.bind(window)(metaData, 'rendered');
+    ['preRequest', 'postRequest'].forEach((fnName) => {
+        evalWrap.bind(window)(metaData, fnName);
+    });
     if (window.LcapMicro?.container) {
         if (document.currentScript
             && (!document.head.contains(document.currentScript) || document.currentScript.active === false)
@@ -68,6 +79,12 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             console.error(err);
         }
     };
+    if (window?.rendered) {
+        if (!window?.$toast) {
+            window.$toast = instance;
+        }
+        window.rendered();
+    }
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
     const authResourcePaths = platformConfig.authResourcePaths || [];
     const baseRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
@@ -82,9 +99,25 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     });
 
     const router = initRouter(baseRoutes);
-
-    router.beforeEach(userInfoGuard);
-    router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, baseResourcePaths));
+    const fnName = 'beforeRouter';
+    if (fnName && metaData.frontendEvents[fnName]) {
+        evalWrap.bind(window)(metaData, fnName);
+        Vue.prototype[fnName] = window[fnName];
+    }
+    const beforeRouter = Vue.prototype.beforeRouter;
+    const getAuthGuard = (router, routes, authResourcePaths, appConfig, beforeRouter) => async (to, from, next) => {
+        try {
+            if (beforeRouter) {
+                const event = {
+                    router, routes, authResourcePaths, appConfig, beforeRouter,
+                    to, from, next, parsePath, getBasePath, filterAuthResources, findNoAuthView, filterRoutes,
+                };
+                await beforeRouter(event);
+            }
+        } catch (err) { }
+        next();
+    };
+    beforeRouter && router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, window.beforeRouter));
     router.beforeEach(getTitleGuard(appConfig));
     router.beforeEach(microFrontend);
 
@@ -95,6 +128,25 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             locale: localStorage.i18nLocale || 'zh-CN',
         },
         ...App,
+    });
+
+    if (metaData && metaData.frontendEvents) {
+        for (let index = 0; index < fnList.length; index++) {
+            const fnName = fnList[index];
+            if (fnName && metaData.frontendEvents[fnName]) {
+                evalWrap.bind(app)(metaData, fnName);
+                Vue.prototype[fnName] = window[fnName];
+            }
+        }
+    }
+    const afterRouter = Vue.prototype.afterRouter;
+
+    afterRouter && router.afterEach(async (to, from, next) => {
+        try {
+            if (afterRouter) {
+                await afterRouter(to, from);
+            }
+        } catch (err) { }
     });
 
     if (window.LcapMicro?.container) {
