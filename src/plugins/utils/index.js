@@ -174,7 +174,7 @@ export const utils = {
     ListLast(arr) {
         if (!Array.isArray(arr) || arr.length === 0) {
             return null;
-        } else {　
+        } else {
             return arr[arr.length - 1];
         }
     },
@@ -194,9 +194,9 @@ export const utils = {
     },
     async ListTransformAsync(arr, trans) {
         if (Array.isArray(arr)) {
-            return await mapAsync(arr, (elem) => trans(elem))
+            return await mapAsync(arr, (elem) => trans(elem));
         } else {
-            return null
+            return null;
         }
     },
     ListSum(arr) {
@@ -265,28 +265,27 @@ export const utils = {
         }
     },
     async ListSortAsync(arr, callback, sort) {
+        const sortRule = (valueA, valueB) => {
+            if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
+                return 1;
+            } else {
+                if (valueA >= valueB) {
+                    if (sort) {
+                        return 1;
+                    }
+                    return -1;
+                } else {
+                    if (sort) {
+                        return -1;
+                    }
+                    return 1;
+                }
+            }
+        };
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                sortAsync(arr, async (a, b) => {
-                    const valueA = await callback(a);
-                    const valueB = await callback(b);
-                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
-                        return 1
-                    } else {
-                        if (valueA >= valueB) {
-                            if (sort) {
-                                return 1
-                            }
-                            return -1
-                        } else {
-                            if (sort) {
-                                return -1
-                            }
-                            return 1
-                        }
-                    }
-                })
-            } 
+                return await sortAsync(arr, sortRule)(callback);
+            }
         }
     },
     ListFind(arr, by) {
@@ -302,7 +301,7 @@ export const utils = {
             if (typeof by === 'function') {
                 const value = await findAsync(arr, by);
                 return (typeof value === 'undefined') ? null : value;
-            } 
+            }
         }
     },
     ListFilter(arr, by) {
@@ -313,9 +312,9 @@ export const utils = {
     },
     async ListFilterAsync(arr, by) {
         if (!Array.isArray(arr) || typeof by !== 'function') {
-            return null
+            return null;
         }
-        return await filterAsync(arr, by)
+        return await filterAsync(arr, by);
     },
     ListFindIndex(arr, callback) {
         if (Array.isArray(arr)) {
@@ -327,7 +326,7 @@ export const utils = {
     async ListFindIndexAsync(arr, callback) {
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                return await findIndexAsync(arr, callback)
+                return await findIndexAsync(arr, callback);
             }
         }
     },
@@ -403,10 +402,10 @@ export const utils = {
     async ListDistinctByAsync(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
         if (!Array.isArray(arr) || typeof getVal !== 'function') {
-            return null
+            return null;
         }
         if (arr.length === 0) {
-            return arr
+            return arr;
         }
 
         const res = [];
@@ -418,7 +417,7 @@ export const utils = {
                 res.push(item);
             }
         }
-        return res
+        return res;
     },
     ListGroupBy(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
@@ -440,13 +439,13 @@ export const utils = {
         });
         return res;
     },
-   async ListGroupByAsync(arr, getVal) {
+    async ListGroupByAsync(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
         if (!arr || typeof getVal !== 'function') {
             return null;
         }
         if (arr.length === 0) {
-            return arr
+            return arr;
         }
         const res = {};
         for (let i = 0; i < arr.length; i++) {
@@ -459,7 +458,7 @@ export const utils = {
                 res[val] = [e];
             }
         }
-        return res
+        return res;
     },
     MapGet(map, key) {
         if (isObject(map)) {
@@ -527,7 +526,7 @@ export const utils = {
                 res[k] = v;
             }
         }
-        return res
+        return res;
     },
     MapTransform(map, toKey, toValue) {
         if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
@@ -541,7 +540,7 @@ export const utils = {
     },
     async MapTransformAsync(map, toKey, toValue) {
         if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
-            return null
+            return null;
         }
         const res = {};
         for (const [k, v] of Object.entries(map)) {
@@ -575,7 +574,7 @@ export const utils = {
                 res[key] = await toValue(e);
             }
         }
-        return res
+        return res;
     },
     CurrDate() {
         const date = parseISO(this.ConvertTimezone(new Date(), appTimezone));
