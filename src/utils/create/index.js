@@ -85,6 +85,9 @@ const requester = function (requestInfo) {
     if (window.appInfo?.frontendName)
         headers['LCAP-FRONTEND'] = window.appInfo?.frontendName;
 
+    // 时区信息，默认是user
+    headers.TimeZone = window.appInfo?.appTimeZone || 'user';
+
     if (config.download) {
         return download(url);
     }
