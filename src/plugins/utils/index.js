@@ -972,14 +972,20 @@ export const utils = {
                 return false;
             } else if (['nasl.core.Boolean'].includes(value) || value === true || value === false) {
                 return true;
-            } else if (isDefString(typeKey) || typeof value === 'string') {
+            } else if (isDefString(typeKey)) {
                 return value.trim() !== '';
-            } else if (isDefNumber(typeKey) || typeof value === 'number') {
+            } else if (isDefNumber(typeKey)) {
                 return !isNaN(value);
-            } else if (isDefList(typeDefinition) || Array.isArray(value)) {
+            } else if (isDefList(typeDefinition)) {
                 return value && value.length > 0;
             } else if (isDefMap(typeDefinition)) {
                 return Object.keys(value).length > 0;
+            } else if (typeof value === 'string') {
+                return value.trim() !== '';
+            } else if (typeof value === 'number') {
+                return !isNaN(value);
+            } else if (Array.isArray(value)) {
+                return value && value.length > 0;
             } else { // structure/entity
                 return !Object.keys(value).every((key) => {
                     const v = value[key];
