@@ -376,6 +376,10 @@ const isTypeMatch = (typeKey, value) => {
  * @returns
  */
 export const genInitData = (typeKey, defaultValue, parentLevel) => {
+    // 已经实例化过的值，直接返回
+    if (isInstanceOf(defaultValue, typeKey)) {
+        return defaultValue;
+    }
     let level = 1;
     if (parentLevel !== undefined) {
         level = parentLevel + 1;
