@@ -105,10 +105,11 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         Vue.prototype[fnName] = window[fnName];
     }
     const beforeRouter = Vue.prototype.beforeRouter;
-    const getAuthGuard = (router, routes, authResourcePaths, appConfig, beforeRouter) => async (to, from, next) => {
+    const getAuthGuard = (router, routes, authResourcePaths, appConfig, baseResourcePaths, beforeRouter) => async (to, from, next) => {
         try {
             if (beforeRouter) {
                 const event = {
+                    baseResourcePaths,
                     router, routes, authResourcePaths, appConfig, beforeRouter,
                     to, from, next, parsePath, getBasePath, filterAuthResources, findNoAuthView, filterRoutes,
                 };
@@ -117,7 +118,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         } catch (err) { }
         next();
     };
-    beforeRouter && router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, window.beforeRouter));
+    beforeRouter && router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, baseResourcePaths, window.beforeRouter));
     router.beforeEach(getTitleGuard(appConfig));
     router.beforeEach(microFrontend);
 
