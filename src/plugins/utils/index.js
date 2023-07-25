@@ -576,7 +576,7 @@ export const utils = {
     },
     CurrDate() {
         const date = parseISO(this.ConvertTimezone(new Date(), getAppTimezone()));
-        return format(date, 'yyy-MM-dd');
+        return format(date, 'yyyy-MM-dd');
     },
     CurrTime() {
         const date = parseISO(this.ConvertTimezone(new Date(), getAppTimezone()));
