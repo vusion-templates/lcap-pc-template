@@ -44,12 +44,14 @@ export default {
                 });
             }
             userInfoPromise = userInfoPromise.then((result) => {
-                const userInfo = result.Data;
-                if (!userInfo.UserId && userInfo.userId) {
+                const userInfo = result?.Data;
+                if (!userInfo?.UserId && userInfo?.userId) {
                     userInfo.UserId = userInfo.userId;
                     userInfo.UserName = userInfo.userName;
                 }
                 const $global = Vue.prototype.$global || {};
+                const frontendVariables = Vue.prototype.$global.frontendVariables || {};
+                frontendVariables.userInfo = userInfo;
                 $global.userInfo = userInfo;
                 return userInfo;
             }).catch((e) => {
@@ -81,6 +83,7 @@ export default {
                 return resources;
             });
         } else {
+            // 这个是非下沉应用，调用的是Nuims的接口，此处需非常注意Resource大小写情况，开发时需关注相关测试用例是否覆盖
             userResourcesPromise = this.authService.GetUserResources({
                 headers: getBaseHeaders(),
                 query: {
@@ -91,8 +94,12 @@ export default {
                 },
             }).then((res) => {
                 this._map = new Map();
-                const result = res?.Data?.items || [];
-                const resources = result.filter((resource) => resource?.ResourceType === 'ui');
+                const resources = res.Data.items.reduce((acc, { ResourceType, ResourceValue, ...item }) => {
+                    if (ResourceType === 'ui') {
+                        acc.push({ ...item, ResourceType, ResourceValue, resourceType: ResourceType, resourceValue: ResourceValue }); // 兼容大小写写法，留存大写，避免影响其他隐藏逻辑
+                    }
+                    return acc;
+                }, []);
                 // 初始化权限项
                 resources.forEach((resource) => this._map.set(resource?.ResourceValue, resource));
                 return resources;
