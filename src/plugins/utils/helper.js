@@ -37,13 +37,11 @@ export const findIndexAsync = async (arr, callback) => {
 };
 
 export const sortAsync = (array = [], sortRule) => async (callback) => {
-  const promises = array.map(callback);
+  const promises = array.map(async (current) => {
+    const id = await callback(current);
+    return { id, current };
+  });
   const list = await Promise.all(promises);
-
-  const reset = (current, index) => {
-    array[index] = current;
-    return current;
-  };
-
-  return list.sort(sortRule).map(reset);
-};
+  let res = list.sort((a, b) => sortRule(a.id, b.id))
+  return res.forEach((item, index) => array[index] = item.current);
+}
