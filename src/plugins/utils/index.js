@@ -16,7 +16,7 @@ import {
     addSeconds, addMinutes, addHours, addQuarters, addYears, addWeeks, formatISO,
     eachDayOfInterval, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday, parseISO,
 } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
+import { utcToZonedTime, formatInTimeZone, format as formatTZ } from 'date-fns-tz';
 import Vue from 'vue';
 import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
@@ -576,11 +576,11 @@ export const utils = {
     },
     CurrDate() {
         const date = parseISO(this.ConvertTimezone(new Date(), getAppTimezone()));
-        return format(date, 'yyyy-MM-dd');
+        return formatTZ(date, 'yyyy-MM-dd', { timeZone: getAppTimezone() });
     },
     CurrTime() {
         const date = parseISO(this.ConvertTimezone(new Date(), getAppTimezone()));
-        return format(date, 'HH:mm:ss');
+        return formatTZ(date, 'HH:mm:ss', { timeZone: getAppTimezone() });
     },
     CurrDateTime() {
         return this.ConvertTimezone(new Date(), getAppTimezone());
@@ -838,8 +838,8 @@ export const utils = {
         if (!isValidTimezoneIANAString(timezone)) {
             toastAndThrowError(`内置函数ConvertTimezone入参错误：传入时区${timezone}不是合法时区字符`);
         }
-
-        return formatISO(utcToZonedTime(dateTime, timezone));
+        const result = formatInTimeZone(dateTime, timezone, "yyyy-MM-dd'T'HH:mm:ssxxx");
+        return result;
     },
     /**
      * 字符串查找
