@@ -21,7 +21,9 @@ export const filterAsync = async (arr, callback) => {
   const result = [];
   for (let i = 0; i < arr.length; i++) {
     const filteredValue = await callback(arr[i], i, arr);
-    result.push(filteredValue);
+    if (filteredValue) {
+      result.push(arr[i]);
+    }
   }
   return result;
 };
