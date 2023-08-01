@@ -658,6 +658,11 @@ export const utils = {
 
         const startDate = utcToZonedTime(parseISO(startDateString), getAppTimezone());
         const endDate = utcToZonedTime(parseISO(endDateString), getAppTimezone());
+
+        if (startDate > endDate) {
+            return [];
+        }
+
         const fns = [isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday];
         const datesInRange = eachDayOfInterval({ start: startDate, end: endDate });
         const isDays = fns.filter((_, index) => arr.includes((index + 1)));
