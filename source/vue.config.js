@@ -11,6 +11,7 @@ module.exports = {
     },
     devServer: {
         port: 8810,
+        lintOnSave: false,
         proxy: {
             '/api': {
                 target: 'http://localhost:8080',
