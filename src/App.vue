@@ -1,24 +1,21 @@
 <template>
     <div style="height:100%">
-        <s-freesass-banner v-if="isFreeSass"></s-freesass-banner>
         <router-view></router-view>
         <s-freesass-login @afterShufanLogin="afterShufanLogin" ref="freeSassLogin"></s-freesass-login>
-        <s-freesass-transfer v-if="isPersonSass&&loginFinished" ref="freesassTransfer"></s-freesass-transfer>
+        <s-freesass-transfer v-if="isPersonSass && loginFinished" ref="freesassTransfer"></s-freesass-transfer>
     </div>
 </template>
 
 <script>
 import SFreesassLogin from '@/components/s-freesass-login';
 import SFreesassTransfer from '@/components/s-freesass-transfer';
-import SFreesassBanner from '@/components/s-freesass-banner';
-import auth from '@/apis/auth';
 
 const serviceMap = {
     checkSfToken: `${location.protocol}//sfsso.community1.lcap.qz.163yun.com/api/checkSfToken`,
     checkSfTokenNew: `${location.protocol}//sfsso-community1.app.codewave.163.com/api/checkSfToken`,
 };
 export default {
-    components: { SFreesassLogin, SFreesassBanner, SFreesassTransfer },
+    components: { SFreesassLogin, SFreesassTransfer },
     data() {
         return {
             loginFinished: false,
@@ -31,9 +28,6 @@ export default {
         },
         isPersonSass() {
             return +window.appInfo?.tenantType === 1;
-        },
-        isFreeSass() {
-            return +window.appInfo?.tenantType === 1 && +window.appInfo?.tenantLevel === 0;
         },
     },
     async mounted() {
@@ -68,5 +62,4 @@ export default {
         },
     },
 };
-
 </script>
