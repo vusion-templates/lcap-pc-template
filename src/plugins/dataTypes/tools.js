@@ -58,7 +58,7 @@ export function genSortedTypeKey(typeAnnotation) {
 }
 
 // 生成构造函数
-function genConstructor(typeKey, definition) {
+function genConstructor(typeKey, definition, Vue) {
     if (typeMap[typeKey]) {
         return typeMap[typeKey];
     } else {
@@ -159,17 +159,17 @@ function genConstructor(typeKey, definition) {
             });
         }
         // eslint-disable-next-line no-new-func
-        const fn = Function('params', code);
+        const fn = Function('Vue', 'params', code).bind(null, Vue);
         typeMap[typeKey] = fn;
         return fn;
     }
 }
 
 // 初始化整个应用的构造器
-export function initApplicationConstructor(dataTypesMap) {
+export function initApplicationConstructor(dataTypesMap, Vue) {
     if (dataTypesMap) {
         for (const typeKey in dataTypesMap) {
-            genConstructor(typeKey, dataTypesMap[typeKey]);
+            genConstructor(typeKey, dataTypesMap[typeKey], Vue);
         }
     }
 }
