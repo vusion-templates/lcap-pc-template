@@ -218,23 +218,12 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
                 if (!response) {
                     return Promise.reject();
                 }
-                const status = 'success';// 通过传入状态将两个钩子写在一个函数里
-                // 线看下写一个钩子行不行  不行的化需要 通过传参把 nasl 当两个函数用 创建两个钩子
-                // 分开的好处： 可以让success 抛出异常给error? 好像也没有这个必要
-                console.log('自定义接口请求后事件 success: ', response);
+                const status = 'success';
                 const { config } = requestInfo;
                 const serviceType = config?.serviceType;
                 if (serviceType && serviceType === 'external') {
                     return response;
                 }
-                // const data = response.data;
-                // const code = data.code || data.Code;
-                // if ((code === undefined) || (code === 'Success') || (code + '').startsWith('2')) {
-                //     return response;
-                // }
-                // 这里是200return responese 给下一个  else reject 给下一个
-                // 需要改写为一个函数里 处理这两种情况 : 不行错误是强制写在另一个钩子里的
-
                 const HttpResponse = {
                     status: response.status + '',
                     body: JSON.stringify(response.data),
@@ -242,27 +231,11 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
                     cookies: foramtCookie(document.cookie),
                 };
                 window.postRequest && window.postRequest(HttpResponse, requestInfo, status);
-                // 接受出参： result
-                const result = {
-                    status: 'reject',
-                };
                 return response;
-                // if (result.status === 'reject') {
-                //     // const errHandle = {
-                //     //     ...result.errhandle,
-                //     // };
-                // } else if (result.status === 'resolve') {
-                // }
-
-                // return Promise.reject({
-                //     code,
-                //     msg: data.msg || data.Message,
-                // });
             },
         });
         service.postConfig.set('postRequestError', {
             reject(response, params, requestInfo) {
-                console.log('自定义接口请求后事件 fail: ', response);
                 response.Code = response.code || response.status;
                 const status = 'error';
                 const err = response;
