@@ -29,12 +29,13 @@ export default {
             this.copySuccess = false;
             if (!this.$el) {
                 this.$mount(document.createElement('div'));
+            } else {
+                this.$nextTick(() => {
+                    this.text = text;
+                    this.message = message;
+                    this.$refs.toast.error(null, duration);
+                });
             }
-            this.$nextTick(() => {
-                this.text = text;
-                this.message = message;
-                this.$refs.toast.error(null, duration);
-            });
         },
     },
 };

@@ -26,7 +26,7 @@ export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
 
-        initApplicationConstructor(dataTypesMap);
+        initApplicationConstructor(dataTypesMap, Vue);
 
         const genInitFromSchema = (typeKey, defaultValue, level) => genInitData(typeKey, defaultValue, level);
 
@@ -35,11 +35,15 @@ export default {
          * @param {*} schema 是前端用的 refSchema
          */
         Vue.prototype.$genInitFromSchema = genInitFromSchema;
+        window.$genInitFromSchema = genInitFromSchema;
 
         const frontendVariables = {};
+        const localCacheVariableSet = new Set(); // 本地存储的全局变量集合
+
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
-                const { name, typeAnnotation, defaultValue } = frontendVariable;
+                const { name, typeAnnotation, defaultValue, localCache } = frontendVariable;
+                localCache && localCacheVariableSet.add(name); // 本地存储的全局变量集合
                 frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
             });
         }
@@ -306,7 +310,9 @@ export default {
             },
         });
 
+        Vue.prototype.$localCacheVariableSet = localCacheVariableSet;
         Vue.prototype.$global = $global;
+        window.$global = $global;
 
         Vue.prototype.$isInstanceOf = isInstanceOf;
 
@@ -359,10 +365,8 @@ export default {
             }
             return true;
         }
-
         // 判断两个对象是否相等，不需要引用完全一致
         Vue.prototype.$isLooseEqualFn = isLooseEqualFn;
-
         const enumsMap = options.enumsMap || {};
         Vue.prototype.$enums = (key, value) => {
             if (!key || !value)

@@ -4,7 +4,7 @@ const isPromise = function (func) {
     return func && typeof func.then === 'function';
 };
 
-function httpCode(response, params, requestInfo) {
+export function httpCode(response, params, requestInfo) {
     const { config } = requestInfo;
     const serviceType = config?.serviceType;
     if (serviceType && serviceType === 'external') {
@@ -20,15 +20,14 @@ function httpCode(response, params, requestInfo) {
         msg: data.msg || data.Message,
     });
 }
-function shortResponse(response, params, requestInfo) {
+export function shortResponse(response, params, requestInfo) {
     if (requestInfo.config?.concept === 'Logic') {
         return response.data?.Data !== undefined ? response.data?.Data : response.data;
     }
-
     return response.data;
 }
 
-const httpError = {
+export const httpError = {
     reject(err, params, requestInfo) {
         const { url, config = {} } = requestInfo;
         const { method, body = {}, headers = {} } = url;
@@ -68,7 +67,7 @@ const httpError = {
     },
 };
 
-export default function (service) {
+export function addConfigs(service) {
     if (process.env.NODE_ENV === 'development') {
         service.preConfig.set('baseURL', (requestInfo, baseURL) => {
             if (!baseURL.startsWith('http')) {
@@ -76,7 +75,6 @@ export default function (service) {
             }
         });
     }
-
     service.postConfig.set('httpCode', httpCode);
     service.postConfig.set('httpError', httpError);
     service.postConfig.set('shortResponse', shortResponse);

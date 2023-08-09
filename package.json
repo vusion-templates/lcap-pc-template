@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.5.2",
+  "version": "0.5.1",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -17,7 +17,9 @@
     "ui": "npx vue ui",
     "manage": "plop",
     "screenshot": "vusion screenshot --server public/index.html -o screenshots/0.png -w 1440 -h 900 && vusion screenshot --server public/index.html#/demo/list/basic -o screenshots/1.png -w 1440 -h 900 -d 200",
-    "build:designer": "npm run check && cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js",
+    "watch:designer-local": "node ./bin/local-designer-build.js",
+    "build:designer-local": "cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js",
+    "build:designer": "npm run check && cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js && rimraf public/*.common.js && rimraf public/*.umd.js && rimraf public/index.html && rimraf public/demo.html",
     "deploy:dev": "lcap deploy ./public --platform http://defaulttenant.lcap.dev.env.com",
     "deploy:test": "lcap deploy ./public --platform http://defaulttenant.lcap.ha.test.com",
     "deploy:pre": "lcap deploy ./public --platform http://defaulttenant.lcap.hadri.163yun.com",
@@ -96,6 +98,7 @@
     "cloud-ui.vusion": "^0.14.1",
     "crypto-js": "^4.1.1",
     "date-fns": "^2.6.0",
+    "date-fns-tz": "^2.0.0",
     "decimal.js": "^10.4.1",
     "event-hooks-webpack-plugin": "^2.1.6",
     "i-material-design.vue": "^5.1.0",

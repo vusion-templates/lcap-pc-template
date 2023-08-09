@@ -21,5 +21,6 @@ export default {
             });
 
         Vue.prototype.$logics = createLogicService(logicsMap);
+        window.$logics = createLogicService(logicsMap);
     },
 };

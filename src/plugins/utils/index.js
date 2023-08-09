@@ -13,15 +13,17 @@ import {
     differenceInMinutes,
     differenceInSeconds,
     getDayOfYear, getWeekOfMonth, getQuarter, startOfWeek, getMonth, getWeek, getDate, startOfQuarter,
-    addSeconds, addMinutes, addHours, addQuarters, addYears, addWeeks,
-    eachDayOfInterval, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday,
+    addSeconds, addMinutes, addHours, addQuarters, addYears, addWeeks, formatISO,
+    eachDayOfInterval, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday, parseISO,
 } from 'date-fns';
+import { utcToZonedTime, formatInTimeZone, format as formatTZ } from 'date-fns-tz';
 import Vue from 'vue';
-
-import { toString, fromString, toastAndThrowError } from '../dataTypes/tools';
+import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
-import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync}  from './helper'
+import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
+import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
 let enumsMap = {};
+
 
 function toValue(date, converter) {
     if (!date)
@@ -170,7 +172,7 @@ export const utils = {
     ListLast(arr) {
         if (!Array.isArray(arr) || arr.length === 0) {
             return null;
-        } else {　
+        } else {
             return arr[arr.length - 1];
         }
     },
@@ -190,9 +192,9 @@ export const utils = {
     },
     async ListTransformAsync(arr, trans) {
         if (Array.isArray(arr)) {
-            return await mapAsync(arr, (elem) => trans(elem))
+            return await mapAsync(arr, (elem) => trans(elem));
         } else {
-            return null
+            return null;
         }
     },
     ListSum(arr) {
@@ -261,28 +263,27 @@ export const utils = {
         }
     },
     async ListSortAsync(arr, callback, sort) {
+        const sortRule = (valueA, valueB) => {
+            if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
+                return 1;
+            } else {
+                if (valueA >= valueB) {
+                    if (sort) {
+                        return 1;
+                    }
+                    return -1;
+                } else {
+                    if (sort) {
+                        return -1;
+                    }
+                    return 1;
+                }
+            }
+        };
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                sortAsync(arr, async (a, b) => {
-                    const valueA = await callback(a);
-                    const valueB = await callback(b);
-                    if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
-                        return 1
-                    } else {
-                        if (valueA >= valueB) {
-                            if (sort) {
-                                return 1
-                            }
-                            return -1
-                        } else {
-                            if (sort) {
-                                return -1
-                            }
-                            return 1
-                        }
-                    }
-                })
-            } 
+                return await sortAsync(arr, sortRule)(callback);
+            }
         }
     },
     ListFind(arr, by) {
@@ -298,7 +299,7 @@ export const utils = {
             if (typeof by === 'function') {
                 const value = await findAsync(arr, by);
                 return (typeof value === 'undefined') ? null : value;
-            } 
+            }
         }
     },
     ListFilter(arr, by) {
@@ -309,9 +310,9 @@ export const utils = {
     },
     async ListFilterAsync(arr, by) {
         if (!Array.isArray(arr) || typeof by !== 'function') {
-            return null
+            return null;
         }
-        return await filterAsync(arr, by)
+        return await filterAsync(arr, by);
     },
     ListFindIndex(arr, callback) {
         if (Array.isArray(arr)) {
@@ -323,7 +324,7 @@ export const utils = {
     async ListFindIndexAsync(arr, callback) {
         if (Array.isArray(arr)) {
             if (typeof callback === 'function') {
-                return await findIndexAsync(arr, callback)
+                return await findIndexAsync(arr, callback);
             }
         }
     },
@@ -399,10 +400,10 @@ export const utils = {
     async ListDistinctByAsync(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
         if (!Array.isArray(arr) || typeof getVal !== 'function') {
-            return null
+            return null;
         }
         if (arr.length === 0) {
-            return arr
+            return arr;
         }
 
         const res = [];
@@ -414,7 +415,7 @@ export const utils = {
                 res.push(item);
             }
         }
-        return res
+        return res;
     },
     ListGroupBy(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
@@ -436,13 +437,13 @@ export const utils = {
         });
         return res;
     },
-   async ListGroupByAsync(arr, getVal) {
+    async ListGroupByAsync(arr, getVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
         if (!arr || typeof getVal !== 'function') {
             return null;
         }
         if (arr.length === 0) {
-            return arr
+            return arr;
         }
         const res = {};
         for (let i = 0; i < arr.length; i++) {
@@ -455,7 +456,7 @@ export const utils = {
                 res[val] = [e];
             }
         }
-        return res
+        return res;
     },
     MapGet(map, key) {
         if (isObject(map)) {
@@ -523,7 +524,7 @@ export const utils = {
                 res[k] = v;
             }
         }
-        return res
+        return res;
     },
     MapTransform(map, toKey, toValue) {
         if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
@@ -537,7 +538,7 @@ export const utils = {
     },
     async MapTransformAsync(map, toKey, toValue) {
         if (!isObject(map) || typeof toKey !== 'function' || typeof toValue !== 'function') {
-            return null
+            return null;
         }
         const res = {};
         for (const [k, v] of Object.entries(map)) {
@@ -571,17 +572,20 @@ export const utils = {
                 res[key] = await toValue(e);
             }
         }
-        return res
+        return res;
     },
     CurrDate() {
-        return new Date().toJSON().replace(/T.+?Z/, '');
+        const date = parseISO(this.ConvertTimezone(new Date(), getAppTimezone()));
+        return formatTZ(date, 'yyyy-MM-dd', { timeZone: getAppTimezone() });
     },
     CurrTime() {
-        return new Date().toTimeString().split(' ')[0];
+        const date = parseISO(this.ConvertTimezone(new Date(), getAppTimezone()));
+        return formatTZ(date, 'HH:mm:ss', { timeZone: getAppTimezone() });
     },
     CurrDateTime() {
-        return new Date().toJSON();
+        return this.ConvertTimezone(new Date(), getAppTimezone());
     },
+
     AddDays(date = new Date(), amount = 1, converter = 'json') {
         return toValue(addDays(new Date(date), amount), converter);
     },
@@ -593,7 +597,8 @@ export const utils = {
         return toValue(subDays(new Date(date), amount), converter);
     },
     GetDateCount(dateString, metric) {
-        const date = new Date(dateString);
+        const date = parseISO(this.ConvertTimezone(new Date(dateString), getAppTimezone()));
+
         const [metric1, metric2] = metric.split('-');
         // 获取当年的最后一天的所在周会返回1，需要额外判断一下
         function getCurrentWeek(value) {
@@ -643,8 +648,21 @@ export const utils = {
         }
     },
     GetSpecificDaysOfWeek(startDateString, endDateString, arr) {
-        const startDate = new Date(startDateString);
-        const endDate = new Date(endDateString);
+        if (!startDateString)
+            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：startDate不能为空`);
+        if (!endDateString)
+            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：endDate不能为空`);
+        if (!Array.isArray(arr)) {
+            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：参数“指定”非合法数组`);
+        }
+
+        const startDate = utcToZonedTime(parseISO(startDateString), getAppTimezone());
+        const endDate = utcToZonedTime(parseISO(endDateString), getAppTimezone());
+
+        if (startDate > endDate) {
+            return [];
+        }
+
         const fns = [isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday];
         const datesInRange = eachDayOfInterval({ start: startDate, end: endDate });
         const isDays = fns.filter((_, index) => arr.includes((index + 1)));
@@ -663,7 +681,9 @@ export const utils = {
     FormatDateTime(value, formatter) {
         if (!value)
             return '-';
-        return cutils.dateFormatter.format(value, formatter);
+
+        const date = this.ConvertTimezone(value, getAppTimezone());
+        return cutils.dateFormatter.format(date, formatter);
     },
     Clone(obj) {
         return cloneDeep(obj);
@@ -783,9 +803,11 @@ export const utils = {
      * @param {dateTime2} 时间
      * @param {calcType} 计算类型：年(y)、季度(q)、月(M)、星期(w)、天数(d)、小时数(h)、分钟数(m)、秒数(s)
     */
-    DateDiff(dateTime1, dateTime2, calcType) {
-        if (!dateTime1 || !dateTime2)
-            return;
+    DateDiff(dateTime1, dateTime2, calcType, isAbs = true) {
+        if (!dateTime1)
+            toastAndThrowError(`内置函数DateDiff入参错误：dateTime1不能为空`);
+        if (!dateTime2)
+            toastAndThrowError(`内置函数DateDiff入参错误：dateTime2不能为空`);
         // Time
         const timeReg = /^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
         if (timeReg.test(dateTime1) && timeReg.test(dateTime2)) {
@@ -807,7 +829,22 @@ export const utils = {
         if (!map[calcType])
             return;
         const method = map[calcType];
-        return Math.abs(method(new Date(dateTime2), new Date(dateTime1)));
+        const diffRes = method(new Date(dateTime2), new Date(dateTime1));
+        return isAbs ? Math.abs(diffRes) : diffRes;
+    },
+    // 时区转换
+    ConvertTimezone(dateTime, timezone) {
+        if (!dateTime) {
+            toastAndThrowError(`内置函数ConvertTimezone入参错误：指定日期为空`);
+        }
+        if (!isValid(new Date(dateTime))) {
+            toastAndThrowError(`内置函数ConvertTimezone入参错误：指定日期不是合法日期类型`);
+        }
+        if (!isValidTimezoneIANAString(timezone)) {
+            toastAndThrowError(`内置函数ConvertTimezone入参错误：传入时区${timezone}不是合法时区字符`);
+        }
+        const result = formatInTimeZone(dateTime, timezone, "yyyy-MM-dd'T'HH:mm:ssxxx");
+        return result;
     },
     /**
      * 字符串查找
@@ -925,12 +962,61 @@ export const utils = {
         };
         return new Decimal(value).toFixed(0, modeMap[mode]);
     },
+    /**
+     * 空值判断（与）
+     * @param {Object[]} values 值
+     * @returns {boolean} 返回值
+     */
+    HasValue(...values) {
+        const hasValue = (value, typeKey) => {
+            const typeDefinition = typeDefinitionMap[typeKey] || {};
+
+            if (['nasl.core.Null'].includes(value) || value === undefined || value === null) {
+                return false;
+            } else if (['nasl.core.Boolean'].includes(value) || value === true || value === false) {
+                return true;
+            } else if (isDefString(typeKey)) {
+                return value.trim() !== '';
+            } else if (isDefNumber(typeKey)) {
+                return !isNaN(value);
+            } else if (isDefList(typeDefinition)) {
+                return value && value.length > 0;
+            } else if (isDefMap(typeDefinition)) {
+                return Object.keys(value).length > 0;
+            } else if (typeof value === 'string') {
+                return value.trim() !== '';
+            } else if (typeof value === 'number') {
+                return !isNaN(value);
+            } else if (Array.isArray(value)) {
+                return value && value.length > 0;
+            } else { // structure/entity
+                return !Object.keys(value).every((key) => {
+                    const v = value[key];
+                    return v === null || v === undefined;
+                });
+            }
+        };
+
+        let isValid = true;
+
+        for (let i = 0; i < values.length; i += 1) {
+            const { value, type } = values[i];
+
+            if (!hasValue(value, type)) {
+                isValid = false;
+                break;
+            }
+        }
+
+        return isValid;
+    },
 };
 
 export default {
     install(Vue, options) {
         utils.Vue = Vue;
         Vue.prototype.$utils = utils;
+        window.$utils = utils;
         enumsMap = options.enumsMap;
     },
 };
