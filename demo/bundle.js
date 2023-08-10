@@ -1,4 +1,4 @@
-import initModule from '../src/init.js';
+import initModule from '../../src/init.js';
 
 var platformConfig = {
     appConfig: {

@@ -3,6 +3,7 @@
   "version": "0.4.35",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
+    "gen:bundle": "node --experimental-modules demo/gen/gen-bundle.mjs",
     "dev:demo": "VUE_CLI_SERVICE_CONFIG_PATH=./demo/vue.demo.config.js vue-cli-service serve demo/entry.js",
     "dev": "vue-cli-service serve",
     "serve": "npm run dev",
@@ -72,7 +73,7 @@
     "cross-env": "^7.0.2",
     "eslint": "^6.5.1",
     "eslint-config-vusion": "^3.0.2",
-    "fs-extra": "^9.0.0",
+    "fs-extra": "^9.1.0",
     "html-webpack-plugin": "^3.2.0",
     "husky": "^3.0.5",
     "inquirer-directory": "^2.2.0",
@@ -91,6 +92,7 @@
     "webpack-cli": "^3.3.9"
   },
   "dependencies": {
+    "@lcap/nasl-core": "npm:@lcap/nasl@2.22.2-beta.2",
     "@vusion/utils": "^0.4.10",
     "axios": "^0.19.0",
     "babel-polyfill": "^6.26.0",
@@ -100,7 +102,9 @@
     "decimal.js": "^10.4.1",
     "event-hooks-webpack-plugin": "^2.1.6",
     "i-material-design.vue": "^5.1.0",
+    "json5": "^2.2.3",
     "lodash": "^4.17.15",
+    "postcss": "^8.4.27",
     "qs": "^6.8.0",
     "request-pre": "^0.4.3",
     "uuid": "^7.0.3",

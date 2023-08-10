@@ -1,3 +1,3 @@
 import './lib';
 import './client';
-import './bundle';
+import './bundle/pc';
