@@ -3,6 +3,9 @@
   "version": "0.5.1",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
+    "gen:with:start": "npm run gen:bundle && npm run dev:demo",
+    "gen:bundle": "node --experimental-modules demo/gen/index.mjs",
+    "dev:demo": "VUE_CLI_SERVICE_CONFIG_PATH=./demo/vue.demo.config.js vue-cli-service serve demo/entry.js",
     "dev": "vue-cli-service serve",
     "serve": "npm run dev",
     "check": "node bin/ggpull && node bin/check-deps",
@@ -92,6 +95,7 @@
     "webpack-cli": "^3.3.9"
   },
   "dependencies": {
+    "@lcap/nasl-core": "npm:@lcap/nasl@3.1.0-beta.3",
     "@vusion/utils": "^0.4.10",
     "axios": "^0.19.0",
     "babel-polyfill": "^6.26.0",
