@@ -3,6 +3,7 @@
   "version": "0.4.35",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
+    "dev:demo": "VUE_CLI_SERVICE_CONFIG_PATH=./demo/vue.demo.config.js vue-cli-service serve demo/entry.js",
     "dev": "vue-cli-service serve",
     "serve": "npm run dev",
     "check": "node bin/ggpull && node bin/check-deps",
