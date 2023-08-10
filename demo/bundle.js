@@ -26,7 +26,7 @@
                         }
         
 
-    import initModule from '../../src/init.js';
+    import initModule from '../src/init.js';
 
     var customNames = ['lcap-you-data','lcap-echarts-customization','lcap-echarts-bar','lcap-video','lcap-wang-editor','lcap-markdown-doc-render','lcap-gantt','lcap-login','calendar_library','drawing_pad','adapter_sdk'];
     for(var i=0;i<customNames.length;i++){

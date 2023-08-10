@@ -228,7 +228,7 @@ export function genBundleFiles(app, frontend, config) {
 
     content += `
 
-    import initModule from '../../src/init.js';
+    import initModule from '../src/init.js';
 
     var customNames = ${customNames};
     for(var i=0;i<customNames.length;i++){

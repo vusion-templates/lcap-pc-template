@@ -47,35 +47,42 @@ async function genBundle({
     });
 }
 
+const validate = (input) => {
+    if (input.trim().length === 0) {
+        return '不能为空';
+    }
+    return true;
+};
+
 inquirer.prompt([
     {
         type: 'input',
         name: 'platform',
         message: chalk.green('请输入平台地址:'),
         default: 'http://defaulttenant.lcap.ha.test.com/',
+        validate,
     },
     {
         type: 'input',
         name: 'username',
         message: chalk.green('请输入账号:'),
         default: 'admin',
+        validate,
     },
     {
         type: 'input',
         name: 'password',
         message: chalk.green('请输入密码:'),
         default: 'Admin@123456',
+        validate,
     },
     {
         type: 'input',
         name: 'appId',
         message: chalk.red('请输入应用id:'),
+        validate,
     },
 ]).then(({ platform, username, password, appId }) => {
-    if (!appId) {
-        console.log('应用id不能为空');
-        return;
-    }
     genBundle({
         platform,
         username,
