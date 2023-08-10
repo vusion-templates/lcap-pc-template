@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "skipLibCheck": true,
+        "allowJs": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": false,
+        "experimentalDecorators": true,
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "pretty": true,
+        "baseUrl": "."
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.js",
+        "test/**/*.ts",
+        "scripts/**/*.ts"
+    ],
+    "exclude": ["node_modules", "src/oldTemplate"]
+}
