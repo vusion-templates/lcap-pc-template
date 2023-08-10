@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
 import nasl from '@lcap/nasl-core';
+//import * as Command from '@lcap/nasl-core/src/common/Command';
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
@@ -18,17 +19,20 @@ async function genBundle({
     password,
     appId,
 }) {
-    const res = await utils.batchQuery({
-        platform,
-        username,
-        password,
-        appId,
-    });
+    utils.platform = platform;
+    utils.username = username;
+    utils.password = password;
+    const res = await utils.batchQuery(appId);
     const appJson = res?.data?.result?.[0];
+    const app = new nasl.App(appJson);
+    const naslServer = new nasl.NaslServer();
+    app.naslServer = naslServer;
+    await naslServer.start();
+    await naslServer.openApp(app);
+    await naslServer.createUiTs({});
     const frontendList = appJson.frontends.map(({ name }) => {
         return name;
     });
-    const app = new nasl.App(appJson);
     inquirer.prompt([
         {
             type: 'list',
@@ -80,6 +84,7 @@ inquirer.prompt([
         type: 'input',
         name: 'appId',
         message: chalk.red('请输入应用id:'),
+        default: 'ee5daaa6-b7ae-4095-8e6d-322e42bd36bd',
         validate,
     },
 ]).then(({ platform, username, password, appId }) => {

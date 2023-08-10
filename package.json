@@ -4,7 +4,7 @@
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "gen:bundle": "node --experimental-modules demo/gen/index.mjs",
-    "dev:demo": "npm run gen:bundle && VUE_CLI_SERVICE_CONFIG_PATH=./demo/vue.demo.config.js vue-cli-service serve demo/entry.js",
+    "dev:demo": "VUE_CLI_SERVICE_CONFIG_PATH=./demo/vue.demo.config.js vue-cli-service serve demo/entry.js",
     "dev": "vue-cli-service serve",
     "serve": "npm run dev",
     "check": "node bin/ggpull && node bin/check-deps",

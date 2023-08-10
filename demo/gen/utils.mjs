@@ -2,13 +2,16 @@ import axios from 'axios';
 import cryptoJS from 'crypto-js';
 
 export const utils = {
+    platform: undefined,
+    username: undefined,
+    password: undefined,
     /**
      * 平台请求
      */
-    getPlatformAxios(platform) {
+    getPlatformAxios() {
         return new Promise((res, rej) => {
             res(axios.create({
-                baseURL: platform,
+                baseURL: this.platform,
                 maxContentLength: 1024 * 1024 * 50,
             }));
         });
@@ -16,20 +19,16 @@ export const utils = {
     /**
     * 获取平台有效 authorization
     */
-    async getAuthorization({
-        platform,
-        username,
-        password,
-    }) {
+    async getAuthorization() {
         let authorization;
         try {
-            const TenantName = platform.match(/^https?:\/\/([^.]+)./)[1];
-            const pfAxios = await this.getPlatformAxios(platform);
+            const TenantName = this.platform.match(/^https?:\/\/([^.]+)./)[1];
+            const pfAxios = await this.getPlatformAxios(this.platform);
             const loginRes = await pfAxios.post('/proxy/nuims/gateway/nuims/nuims?Action=Login&Version=2020-06-01', {
                 DomainName: 'Nuims',
                 LoginType: 'Normal',
-                UserName: username,
-                Password: this.aesEcbEncrypt(password),
+                UserName: this.username,
+                Password: this.aesEcbEncrypt(this.password),
                 TenantName,
             }) || {};
             const { headers = {} } = loginRes;
@@ -39,18 +38,9 @@ export const utils = {
         }
         return authorization;
     },
-    async batchQuery({
-        platform,
-        username,
-        password,
-        appId,
-    }) {
-        const authorization = await this.getAuthorization({
-            platform,
-            username,
-            password,
-        });
-        const pfAxios = await this.getPlatformAxios(platform);
+    async batchQuery(appId) {
+        const authorization = await this.getAuthorization();
+        const pfAxios = await this.getPlatformAxios(this.platform);
         const loginRes = await pfAxios.post('/proxy/nasl-storage/api/storage/batchQuery', [{
             path: 'app',
         }], {
