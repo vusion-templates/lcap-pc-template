@@ -5,6 +5,7 @@ export const utils = {
     platform: undefined,
     username: undefined,
     password: undefined,
+    pfAxios: undefined,
     /**
      * 平台请求
      */
@@ -19,12 +20,19 @@ export const utils = {
     /**
     * 获取平台有效 authorization
     */
-    async getAuthorization() {
+    async getAuthorization({
+        platform,
+        username,
+        password,
+    }) {
+        this.platform = platform;
+        this.username = username;
+        this.password = password;
         let authorization;
         try {
             const TenantName = this.platform.match(/^https?:\/\/([^.]+)./)[1];
-            const pfAxios = await this.getPlatformAxios(this.platform);
-            const loginRes = await pfAxios.post('/proxy/nuims/gateway/nuims/nuims?Action=Login&Version=2020-06-01', {
+            this.pfAxios = await this.getPlatformAxios(this.platform);
+            const loginRes = await this.pfAxios.post('/proxy/nuims/gateway/nuims/nuims?Action=Login&Version=2020-06-01', {
                 DomainName: 'Nuims',
                 LoginType: 'Normal',
                 UserName: this.username,
@@ -36,17 +44,38 @@ export const utils = {
         } catch (error) {
             console.error('getAuthorization error :', error);
         }
+        this.authorization = authorization;
         return authorization;
     },
+    async loadDetail(appId) {
+        const res = await this.pfAxios.get('/api/v1/lcpapp/getLcpAppByAppId', {
+            params: {
+                lcpAppId: appId,
+            },
+            headers: {
+                Cookie: `authorization=${this.authorization}`,
+            },
+        }) || {};
+        return res?.data?.result || {};
+    },
+    async loadVersionDetail(ideVersion) {
+        const res = await this.pfAxios.get('/api/v1/ide/version/user/detail', {
+            params: {
+                version: ideVersion,
+            },
+            headers: {
+                Cookie: `authorization=${this.authorization}`,
+            },
+        }) || {};
+        return res?.data?.result || {};
+    },
     async batchQuery(appId) {
-        const authorization = await this.getAuthorization();
-        const pfAxios = await this.getPlatformAxios(this.platform);
-        const loginRes = await pfAxios.post('/proxy/nasl-storage/api/storage/batchQuery', [{
+        const res = await this.pfAxios.post('/proxy/nasl-storage/api/storage/batchQuery', [{
             path: 'app',
         }], {
             headers: {
                 appid: appId,
-                Cookie: `authorization=${authorization}`,
+                Cookie: `authorization=${this.authorization}`,
             },
             body: [
                 {
@@ -54,7 +83,7 @@ export const utils = {
                 },
             ],
         }) || {};
-        return loginRes;
+        return res;
     },
     /**
      * 认证信息加密

@@ -1,5 +1,5 @@
 import JSON5 from 'json5';
-import nasl from '@lcap/nasl-core';
+import nasl from '@lcap/nasl';
 
 import { compileComponent } from './compileComponent.mjs';
 
