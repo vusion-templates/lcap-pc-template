@@ -61,50 +61,57 @@ const validate = (input) => {
     return true;
 };
 
-inquirer.prompt([
-    {
-        type: 'input',
-        name: 'platform',
-        message: chalk.green('请输入平台地址:'),
-        default: 'http://defaulttenant.lcap.ha.test.com/',
-        validate,
-    },
-    {
-        type: 'input',
-        name: 'username',
-        message: chalk.green('请输入账号:'),
-        default: 'admin',
-        validate,
-    },
-    {
-        type: 'input',
-        name: 'password',
-        message: chalk.green('请输入密码:'),
-        default: 'Admin@123456',
-        validate,
-    },
-    {
-        type: 'input',
-        name: 'appId',
-        message: chalk.red('请输入应用id:'),
-        default: 'ee5daaa6-b7ae-4095-8e6d-322e42bd36bd',
-        validate,
-    },
-    {
-        type: 'input',
-        name: 'targetUrl',
-        message: chalk.red('请输入制品地址:'),
-        default: 'http://dev.lq0810.defaulttenant.lcap.hatest.163yun.com/',
-        validate,
-    },
-]).then(({ platform, username, password, appId, targetUrl }) => {
-    genBundle({
-        platform,
-        username,
-        password,
-        appId,
-        targetUrl,
+inquirer.prompt({
+    type: 'confirm',
+    name: 'install',
+    message: chalk.red('是否重新生成制品?'),
+    default: false,
+}).then(() => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'platform',
+            message: chalk.green('请输入平台地址:'),
+            default: 'http://defaulttenant.lcap.ha.test.com/',
+            validate,
+        },
+        {
+            type: 'input',
+            name: 'username',
+            message: chalk.green('请输入账号:'),
+            default: 'admin',
+            validate,
+        },
+        {
+            type: 'input',
+            name: 'password',
+            message: chalk.green('请输入密码:'),
+            default: 'Admin@123456',
+            validate,
+        },
+        {
+            type: 'input',
+            name: 'appId',
+            message: chalk.red('请输入应用id:'),
+            default: 'ee5daaa6-b7ae-4095-8e6d-322e42bd36bd',
+            validate,
+        },
+        {
+            type: 'input',
+            name: 'targetUrl',
+            message: chalk.red('请输入制品地址:'),
+            default: 'http://dev.lq0810.defaulttenant.lcap.hatest.163yun.com/',
+            validate,
+        },
+    ]).then(({ platform, username, password, appId, targetUrl }) => {
+        genBundle({
+            platform,
+            username,
+            password,
+            appId,
+            targetUrl,
+        });
+    }, (err) => {
+        console.log(err);
     });
-}, (err) => {
-    console.log(err);
-});
+}, () => { });
