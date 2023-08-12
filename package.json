@@ -99,7 +99,7 @@
     "@vusion/utils": "^0.4.10",
     "axios": "^0.19.0",
     "babel-polyfill": "^6.26.0",
-    "cloud-ui.vusion": "^0.14.1",
+    "cloud-ui.vusion": "^0.15.0",
     "crypto-js": "^4.1.1",
     "date-fns": "^2.6.0",
     "date-fns-tz": "^2.0.0",

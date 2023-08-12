@@ -203,7 +203,9 @@ export function genBundleFiles(app, frontend, config) {
     const metaDataStr = JSON5.stringify(metaData);
 
     const assetsInfo = app.genAllAssetsInfo(config?.STATIC_URL, frontend.type);
-    const customNames = JSON5.stringify(assetsInfo.custom.names);
+    const customJs = JSON5.stringify(assetsInfo?.custom?.js);
+    const customNames = JSON5.stringify(assetsInfo?.custom?.names);
+
     let content = ``;
 
     const themeCSS = frontend.genThemeCSS();
@@ -226,9 +228,10 @@ export function genBundleFiles(app, frontend, config) {
         }`;
     }
 
-    content += `import initModule from '../src/init.js';`;
-
     content += `
+import initModule from '../src/init.js';
+import { loadScripts } from './loadAssets.js'
+
         var platformConfig = ${platformConfig};
         var metaData = ${metaDataStr};
         var routes = ${routesStr};
@@ -246,16 +249,19 @@ export function genBundleFiles(app, frontend, config) {
             return window.appVM = appVM;
         };
 
-        setTimeout(() => {
+        async function start() {
+            await loadScripts([${customJs}]);
+            
             var customNames = ${customNames};
-            for(var i=0;i<customNames.length;i++){
+            for (var i = 0; i < customNames.length; i++) {
                 var name = window.kebab2Camel(customNames[i]);
-                if(window[name]){
+                if (window[name]) {
                     window.CloudUI.install(window.Vue, window[name]);
                 }
             }
             window.createLcapApp();
-        }, 1000)
+        }
+        start();
     `;
     return content;
 }

@@ -102,6 +102,14 @@ export const utils = {
         }) || {};
         return res?.data?.result || {};
     },
+    async getEnv() {
+        const res = await this.pfAxios.get('/api/v1/env/config', {
+            headers: {
+                Cookie: `authorization=${this.authorization}`,
+            },
+        }) || {};
+        return res?.data?.result || {};
+    },
     /**
      * 认证信息加密
      */

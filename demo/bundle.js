@@ -1,4 +1,7 @@
+
 import initModule from '../src/init.js';
+import { loadScripts } from './loadAssets.js'
+
         var platformConfig = {
     appConfig: {
         project: 'lq0812',
@@ -587,12 +590,12 @@ this.alreadyBindRoleUserList = this.$genInitFromSchema('nasl.collection.List<{lC
 inputRoleId: inputRoleId
 }
 })))
-var $forEachListVariable580 = this.alreadyBindRoleUserList;
-var $forEachStartVariable580 = 0;
-var $forEachEndVariable580 = (this.alreadyBindRoleUserList || {}).length;
-if(Array.isArray($forEachListVariable580)) {
-for (let i = $forEachStartVariable580; i < $forEachEndVariable580; i++) {
-const item = $forEachListVariable580[i];
+var $forEachListVariable8625 = this.alreadyBindRoleUserList;
+var $forEachStartVariable8625 = 0;
+var $forEachEndVariable8625 = (this.alreadyBindRoleUserList || {}).length;
+if(Array.isArray($forEachListVariable8625)) {
+for (let i = $forEachStartVariable8625; i < $forEachEndVariable8625; i++) {
+const item = $forEachListVariable8625[i];
 this.$utils['Add'](userIdList, ((item || {}).lCAPUserRoleMapping || {}).userId)
 }
 }
@@ -726,12 +729,12 @@ await (async () => {
         let UserName ="";
         let returnOfGetUser =this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUser',undefined);
 
-var $forEachListVariable2817 = this.userIdListBySelect;
-var $forEachStartVariable2817 = 0;
-var $forEachEndVariable2817 = (this.userIdListBySelect || {}).length;
-if(Array.isArray($forEachListVariable2817)) {
-for (let i = $forEachStartVariable2817; i < $forEachEndVariable2817; i++) {
-const item = $forEachListVariable2817[i];
+var $forEachListVariable4085 = this.userIdListBySelect;
+var $forEachStartVariable4085 = 0;
+var $forEachEndVariable4085 = (this.userIdListBySelect || {}).length;
+if(Array.isArray($forEachListVariable4085)) {
+for (let i = $forEachStartVariable4085; i < $forEachEndVariable4085; i++) {
+const item = $forEachListVariable4085[i];
 isDuplicateUserId = await (this.roleAddUserReduplicate(item, this.roleid))
 returnOfGetUser = this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUser', await (this.$logics['app.logics.LCAPGetUserByUserId']({
                 config: {
@@ -971,12 +974,12 @@ variable2 = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPPerResMapp
 roleId: this.roleId
 }
 })))
-var $forEachListVariable4364 = (variable2 || {}).list;
-var $forEachStartVariable4364 = 0;
-var $forEachEndVariable4364 = ((variable2 || {}).list || {}).length;
-if(Array.isArray($forEachListVariable4364)) {
-for (let i = $forEachStartVariable4364; i < $forEachEndVariable4364; i++) {
-const item = $forEachListVariable4364[i];
+var $forEachListVariable5818 = (variable2 || {}).list;
+var $forEachStartVariable5818 = 0;
+var $forEachEndVariable5818 = ((variable2 || {}).list || {}).length;
+if(Array.isArray($forEachListVariable5818)) {
+for (let i = $forEachStartVariable5818; i < $forEachEndVariable5818; i++) {
+const item = $forEachListVariable5818[i];
 variable4 = (item || {}).lCAPResource
 this.$utils['Add'](variable5, variable4)
 }
@@ -1056,12 +1059,12 @@ permissionList = this.$genInitFromSchema('nasl.collection.List<app.dataSources.d
 roleId: this.roleId
 }
 })))
-var $forEachListVariable5172 = permissionList;
-var $forEachStartVariable5172 = 0;
-var $forEachEndVariable5172 = (permissionList || {}).length;
-if(Array.isArray($forEachListVariable5172)) {
-for (let i = $forEachStartVariable5172; i < $forEachEndVariable5172; i++) {
-const item = $forEachListVariable5172[i];
+var $forEachListVariable1240 = permissionList;
+var $forEachStartVariable1240 = 0;
+var $forEachEndVariable1240 = (permissionList || {}).length;
+if(Array.isArray($forEachListVariable1240)) {
+for (let i = $forEachStartVariable1240; i < $forEachEndVariable1240; i++) {
+const item = $forEachListVariable1240[i];
 mappingIdList = this.$genInitFromSchema('nasl.collection.List<nasl.core.Long>', await (this.$logics['app.logics.LCAPGetMappingByPermissionIdAndResourceId']({
                 config: {
                     download: false,
@@ -1076,12 +1079,12 @@ permissionId: (item || {}).id,
 resourceId: this.removeResourceId
 }
 })))
-var $forEachListVariable7168 = mappingIdList;
-var $forEachStartVariable7168 = 0;
-var $forEachEndVariable7168 = (mappingIdList || {}).length;
-if(Array.isArray($forEachListVariable7168)) {
-for (let j = $forEachStartVariable7168; j < $forEachEndVariable7168; j++) {
-const item1 = $forEachListVariable7168[j];
+var $forEachListVariable2035 = mappingIdList;
+var $forEachStartVariable2035 = 0;
+var $forEachEndVariable2035 = (mappingIdList || {}).length;
+if(Array.isArray($forEachListVariable2035)) {
+for (let j = $forEachStartVariable2035; j < $forEachEndVariable2035; j++) {
+const item1 = $forEachListVariable2035[j];
 await (this.$logics['app.dataSources.defaultDS.entities.LCAPPerResMapping.logics.delete']({
                 config: {
                     download: false,
@@ -1136,18 +1139,18 @@ permissionList = this.$genInitFromSchema('nasl.collection.List<app.dataSources.d
 roleId: this.roleId
 }
 })))
-var $forEachListVariable2176 = permissionList;
-var $forEachStartVariable2176 = 0;
-var $forEachEndVariable2176 = (permissionList || {}).length;
-if(Array.isArray($forEachListVariable2176)) {
-for (let i = $forEachStartVariable2176; i < $forEachEndVariable2176; i++) {
-const item = $forEachListVariable2176[i];
-var $forEachListVariable9 = this.alreadySelectedResourceIdList;
-var $forEachStartVariable9 = 0;
-var $forEachEndVariable9 = (this.alreadySelectedResourceIdList || {}).length;
-if(Array.isArray($forEachListVariable9)) {
-for (let j = $forEachStartVariable9; j < $forEachEndVariable9; j++) {
-const item1 = $forEachListVariable9[j];
+var $forEachListVariable2417 = permissionList;
+var $forEachStartVariable2417 = 0;
+var $forEachEndVariable2417 = (permissionList || {}).length;
+if(Array.isArray($forEachListVariable2417)) {
+for (let i = $forEachStartVariable2417; i < $forEachEndVariable2417; i++) {
+const item = $forEachListVariable2417[i];
+var $forEachListVariable9719 = this.alreadySelectedResourceIdList;
+var $forEachStartVariable9719 = 0;
+var $forEachEndVariable9719 = (this.alreadySelectedResourceIdList || {}).length;
+if(Array.isArray($forEachListVariable9719)) {
+for (let j = $forEachStartVariable9719; j < $forEachEndVariable9719; j++) {
+const item1 = $forEachListVariable9719[j];
 mapping.permissionId = (item || {}).id
 mapping.resourceId = item1
 mappingIdList = this.$genInitFromSchema('nasl.collection.List<nasl.core.Long>', await (this.$logics['app.logics.LCAPGetMappingByPermissionIdAndResourceId']({
@@ -1727,12 +1730,12 @@ inputRoleId: (((current || {}).item || {}).lCAPRole || {}).id
 })))
 variable2 = (variable1 || {}).list
 this.$genInitFromSchema('nasl.collection.List<app.dataSources.defaultDS.entities.LCAPPermission>', this.$utils['Clear'](this.rolePermissionList))
-var $forEachListVariable5306 = variable2;
-var $forEachStartVariable5306 = 0;
-var $forEachEndVariable5306 = (variable2 || {}).length;
-if(Array.isArray($forEachListVariable5306)) {
-for (let i = $forEachStartVariable5306; i < $forEachEndVariable5306; i++) {
-const item = $forEachListVariable5306[i];
+var $forEachListVariable5497 = variable2;
+var $forEachStartVariable5497 = 0;
+var $forEachEndVariable5497 = (variable2 || {}).length;
+if(Array.isArray($forEachListVariable5497)) {
+for (let i = $forEachStartVariable5497; i < $forEachEndVariable5497; i++) {
+const item = $forEachListVariable5497[i];
 this.$utils['Add'](this.rolePermissionList, (item || {}).lCAPPermission)
 }
 }
@@ -2063,12 +2066,12 @@ result = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPUser: app.dat
                 body: {
 }
 })))
-var $forEachListVariable4325 = (result || {}).list;
-var $forEachStartVariable4325 = 0;
-var $forEachEndVariable4325 = ((result || {}).list || {}).length;
-if(Array.isArray($forEachListVariable4325)) {
-for (let index = $forEachStartVariable4325; index < $forEachEndVariable4325; index++) {
-const item = $forEachListVariable4325[index];
+var $forEachListVariable2570 = (result || {}).list;
+var $forEachStartVariable2570 = 0;
+var $forEachEndVariable2570 = ((result || {}).list || {}).length;
+if(Array.isArray($forEachListVariable2570)) {
+for (let index = $forEachStartVariable2570; index < $forEachEndVariable2570; index++) {
+const item = $forEachListVariable2570[index];
 this.$utils['Add'](this.userList, ((item || {}).lCAPUser || {}).userName)
 }
 }
@@ -2496,14 +2499,17 @@ methods: {
             return window.appVM = appVM;
         };
 
-        setTimeout(() => {
+        async function start() {
+            await loadScripts([['//ceph.lcap.hatest.163yun.com/lcap-test-static/packages/lcap-login@1.2.2/dist-theme/index.js']]);
+            
             var customNames = ['lcap-login'];
-            for(var i=0;i<customNames.length;i++){
+            for (var i = 0; i < customNames.length; i++) {
                 var name = window.kebab2Camel(customNames[i]);
-                if(window[name]){
+                if (window[name]) {
                     window.CloudUI.install(window.Vue, window[name]);
                 }
             }
             window.createLcapApp();
-        }, 1000)
+        }
+        start();
     
