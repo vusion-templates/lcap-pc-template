@@ -101,13 +101,16 @@ async function genFrontendBundle({ app, frontendName }) {
     scopes.forEach((scope) => {
         app.packageInfos.push(loadPackageInfo(versionData?.dependencies, scope));
     });
-    const content = genBundleFiles(app, frontend);
+    const envData = await utils.getEnv();
+    const content = genBundleFiles(app, frontend, {
+        STATIC_URL: envData.STATIC_URL,
+    });
     fs.writeFileSync(path.join(__dirname, `../bundle.js`), content);
     const releaseInfo = await utils.getFrontendReleaseInfo({
         env: 'dev',
         appId,
     });
-    const frontendInfo = releaseInfo?.find(({ name }) => name === frontendName);
+    const frontendInfo = releaseInfo?.find?.(({ name }) => name === frontendName);
     const { domain } = frontendInfo || {};
     if (!domain) {
         console.log(chalk.red('未找到对应的域名，请检查是否已经发布!'));
