@@ -580,19 +580,19 @@ this.alreadyBindRoleUserList = this.$genInitFromSchema('nasl.collection.List<{lC
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "b48f61c761e64949afd5ab26c2c775d0",
+                    "lcap-calllogic-uuid": "ca730b7c1d174d5aa61ca799f2c8be90",
                 },
             path: {},
                 body: {
 inputRoleId: inputRoleId
 }
 })))
-var $forEachListVariable6105 = this.alreadyBindRoleUserList;
-var $forEachStartVariable6105 = 0;
-var $forEachEndVariable6105 = (this.alreadyBindRoleUserList || {}).length;
-if(Array.isArray($forEachListVariable6105)) {
-for (let i = $forEachStartVariable6105; i < $forEachEndVariable6105; i++) {
-const item = $forEachListVariable6105[i];
+var $forEachListVariable3295 = this.alreadyBindRoleUserList;
+var $forEachStartVariable3295 = 0;
+var $forEachEndVariable3295 = (this.alreadyBindRoleUserList || {}).length;
+if(Array.isArray($forEachListVariable3295)) {
+for (let i = $forEachStartVariable3295; i < $forEachEndVariable3295; i++) {
+const item = $forEachListVariable3295[i];
 this.$utils['Add'](userIdList, ((item || {}).lCAPUserRoleMapping || {}).userId)
 }
 }
@@ -614,7 +614,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUserRoleMapping'
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "53248d739cd14701abd24bfa99a1f8cb",
+                    "lcap-calllogic-uuid": "f9173ee64d5640fc92507b651d119f83",
                 },
             body: {
 entity: this.input},
@@ -627,7 +627,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUserRoleMapping'
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "7481ce56cfc9480cb77a08723c703551",
+                    "lcap-calllogic-uuid": "434a760e78724b6a95261d0e6d20b548",
                 },
             
 body: this.input
@@ -662,7 +662,7 @@ returnBody = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPUser: app
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "70ca801174494bf8898ca3b28d03b776",
+                    "lcap-calllogic-uuid": "e90839f48e394b0ea81ecd47e6e2caec",
                 },
             path: {},
                 body: {
@@ -686,7 +686,7 @@ result = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPRole: app.dat
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "03522cf3f4a944b8953b90ee1d6951b2",
+                    "lcap-calllogic-uuid": "10e10a9be8804a589bda4b4add54437d",
                 },
             path: {},
                 body: {
@@ -726,12 +726,12 @@ await (async () => {
         let UserName ="";
         let returnOfGetUser =this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUser',undefined);
 
-var $forEachListVariable9824 = this.userIdListBySelect;
-var $forEachStartVariable9824 = 0;
-var $forEachEndVariable9824 = (this.userIdListBySelect || {}).length;
-if(Array.isArray($forEachListVariable9824)) {
-for (let i = $forEachStartVariable9824; i < $forEachEndVariable9824; i++) {
-const item = $forEachListVariable9824[i];
+var $forEachListVariable2615 = this.userIdListBySelect;
+var $forEachStartVariable2615 = 0;
+var $forEachEndVariable2615 = (this.userIdListBySelect || {}).length;
+if(Array.isArray($forEachListVariable2615)) {
+for (let i = $forEachStartVariable2615; i < $forEachEndVariable2615; i++) {
+const item = $forEachListVariable2615[i];
 isDuplicateUserId = await (this.roleAddUserReduplicate(item, this.roleid))
 returnOfGetUser = this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUser', await (this.$logics['app.logics.LCAPGetUserByUserId']({
                 config: {
@@ -739,7 +739,7 @@ returnOfGetUser = this.$genInitFromSchema('app.dataSources.defaultDS.entities.LC
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "2abcbb19ae3c4e9ba917d6574445098e",
+                    "lcap-calllogic-uuid": "061160205736418faada27a8180c2263",
                 },
             path: {},
                 body: {
@@ -758,7 +758,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUserRoleMapping'
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "4b53b451464645df9dfb3c636cb089a3",
+                    "lcap-calllogic-uuid": "ac70e7523ea34344985041ddc60f7091",
                 },
             
 body: createUserAndRole
@@ -795,7 +795,7 @@ await (this.$logics['app.dataSources.defaultDS.entities.LCAPUserRoleMapping.logi
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "3f1818957a9a44568ea96b8633fd5c74",
+                    "lcap-calllogic-uuid": "dd9cd5a017654bffba99926cb4623a81",
                 },
             query: {
 id: (((current || {}).item || {}).lCAPUserRoleMapping || {}).id},
@@ -903,7 +903,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPResource', await
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "2b035faabc554041b5f6af3d88dd570f",
+                    "lcap-calllogic-uuid": "3f1e8ecff82045c69e00c355ecf52324",
                 },
             
 body: this.variable
@@ -922,7 +922,7 @@ result = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPResource: app
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "4fe88c5d579a4c14a206b3ba9453bfb8",
+                    "lcap-calllogic-uuid": "77ff291c44d14bbc85cda2d7c39c3ece",
                 },
             path: {},
                 body: {
@@ -948,19 +948,19 @@ variable2 = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPPerResMapp
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "3bd673615b2a45259334658efcdee99f",
+                    "lcap-calllogic-uuid": "0295574b9bd4413b9ded5553fe656ad8",
                 },
             path: {},
                 body: {
 roleId: this.roleId
 }
 })))
-var $forEachListVariable739 = (variable2 || {}).list;
-var $forEachStartVariable739 = 0;
-var $forEachEndVariable739 = ((variable2 || {}).list || {}).length;
-if(Array.isArray($forEachListVariable739)) {
-for (let i = $forEachStartVariable739; i < $forEachEndVariable739; i++) {
-const item = $forEachListVariable739[i];
+var $forEachListVariable479 = (variable2 || {}).list;
+var $forEachStartVariable479 = 0;
+var $forEachEndVariable479 = ((variable2 || {}).list || {}).length;
+if(Array.isArray($forEachListVariable479)) {
+for (let i = $forEachStartVariable479; i < $forEachEndVariable479; i++) {
+const item = $forEachListVariable479[i];
 variable4 = (item || {}).lCAPResource
 this.$utils['Add'](variable5, variable4)
 }
@@ -980,7 +980,7 @@ await (this.$logics['app.dataSources.defaultDS.entities.LCAPResource.logics.dele
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "cd2ad1c78d9640a98e724409b8cd7527",
+                    "lcap-calllogic-uuid": "5738779e64aa45be9236b95fe11b4008",
                 },
             query: {
 id: (((current || {}).item || {}).lCAPResource || {}).id},
@@ -1001,7 +1001,7 @@ result = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPResource: app
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "97ec62dd1e4a4e0dbf7f86840afd3e73",
+                    "lcap-calllogic-uuid": "73cfbaada25544baafb097d47af7518b",
                 },
             path: {},
                 body: {
@@ -1033,26 +1033,26 @@ permissionList = this.$genInitFromSchema('nasl.collection.List<app.dataSources.d
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "bdacc041dfd94b79aa7e0182b3863f22",
+                    "lcap-calllogic-uuid": "1025e2e3c5894cff8d40ea8a28440471",
                 },
             path: {},
                 body: {
 roleId: this.roleId
 }
 })))
-var $forEachListVariable5072 = permissionList;
-var $forEachStartVariable5072 = 0;
-var $forEachEndVariable5072 = (permissionList || {}).length;
-if(Array.isArray($forEachListVariable5072)) {
-for (let i = $forEachStartVariable5072; i < $forEachEndVariable5072; i++) {
-const item = $forEachListVariable5072[i];
+var $forEachListVariable6859 = permissionList;
+var $forEachStartVariable6859 = 0;
+var $forEachEndVariable6859 = (permissionList || {}).length;
+if(Array.isArray($forEachListVariable6859)) {
+for (let i = $forEachStartVariable6859; i < $forEachEndVariable6859; i++) {
+const item = $forEachListVariable6859[i];
 mappingIdList = this.$genInitFromSchema('nasl.collection.List<nasl.core.Long>', await (this.$logics['app.logics.LCAPGetMappingByPermissionIdAndResourceId']({
                 config: {
                     download: false,
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "e89e6850236c4408848aaec3b823ef8c",
+                    "lcap-calllogic-uuid": "4854d91ef084407481c11878b45d7a4e",
                 },
             path: {},
                 body: {
@@ -1060,19 +1060,19 @@ permissionId: (item || {}).id,
 resourceId: this.removeResourceId
 }
 })))
-var $forEachListVariable3263 = mappingIdList;
-var $forEachStartVariable3263 = 0;
-var $forEachEndVariable3263 = (mappingIdList || {}).length;
-if(Array.isArray($forEachListVariable3263)) {
-for (let j = $forEachStartVariable3263; j < $forEachEndVariable3263; j++) {
-const item1 = $forEachListVariable3263[j];
+var $forEachListVariable3517 = mappingIdList;
+var $forEachStartVariable3517 = 0;
+var $forEachEndVariable3517 = (mappingIdList || {}).length;
+if(Array.isArray($forEachListVariable3517)) {
+for (let j = $forEachStartVariable3517; j < $forEachEndVariable3517; j++) {
+const item1 = $forEachListVariable3517[j];
 await (this.$logics['app.dataSources.defaultDS.entities.LCAPPerResMapping.logics.delete']({
                 config: {
                     download: false,
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "cae3ad6f308d4b9aaf442b5cfb576f1d",
+                    "lcap-calllogic-uuid": "60f61c634fe341a4928caf8bcdf3dfe3",
                 },
             query: {
 id: item1},
@@ -1113,25 +1113,25 @@ permissionList = this.$genInitFromSchema('nasl.collection.List<app.dataSources.d
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "848091d309f148cfab059027293d44fa",
+                    "lcap-calllogic-uuid": "ff21e255e97f4e849e20a6a399783f1b",
                 },
             path: {},
                 body: {
 roleId: this.roleId
 }
 })))
-var $forEachListVariable7601 = permissionList;
-var $forEachStartVariable7601 = 0;
-var $forEachEndVariable7601 = (permissionList || {}).length;
-if(Array.isArray($forEachListVariable7601)) {
-for (let i = $forEachStartVariable7601; i < $forEachEndVariable7601; i++) {
-const item = $forEachListVariable7601[i];
-var $forEachListVariable7246 = this.alreadySelectedResourceIdList;
-var $forEachStartVariable7246 = 0;
-var $forEachEndVariable7246 = (this.alreadySelectedResourceIdList || {}).length;
-if(Array.isArray($forEachListVariable7246)) {
-for (let j = $forEachStartVariable7246; j < $forEachEndVariable7246; j++) {
-const item1 = $forEachListVariable7246[j];
+var $forEachListVariable6663 = permissionList;
+var $forEachStartVariable6663 = 0;
+var $forEachEndVariable6663 = (permissionList || {}).length;
+if(Array.isArray($forEachListVariable6663)) {
+for (let i = $forEachStartVariable6663; i < $forEachEndVariable6663; i++) {
+const item = $forEachListVariable6663[i];
+var $forEachListVariable2780 = this.alreadySelectedResourceIdList;
+var $forEachStartVariable2780 = 0;
+var $forEachEndVariable2780 = (this.alreadySelectedResourceIdList || {}).length;
+if(Array.isArray($forEachListVariable2780)) {
+for (let j = $forEachStartVariable2780; j < $forEachEndVariable2780; j++) {
+const item1 = $forEachListVariable2780[j];
 mapping.permissionId = (item || {}).id
 mapping.resourceId = item1
 mappingIdList = this.$genInitFromSchema('nasl.collection.List<nasl.core.Long>', await (this.$logics['app.logics.LCAPGetMappingByPermissionIdAndResourceId']({
@@ -1140,7 +1140,7 @@ mappingIdList = this.$genInitFromSchema('nasl.collection.List<nasl.core.Long>', 
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "d63692e7c9bd44cb8e4fdd3c833bb42d",
+                    "lcap-calllogic-uuid": "834e661db8124d48bf1a7ae2b7bce7b8",
                 },
             path: {},
                 body: {
@@ -1156,7 +1156,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPPerResMapping', 
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "14b622a7363142f6b991ee42c19ebb8c",
+                    "lcap-calllogic-uuid": "fa44906cddd442dc9b87633754a87e7c",
                 },
             
 body: mapping
@@ -1329,7 +1329,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPRole', await (th
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "5757fef60bef4f53bf83abd642215719",
+                    "lcap-calllogic-uuid": "3ff5bca21d1945269b2c6de2f182ed21",
                 },
             body: {
 entity: this.inputRoleBody},
@@ -1342,7 +1342,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPRole', await (th
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "ee6663ee483c4bd79066b2f2b2c55955",
+                    "lcap-calllogic-uuid": "712f0fd806064a51aa6c8553a5b55e13",
                 },
             
 body: this.inputRoleBody
@@ -1366,7 +1366,7 @@ result = this.$genInitFromSchema('nasl.collection.List<app.dataSources.defaultDS
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "df74964e0c4443b6a0b5138590215cbd",
+                    "lcap-calllogic-uuid": "9967316960df44afadefeae0f40edc2b",
                 },
             path: {},
                 body: {
@@ -1397,7 +1397,7 @@ result = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPRole: app.dat
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "6d61010894fb4f7ea16c8856d4fdfc6f",
+                    "lcap-calllogic-uuid": "f84334c958864c51960eb61dbd99841d",
                 },
             path: {},
                 body: {
@@ -1422,7 +1422,7 @@ result = await (this.$logics['app.logics.LCAPIsRoleNameRepeated']({
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "3426ef8a3fd7425194c9426eba345a4e",
+                    "lcap-calllogic-uuid": "a33be2caa06741c8b11ea547be95ddf3",
                 },
             path: {},
                 body: {
@@ -1449,7 +1449,7 @@ await (this.$logics['app.dataSources.defaultDS.entities.LCAPRole.logics.delete']
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "20da1f1e2af64d06a628cac7e73ee40c",
+                    "lcap-calllogic-uuid": "effb8b37fb684fb6899364e0444ccbfd",
                 },
             query: {
 id: (((current || {}).item || {}).lCAPRole || {}).id},
@@ -1490,7 +1490,7 @@ variable1 = this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPRole
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "dce8cdac69a84cd3b2869a9bd18cb656",
+                    "lcap-calllogic-uuid": "cb4cd685979a433189b884bd0c8df7e7",
                 },
             query: {
 id: this.updateRoleId},
@@ -1509,7 +1509,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPRole', await (th
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "8218c499f5e145458697266f72ab1367",
+                    "lcap-calllogic-uuid": "5e9e9c50454b4a0e8156bbc18b0b8a51",
                 },
             body: {
 entity: updateRoleBody},
@@ -1565,7 +1565,7 @@ this.inputRoleBody = this.$genInitFromSchema('app.dataSources.defaultDS.entities
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "72df07e472c44847ae6f83282ed9b98e",
+                    "lcap-calllogic-uuid": "98bc580df08d4d90a4bfcace5902d1ee",
                 },
             
 body: this.inputRoleBody
@@ -1581,7 +1581,7 @@ this.rolePermissionBody = this.$genInitFromSchema('app.dataSources.defaultDS.ent
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "598a8803f8c94731b862f01bc57bc5f5",
+                    "lcap-calllogic-uuid": "03cc51ab81334e649cb8f37cdc5368fe",
                 },
             
 body: this.rolePermissionBody
@@ -1594,7 +1594,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPRolePerMapping',
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "02d58ab97c024e358f8b5a830ef32132",
+                    "lcap-calllogic-uuid": "facaa8f8b95848d3ae8887067f73b456",
                 },
             
 body: this.rolePermissionMappingBody
@@ -1639,7 +1639,7 @@ await (this.$logics['app.dataSources.defaultDS.entities.LCAPRole.logics.delete']
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "c1d5e415ecd64361801b573fa807979e",
+                    "lcap-calllogic-uuid": "9bac53b3550341358e6b9015e50f843c",
                 },
             query: {
 id: (this.deleteRoleBody || {}).id},
@@ -1674,7 +1674,7 @@ variable1 = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPPermission
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "e753d101987442aa927042b4496a8eda",
+                    "lcap-calllogic-uuid": "aae8c17353f042dea6494cb6b4292d00",
                 },
             path: {},
                 body: {
@@ -1683,12 +1683,12 @@ inputRoleId: (((current || {}).item || {}).lCAPRole || {}).id
 })))
 variable2 = (variable1 || {}).list
 this.$genInitFromSchema('nasl.collection.List<app.dataSources.defaultDS.entities.LCAPPermission>', this.$utils['Clear'](this.rolePermissionList))
-var $forEachListVariable3865 = variable2;
-var $forEachStartVariable3865 = 0;
-var $forEachEndVariable3865 = (variable2 || {}).length;
-if(Array.isArray($forEachListVariable3865)) {
-for (let i = $forEachStartVariable3865; i < $forEachEndVariable3865; i++) {
-const item = $forEachListVariable3865[i];
+var $forEachListVariable789 = variable2;
+var $forEachStartVariable789 = 0;
+var $forEachEndVariable789 = (variable2 || {}).length;
+if(Array.isArray($forEachListVariable789)) {
+for (let i = $forEachStartVariable789; i < $forEachEndVariable789; i++) {
+const item = $forEachListVariable789[i];
 this.$utils['Add'](this.rolePermissionList, (item || {}).lCAPPermission)
 }
 }
@@ -1907,7 +1907,7 @@ result = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPUser: app.dat
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "56f608141f164670be413241a895f8f8",
+                    "lcap-calllogic-uuid": "38808c61282247128ef899a8a97be73f",
                 },
             path: {},
                 body: {
@@ -1936,7 +1936,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUser', await (th
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "6edfa165578f4ab7af03fad4d944c228",
+                    "lcap-calllogic-uuid": "a37a1d8aea174aa7920d46cc89688925",
                 },
             body: {
 entity: this.input},
@@ -1951,7 +1951,7 @@ this.$genInitFromSchema('app.dataSources.defaultDS.entities.LCAPUser', await (th
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "5e28c508c37a4e0787cee7439b541710",
+                    "lcap-calllogic-uuid": "cd2a72e04a8d4c2b8cd5155ee1b0f7a7",
                 },
             
 body: this.input
@@ -1977,18 +1977,18 @@ result = this.$genInitFromSchema('{list: nasl.collection.List<{lCAPUser: app.dat
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "3798f8d651744085a5cd44768b42e427",
+                    "lcap-calllogic-uuid": "844f7cc2017147fa87654a78041e3357",
                 },
             path: {},
                 body: {
 }
 })))
-var $forEachListVariable7114 = (result || {}).list;
-var $forEachStartVariable7114 = 0;
-var $forEachEndVariable7114 = ((result || {}).list || {}).length;
-if(Array.isArray($forEachListVariable7114)) {
-for (let index = $forEachStartVariable7114; index < $forEachEndVariable7114; index++) {
-const item = $forEachListVariable7114[index];
+var $forEachListVariable5169 = (result || {}).list;
+var $forEachStartVariable5169 = 0;
+var $forEachEndVariable5169 = ((result || {}).list || {}).length;
+if(Array.isArray($forEachListVariable5169)) {
+for (let index = $forEachStartVariable5169; index < $forEachEndVariable5169; index++) {
+const item = $forEachListVariable5169[index];
 this.$utils['Add'](this.userList, ((item || {}).lCAPUser || {}).userName)
 }
 }
@@ -2026,7 +2026,7 @@ await (this.$logics['app.dataSources.defaultDS.entities.LCAPUser.logics.delete']
                 },
                 query: {},
                 headers: {
-                    "lcap-calllogic-uuid": "c57b1ce08c164a9fb7627ab6fb4a9a51",
+                    "lcap-calllogic-uuid": "d38471ecf5c74b9b864ed9c4c5b8cb59",
                 },
             query: {
 id: (this.deleteUserBody || {}).id},
