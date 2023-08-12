@@ -77,10 +77,10 @@ async function preGenBundle({
     const frontendList = appJson?.frontends?.map(({ name }) => {
         return name;
     }) || [];
-    if (appJson?.frontends.length === 1) {
+    if (app?.frontends.length === 1) {
         genBundle({
             app,
-            frontend: appJson?.frontends[0],
+            frontend: app?.frontends[0],
             config,
         });
     } else {
