@@ -216,7 +216,7 @@ function init() {
     inquirer.prompt({
         type: 'confirm',
         name: 'gen',
-        message: chalk.red('是否重新生成制品?'),
+        message: chalk.green('是否重新生成制品？') + chalk.red('（默认不重新生成）'),
         default: false,
     }).then(({ gen }) => {
         if (gen) {
