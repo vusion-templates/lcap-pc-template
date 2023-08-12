@@ -39,3 +39,5 @@ test/cases/*/dest
 .tmp
 
 pkg
+
+app.config.jsonc
