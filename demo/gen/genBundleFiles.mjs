@@ -250,7 +250,7 @@ import { loadScripts } from './loadAssets.js'
         };
 
         async function start() {
-            await loadScripts([${customJs}]);
+            await loadScripts(${customJs});
             
             var customNames = ${customNames};
             for (var i = 0; i < customNames.length; i++) {
