@@ -3,7 +3,10 @@
         LazyLoad.js([
             '//ceph.lcap.hatest.163yun.com/lcap-test-static/packages/lcap-login@1.2.2/dist-theme/index.js'
         ]);
-        LazyLoad.css(['//ceph.lcap.hatest.163yun.com/lcap-test-static/packages/cloud-ui.vusion@0.14.37/dist-theme/index.css','//ceph.lcap.hatest.163yun.com/lcap-test-static/packages/lcap-pc-template@0.4.35/cloudAdminDesigner.css']);     
+        LazyLoad.css([
+            '//ceph.lcap.hatest.163yun.com/lcap-test-static/packages/cloud-ui.vusion@0.14.37/dist-theme/index.css',
+            '//ceph.lcap.hatest.163yun.com/lcap-test-static/packages/lcap-pc-template@0.4.35/cloudAdminDesigner.css'
+        ]);     
     }
     if(window.ICESTARK?.root) {
         Object.assign(window.ICESTARK, {
