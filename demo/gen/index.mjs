@@ -61,7 +61,11 @@ async function preGenBundle({
         baseVersion,
         versionChangedTime,
     });
-    const appJson = res?.data?.result?.[0] || {};
+    const appJson = res?.data?.result?.[0];
+    if (!appJson) {
+        console.log(chalk.red('未找到对应的应用，请检查应用id是否正确！'));
+        process.exit();
+    }
     const app = new nasl.App(appJson);
     const versionData = await utils.loadVersionDetail(appData?.ideVersion);
     app.packageInfos = [];
@@ -150,7 +154,7 @@ async function getBasicApi({ frontend, config }) {
     const frontendComponentLibrary = frontendComponentLibraryMap[frontend?.type];
     const frontendComponentLibraryInfo = versionData?.dependencies?.[frontendComponentLibrary?.type];
     const basicRes = await axios.create({
-        baseURL: `http:${envData?.STATIC_URL}`,
+        baseURL: utils.normalizeUrl(envData?.STATIC_URL),
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
     }).get(`/packages/${frontendComponentLibrary.name}@${frontendComponentLibraryInfo.version}/dist-theme/usage.json?t=${Date.now()}`);
@@ -198,7 +202,7 @@ async function genFrontendBundle({ app, frontend, config }) {
         process.exit();
     }
     fs.writeJSONSync(path.join(__dirname, `../platform.json`), {
-        platform: domain,
+        platform: utils.normalizeUrl(domain),
     }, { spaces: 4 });
     console.log(chalk.red('文件生成成功！！！'));
     console.log(chalk.green(`开发环境域名：${domain}`));

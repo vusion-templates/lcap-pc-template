@@ -1,5 +1,6 @@
 import axios from 'axios';
 import cryptoJS from 'crypto-js';
+import chalk from 'chalk';
 
 export const utils = {
     platform: undefined,
@@ -42,7 +43,8 @@ export const utils = {
             const { headers = {} } = loginRes;
             authorization = headers.authorization;
         } catch (error) {
-            console.error('getAuthorization error :', error);
+            console.log(chalk.red('平台认证失败，请检查平台地址、用户名和密码是否正确！'));
+            process.exit();
         }
         this.authorization = authorization;
         return authorization;
@@ -122,5 +124,11 @@ export const utils = {
             padding: cryptoJS.pad.Pkcs7,
         });
         return encrypted.toString(); // base64结果
+    },
+    normalizeUrl(url) {
+        if (!(/^https?:\/\//i.test(url))) {
+            url = 'http:' + (url.startsWith('//') ? '' : '//') + url;
+        }
+        return url;
     },
 };
