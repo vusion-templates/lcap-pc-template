@@ -69,13 +69,15 @@ export const utils = {
         }) || {};
         return res?.data?.result || {};
     },
-    async batchQuery(appId) {
+    async batchQuery({ appId, baseVersion, versionChangedTime }) {
         const res = await this.pfAxios.post('/proxy/nasl-storage/api/storage/batchQuery', [{
             path: 'app',
         }], {
             headers: {
                 appid: appId,
                 Cookie: `authorization=${this.authorization}`,
+                'request-appBaseVersion': baseVersion || '',
+                'request-versionChangedTime': versionChangedTime || '',
             },
             body: [
                 {
@@ -84,6 +86,29 @@ export const utils = {
             ],
         }) || {};
         return res;
+    },
+    async getFrontendReleaseInfo({
+        env,
+        appId,
+    }) {
+        const res = await this.pfAxios.get('/api/v1/app/frontend', {
+            params: {
+                env,
+            },
+            headers: {
+                appId,
+                Cookie: `authorization=${this.authorization}`,
+            },
+        }) || {};
+        return res?.data?.result || {};
+    },
+    async getEnv() {
+        const res = await this.pfAxios.get('/api/v1/env/config', {
+            headers: {
+                Cookie: `authorization=${this.authorization}`,
+            },
+        }) || {};
+        return res?.data?.result || {};
     },
     /**
      * 认证信息加密

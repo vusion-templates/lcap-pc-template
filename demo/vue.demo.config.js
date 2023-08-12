@@ -2,8 +2,6 @@ const platformJson = require('./platform.json');
 
 const J_MAIN_TARGET = platformJson.platform;
 
-console.log(J_MAIN_TARGET);
-
 module.exports = {
     devServer: {
         headers: {
@@ -18,6 +16,21 @@ module.exports = {
                 autoRewrite: true,
             },
             '/rest': {
+                target: J_MAIN_TARGET,
+                changeOrigin: true,
+                autoRewrite: true,
+            },
+            '^/gateway/': {
+                target: J_MAIN_TARGET,
+                changeOrigin: true,
+                autoRewrite: true,
+            },
+            '^/gw/': {
+                target: J_MAIN_TARGET,
+                changeOrigin: true,
+                autoRewrite: true,
+            },
+            '^/upload/': {
                 target: J_MAIN_TARGET,
                 changeOrigin: true,
                 autoRewrite: true,
