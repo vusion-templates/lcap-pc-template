@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.6.0",
+  "version": "0.5.1",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "gen:bundle": "node --experimental-modules demo/gen/index.mjs",
@@ -121,11 +121,7 @@
     "cloud-admin-template-sdk": true,
     "vue-cli-plugin-vusion": true
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
+  "husky": {},
   "lint-staged": {
     "*.{js,vue}": [
       "npm run lint -- --fix",
