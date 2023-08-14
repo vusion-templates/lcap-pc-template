@@ -431,7 +431,10 @@ export const utils = {
         const res = [];
         const vis = new Set();
         for (const item of arr) {
-            const hash = listGetVal.map(async (fn) => await fn(item)).join('');
+            // eslint-disable-next-line no-return-await
+            const hashArr = listGetVal.map(async (fn) => await fn(item));
+            // eslint-disable-next-line no-await-in-loop
+            const hash = (await Promise.all(hashArr)).join('');
             if (!vis.has(hash)) {
                 vis.add(hash);
                 res.push(item);
