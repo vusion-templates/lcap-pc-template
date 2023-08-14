@@ -396,28 +396,27 @@ export const utils = {
         }
         return res;
     },
-    async ListDistinctByAsync(arr, getVal) {
-        // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        if (!Array.isArray(arr) || typeof getVal !== 'function') {
-            return null;
-        }
-        if (arr.length === 0) {
-            return arr;
-        }
+    // async ListDistinctByAsync(arr, getVal) {
+    //     // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
+    //     if (!Array.isArray(arr) || typeof getVal !== 'function') {
+    //         return null;
+    //     }
+    //     if (arr.length === 0) {
+    //         return arr;
+    //     }
 
-        const res = [];
-        const vis = new Set();
-        for (const item of arr) {
-            const hash = await getVal(item);
-            if (!vis.has(hash)) {
-                vis.add(hash);
-                res.push(item);
-            }
-        }
-        return res;
-    },
-    ListDistinctByAsync(arr, listGetVal) {
-        console.log('--------ListDistinctByAsync--------');
+    //     const res = [];
+    //     const vis = new Set();
+    //     for (const item of arr) {
+    //         const hash = await getVal(item);
+    //         if (!vis.has(hash)) {
+    //             vis.add(hash);
+    //             res.push(item);
+    //         }
+    //     }
+    //     return res;
+    // },
+    async ListDistinctByAsync(arr, listGetVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
         // listGetVal: getVal 这样的函数组成的 list
 
@@ -432,7 +431,7 @@ export const utils = {
         const res = [];
         const vis = new Set();
         for (const item of arr) {
-            const hash = listGetVal.map((fn) => fn(item)).join('');
+            const hash = listGetVal.map(async (fn) => await fn(item)).join('');
             if (!vis.has(hash)) {
                 vis.add(hash);
                 res.push(item);
