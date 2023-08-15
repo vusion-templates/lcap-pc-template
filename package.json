@@ -112,7 +112,7 @@
     "uuid": "^7.0.3",
     "vue": "^2.6.12",
     "vue-i18n": "^8.28.2",
-    "vue-router": "^3.1.2",
+    "vue-router": "^3.5.2",
     "vue-template-compiler": "^2.6.12"
   },
   "forceUpdate": {
