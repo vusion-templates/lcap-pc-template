@@ -11,7 +11,7 @@ function tryJSONParse(str) {
     return result;
 }
 
-const typeDefinitionMap = new Map();
+export const typeDefinitionMap = new Map();
 const typeMap = new Map();
 
 // 生成typeKey
@@ -58,7 +58,7 @@ export function genSortedTypeKey(typeAnnotation) {
 }
 
 // 生成构造函数
-function genConstructor(typeKey, definition) {
+function genConstructor(typeKey, definition, Vue) {
     if (typeMap[typeKey]) {
         return typeMap[typeKey];
     } else {
@@ -159,17 +159,17 @@ function genConstructor(typeKey, definition) {
             });
         }
         // eslint-disable-next-line no-new-func
-        const fn = Function('params', code);
+        const fn = Function('Vue', 'params', code).bind(null, Vue);
         typeMap[typeKey] = fn;
         return fn;
     }
 }
 
 // 初始化整个应用的构造器
-export function initApplicationConstructor(dataTypesMap) {
+export function initApplicationConstructor(dataTypesMap, Vue) {
     if (dataTypesMap) {
         for (const typeKey in dataTypesMap) {
-            genConstructor(typeKey, dataTypesMap[typeKey]);
+            genConstructor(typeKey, dataTypesMap[typeKey], Vue);
         }
     }
 }
@@ -303,7 +303,7 @@ const isDefPrimitive = (typeKey) => [
 ].includes(typeKey);
 
 // 类型定义是否属于字符串大类
-const isDefString = (typeKey) => [
+export const isDefString = (typeKey) => [
     'nasl.core.String',
     'nasl.core.Text',
     'nasl.core.Binary',
@@ -314,7 +314,7 @@ const isDefString = (typeKey) => [
 ].includes(typeKey);
 
 // 类型定义是否属于数字大类
-const isDefNumber = (typeKey) => [
+export const isDefNumber = (typeKey) => [
     'nasl.core.Integer',
     'nasl.core.Long',
     'nasl.core.Double',
@@ -322,13 +322,13 @@ const isDefNumber = (typeKey) => [
 ].includes(typeKey);
 
 // 类型定义是否属于数组
-const isDefList = (typeDefinition) => {
+export const isDefList = (typeDefinition) => {
     const { typeKind, typeNamespace, typeName } = typeDefinition || {};
     return typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'List';
 };
 
 // 类型定义是否属于Map
-const isDefMap = (typeDefinition) => {
+export const isDefMap = (typeDefinition) => {
     const { typeKind, typeNamespace, typeName } = typeDefinition || {};
     return typeKind === 'generic' && typeNamespace === 'nasl.collection' && typeName === 'Map';
 };
