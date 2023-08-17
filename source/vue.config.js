@@ -33,7 +33,7 @@ module.exports = {
                 changeOrigin: true,
                 autoRewrite: true,
             },
-            '^/upload/': {
+            '^/upload': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
                 autoRewrite: true,
