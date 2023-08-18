@@ -54,7 +54,7 @@ export default {
             frontendVariables,
             // 加
             add(x, y) {
-                if (typeof (x) !== 'number' || typeof (y) !== 'number') {
+                if (typeof x !== 'number' || typeof y !== 'number') {
                     return x + y;
                 }
                 if (!x) {
@@ -161,6 +161,39 @@ export default {
             exitFullscreen() {
                 return document.exitFullscreen();
             },
+            /**
+             * 比较键盘事件
+             * @param {KeyboardEvent} event
+             * @param {String[]} target
+             */
+            compareKeyboardInput(event, target) {
+                // 将target转event
+                const targetEvent = { altKey: false, ctrlKey: false, metaKey: false, shiftKey: false, code: '' };
+                target.forEach((item) => {
+                    if (item === 'Alt') {
+                        targetEvent.altKey = true;
+                    } else if (item === 'Meta') {
+                        targetEvent.metaKey = true;
+                    } else if (item === 'Control') {
+                        targetEvent.ctrlKey = true;
+                    } else if (item === 'Shift') {
+                        targetEvent.shiftKey = true;
+                    } else {
+                        targetEvent.code = item;
+                    }
+                });
+
+                let isMatch = true;
+                for (const key in targetEvent) {
+                    if (Object.hasOwnProperty.call(targetEvent, key)) {
+                        if (targetEvent[key] !== event[key]) {
+                            isMatch = false;
+                        }
+                    }
+                }
+
+                return isMatch;
+            },
             encryptByAES({ string: message }, key = aesKey) {
                 const keyHex = CryptoJS.enc.Utf8.parse(key); //
                 const messageHex = CryptoJS.enc.Utf8.parse(message);
@@ -229,19 +262,19 @@ export default {
                 const R = 6371; // Radius of the earth in km
                 const dLat = deg2rad(lat2t - lat1t); // deg2rad below
                 const dLon = deg2rad(lng2t - lng1t);
-                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                    + Math.cos(deg2rad(lat1t)) * Math.cos(deg2rad(lat2t)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1t)) * Math.cos(deg2rad(lat2t)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                 const d = R * c; // Distance in km
                 return d * 1000;
             },
             logout() {
-                Vue.prototype.$confirm({
-                    content: '确定退出登录吗？',
-                    title: '提示',
-                    okButton: '确定',
-                    cancelButton: '取消',
-                })
+                Vue.prototype
+                    .$confirm({
+                        content: '确定退出登录吗？',
+                        title: '提示',
+                        okButton: '确定',
+                        cancelButton: '取消',
+                    })
                     .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
                         cookie.erase('authorization');
@@ -250,21 +283,25 @@ export default {
                     });
             },
             async downloadFile(url, fileName) {
-                await ioInitService().downloadFiles({
-                    body: {
-                        urls: [url],
-                        fileName,
-                    },
-                }).then((res) => Promise.resolve(res))
+                await ioInitService()
+                    .downloadFiles({
+                        body: {
+                            urls: [url],
+                            fileName,
+                        },
+                    })
+                    .then((res) => Promise.resolve(res))
                     .catch((err) => Promise.resolve(err));
             },
             async downloadFiles(urls, fileName) {
-                await ioInitService().downloadFiles({
-                    body: {
-                        urls,
-                        fileName,
-                    },
-                }).then((res) => Promise.resolve(res))
+                await ioInitService()
+                    .downloadFiles({
+                        body: {
+                            urls,
+                            fileName,
+                        },
+                    })
+                    .then((res) => Promise.resolve(res))
                     .catch((err) => Promise.resolve(err));
             },
             async getCustomConfig(configKey = '') {
@@ -448,4 +485,3 @@ export default {
         Vue.prototype.$resolveRequestData = resolveRequestData;
     },
 };
-
