@@ -220,7 +220,8 @@ export const utils = {
             return null;
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem != null && elem != undefined);
-        return 0 == nullRemoved.length ? null : utils.ListSum(nullRemoved) / nullRemoved.length;
+        return 0 == nullRemoved.length ? null :
+                new Decimal(utils.ListSum(nullRemoved)).div(nullRemoved.length).toNumber();
     },
     ListMax: (arr) => {
         if (!Array.isArray(arr)) {

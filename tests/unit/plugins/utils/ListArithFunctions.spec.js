@@ -42,6 +42,7 @@ describe('Arithmetic functions', () => {
         expect(utils.ListAverage([null,1.5,2.5,3.5])).toBe(2.5);
         expect(utils.ListAverage([-1.1,null,null,-2.2])).toBe(-1.65);
         expect(utils.ListProduct([-1.1,null,null,-2.2])).toBe(2.42);
+        expect(utils.ListAverage([0.2, 0.2, 0.2, null, null])).toBe(0.2);
     })
 });
 
