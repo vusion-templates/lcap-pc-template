@@ -446,13 +446,13 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
                 && !['primitive', 'union'].includes(typeKind)
                 && concept !== 'Enum'
             ) {
-                let instance = new TypeConstructor({
+                if (concept === 'Structure' && Object.prototype.toString.call(parsedValue) === '[object Object]') {
+                    parsedValue = jsonNameReflection(properties, parsedValue);
+                }
+                const instance = new TypeConstructor({
                     defaultValue: parsedValue,
                     level,
                 });
-                if (concept === 'Structure') {
-                    instance = jsonNameReflection(properties, instance);
-                }
                 return instance;
             }
         }
@@ -772,12 +772,14 @@ export function toastAndThrowError(err) {
     throw new Error(err);
 }
 
-function jsonNameReflection(properties, instance) {
+function jsonNameReflection(properties, parsedValue) {
     if (!Array.isArray(properties))
-        return instance;
+        return parsedValue;
     properties.forEach(({ jsonName, name }) => {
-        instance[`${jsonName}1`] = instance[name];
-        delete instance[name];
+        if (jsonName === name)
+            return;
+        parsedValue[jsonName] = parsedValue[name];
+        delete parsedValue[name];
     });
-    return instance;
+    return parsedValue;
 }
