@@ -778,8 +778,8 @@ function jsonNameReflection(properties, parsedValue) {
     properties.forEach(({ jsonName, name }) => {
         if (jsonName === name)
             return;
-        parsedValue[jsonName] = parsedValue[name];
-        delete parsedValue[name];
+        parsedValue[name] = parsedValue[jsonName];
+        delete parsedValue[jsonName];
     });
     return parsedValue;
 }
