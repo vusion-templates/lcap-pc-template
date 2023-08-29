@@ -776,7 +776,7 @@ function jsonNameReflection(properties, parsedValue) {
     if (!Array.isArray(properties))
         return parsedValue;
     properties.forEach(({ jsonName, name }) => {
-        if (jsonName === name)
+        if (jsonName === name || jsonName === undefined || jsonName === null || jsonName === '')
             return;
         parsedValue[name] = parsedValue[jsonName];
         delete parsedValue[jsonName];
