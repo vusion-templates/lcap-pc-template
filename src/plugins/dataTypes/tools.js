@@ -143,7 +143,7 @@ function genConstructor(typeKey, definition, Vue) {
                     }
                 }
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
-                    parsedValue = `'${parsedValue}'`;
+                    parsedValue = `\`${parsedValue.replace(/['"`\\]/g, (m) => `\\${m}`)}\``;
                 }
                 const needGenInitFromSchema = typeAnnotation && !['primitive', 'union'].includes(typeAnnotation.typeKind);
                 const sortedTypeKey = genSortedTypeKey(typeAnnotation);
