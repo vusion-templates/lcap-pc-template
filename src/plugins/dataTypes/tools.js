@@ -755,9 +755,8 @@ export const fromString = (variable, typeKey) => {
         };
         const numberVar = +variable;
         if (
-            numberVar === 0
-            || (numberVar > 0 && numberVar < maxMap[typeName])
-            || (numberVar < 0 && numberVar > -maxMap[typeName])
+            numberVar < maxMap[typeName]
+            && numberVar > -maxMap[typeName]
         ) {
             return numberVar;
         }
