@@ -501,15 +501,21 @@ export const utils = {
     AlterDateTime(dateString, option, count, unit) {
         const date = new Date(dateString);
         const amount = option === 'Increase' ? count : -count;
+        let addDate;
         switch (unit) {
-            case 'second': return addSeconds(date, amount);
-            case 'minute': return addMinutes(date, amount);
-            case 'hour': return addHours(date, amount);
-            case 'day': return addDays(date, amount);
-            case 'week': return addWeeks(date, amount);
-            case 'month': return addMonths(date, amount);
-            case 'quarter': return addQuarters(date, amount);
-            case 'year': return addYears(date, amount);
+            case 'second': addDate = addSeconds(date, amount); break;
+            case 'minute': addDate = addMinutes(date, amount); break;
+            case 'hour': addDate = addHours(date, amount); break;
+            case 'day': addDate = addDays(date, amount); break;
+            case 'week': addDate = addWeeks(date, amount); break;
+            case 'month': addDate = addMonths(date, amount); break;
+            case 'quarter': addDate = addQuarters(date, amount); break;
+            case 'year': addDate = addYears(date, amount); break;
+        }
+        if (typeof dateString === 'object' || dateString.includes('T')) {
+            return format(addDate, 'yyyy-MM-dd HH:mm:ss');
+        } else {
+            return format(addDate, 'yyyy-MM-dd');
         }
     },
     GetSpecificDaysOfWeek(startDateString, endDateString, arr) {
