@@ -28,7 +28,7 @@ export default {
 
         initApplicationConstructor(dataTypesMap, Vue);
 
-        const genInitFromSchema = (typeKey, defaultValue, level) => genInitData(typeKey, defaultValue, level);
+        const genInitFromSchema = (typeKey, defaultValue, helpInfo) => genInitData(typeKey, defaultValue, helpInfo);
 
         /**
          * read datatypes from template, then parse schema

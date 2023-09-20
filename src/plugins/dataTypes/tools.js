@@ -101,7 +101,7 @@ function genConstructor(typeKey, definition, Vue) {
             }
         }
         let code = `
-            const level = params.level;
+            const helpInfo = params.helpInfo;
             const defaultValue = params.defaultValue;
             // 默认值是个对象
             if (defaultValue && Object.prototype.toString.call(defaultValue) === '[object Object]') {
@@ -153,7 +153,7 @@ function genConstructor(typeKey, definition, Vue) {
                 }
                 code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined) ? ${parsedValue} : defaultValue && defaultValue.${propertyName}`;
                 if (needGenInitFromSchema) {
-                    code += `, level)`;
+                    code += `, helpInfo)`;
                 }
                 code += `;\n`;
             });
@@ -372,18 +372,30 @@ const isTypeMatch = (typeKey, value) => {
  * 基础类型不再进初始化方法
  * @param {*} typeKey
  * @param {*} defaultValue
- * @param {*} parentLevel
+ * @param {*} helpInfo
  * @returns
  */
-export const genInitData = (typeKey, defaultValue, parentLevel) => {
+export const genInitData = (typeKey, defaultValue, helpInfo) => {
+    if (!helpInfo) {
+        helpInfo = {
+            instanceMap: new Map(),
+        };
+    }
+    // 避免循环引用
+    const { instanceMap } = helpInfo;
+    if (defaultValue && instanceMap.has(defaultValue)) {
+        return instanceMap.get(defaultValue);
+    }
     // 已经实例化过的值，直接返回
     if (isInstanceOf(defaultValue, typeKey)) {
+        defaultValue && instanceMap.set(defaultValue, defaultValue);
         return defaultValue;
     }
     let level = 1;
-    if (parentLevel !== undefined) {
-        level = parentLevel + 1;
+    if (helpInfo.level !== undefined) {
+        level = helpInfo.level + 1;
     }
+    helpInfo.level = level;
     const defaultValueType = Object.prototype.toString.call(defaultValue);
     let parsedValue = defaultValue;
     // 设置成null，才能同步给后端清除该值，但是null对checkbox组件是一种特殊状态
@@ -411,7 +423,8 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         }
     }
     if (level > 2 && [undefined, null].includes(parsedValue)) {
-        return;
+        defaultValue && instanceMap.set(defaultValue, undefined);
+        return undefined;
     }
     const isTypeMatched = parsedValue === undefined || isTypeMatch(typeKey, parsedValue);
     if (isTypeMatched) {
@@ -421,16 +434,18 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
             && ['List', 'Map'].includes(typeName)
         ) { // 特殊范型List/Map
             let initVal = (typeName === 'List' ? [] : {});
+            defaultValue && instanceMap.set(defaultValue, initVal);
             if (parsedValue) {
                 // valueTypeAnnotation可能会由于一些情况出现空，因此不能加上对typeArguments数组的整体容错判断
                 const valueTypeAnnotation = typeName === 'List' ? typeArguments?.[0] : typeArguments?.[1];
                 const sortedTypeKey = genSortedTypeKey(valueTypeAnnotation);
                 if (typeName === 'List' && Array.isArray(parsedValue)) {
-                    initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, level));
+                    initVal = parsedValue.map((item) => genInitData(sortedTypeKey, item, helpInfo));
+                    defaultValue && instanceMap.set(defaultValue, initVal);
                 } else if (typeName === 'Map') {
                     for (const key in parsedValue) {
                         const val = parsedValue[key];
-                        initVal[key] = genInitData(sortedTypeKey, val, level);
+                        initVal[key] = genInitData(sortedTypeKey, val, helpInfo);
                     }
                 }
             }
@@ -449,15 +464,23 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
                 if (concept === 'Structure' && Object.prototype.toString.call(parsedValue) === '[object Object]') {
                     parsedValue = jsonNameReflection(properties, parsedValue);
                 }
+                defaultValue && instanceMap.set(defaultValue, defaultValue);
+                const instanceTemp = new TypeConstructor({
+                    defaultValue: parsedValue,
+                    helpInfo,
+                });
+                defaultValue && instanceMap.set(defaultValue, instanceTemp);
                 const instance = new TypeConstructor({
                     defaultValue: parsedValue,
-                    level,
+                    helpInfo,
                 });
+                defaultValue && instanceMap.set(defaultValue, instance);
                 return instance;
             }
         }
     }
     if (parsedValue !== undefined) {
+        defaultValue && instanceMap.set(defaultValue, parsedValue);
         return parsedValue;
     }
 };
