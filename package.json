@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.7.0",
+  "version": "0.9.0",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "gen:bundle": "node --experimental-modules demo/gen/index.mjs",
@@ -108,6 +108,7 @@
     "event-hooks-webpack-plugin": "^2.1.6",
     "i-material-design.vue": "^5.1.0",
     "lodash": "^4.17.15",
+    "moment-timezone": "^0.5.43",
     "qs": "^6.8.0",
     "request-pre": "^0.4.3",
     "uuid": "^7.0.3",

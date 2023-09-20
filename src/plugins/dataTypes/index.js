@@ -12,16 +12,6 @@ import { porcessPorts } from '../router/processService';
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 
-// // 获取真实值
-// function getActualValue(value) {
-//    let actualValue = value;
-//    const { __isPrimitive, value: primitiveVal } = value || {};
-//    if (__isPrimitive) {
-//        actualValue = primitiveVal;
-//    }
-//    return actualValue;
-// }
-
 export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
