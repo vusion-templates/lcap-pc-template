@@ -504,7 +504,8 @@ export const toString = (variable, typeKey, tabSize = 0) => {
             const maxLen = 8;
             if (count >= maxLen) {
                 // 去掉+是为了跟后端保持统一
-                str = (+variable)?.toExponential?.().replace?.('e+', 'e');
+                // str = (+variable)?.toExponential?.().replace?.('e+', 'e');
+                str = variable;
             }
         }
         // 日期处理
