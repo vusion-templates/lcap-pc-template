@@ -93,7 +93,10 @@ export const utils = {
         }
     },
     Split(str, seperator) {
-        return str && str.split(seperator);
+        if (Object.prototype.toString.call(str) === '[object String]') {
+            return str.split(seperator);
+        }
+        return [];
     },
     Join(arr, seperator) {
         if (Array.isArray(arr)) {
