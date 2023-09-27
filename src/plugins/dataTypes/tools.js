@@ -1,11 +1,14 @@
 import { format, formatISO } from 'date-fns';
 import { UToast } from 'cloud-ui.vusion';
-
+import { NaslInteger, NaslDecimal } from './packingType.js';
+window.NaslInteger = NaslInteger;
+window.NaslDecimal = NaslDecimal;
 function tryJSONParse(str) {
     let result;
 
     try {
         result = JSON.parse(str);
+        // JSON.parse('3.00') 3
     } catch (e) { }
 
     return result;
@@ -13,7 +16,7 @@ function tryJSONParse(str) {
 
 export const typeDefinitionMap = new Map();
 const typeMap = new Map();
-
+window.$typeMap = typeMap;
 // 生成typeKey
 export function genSortedTypeKey(typeAnnotation) {
     const {
@@ -58,7 +61,7 @@ export function genSortedTypeKey(typeAnnotation) {
 }
 
 // 生成构造函数
-function genConstructor(typeKey, definition) {
+function genConstructor(typeKey, definition, Vue) {
     if (typeMap[typeKey]) {
         return typeMap[typeKey];
     } else {
@@ -115,6 +118,24 @@ function genConstructor(typeKey, definition) {
                     typeAnnotation,
                     defaultValue,
                 } = property || {};
+                if (defaultValue === '3.00') {
+                    console.log('property: ', property);
+                }
+                // 这里要改 ：  这里是字符串 defaultValue: '3.00',  在下边tryJSONParse 字符串 变成了 数字3
+                // 这里可以拿到  typeKind: 'primitive',typeName: 'Decimal', 特殊处理 Decimal 和long 等数字类型
+                // 不使用jsonparse 而是自己解析 字符串表示的数字类型
+                function parseNumberValue(defaultValue, property) {
+                    // 返回字符串
+                    const typeAnnotation = property.typeAnnotation;
+                    const str = defaultValue;
+                    if (typeAnnotation.typeKind === 'primitive' && ['Decimal', 'Long'].includes(typeAnnotation.typeName)) {
+                        console.log('defaultValue: ', defaultValue);
+                        return str;
+                    } else {
+                        return tryJSONParse(defaultValue) ?? defaultValue;
+                    }
+                }
+
                 const defaultValueType = Object.prototype.toString.call(defaultValue);
                 const typeKey = genSortedTypeKey(typeAnnotation);
                 const typeDefinition = typeDefinitionMap[typeKey];
@@ -139,11 +160,12 @@ function genConstructor(typeKey, definition) {
                     if ([''].includes(defaultValue)) {
                         parsedValue = undefined;
                     } else {
-                        parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+                        // parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
+                        parsedValue = parseNumberValue(defaultValue, property);
                     }
                 }
                 if (Object.prototype.toString.call(parsedValue) === '[object String]') {
-                    parsedValue = `'${parsedValue}'`;
+                    parsedValue = `\`${parsedValue.replace(/['"`\\]/g, (m) => `\\${m}`)}\``;
                 }
                 const needGenInitFromSchema = typeAnnotation && !['primitive', 'union'].includes(typeAnnotation.typeKind);
                 const sortedTypeKey = genSortedTypeKey(typeAnnotation);
@@ -159,17 +181,17 @@ function genConstructor(typeKey, definition) {
             });
         }
         // eslint-disable-next-line no-new-func
-        const fn = Function('params', code);
+        const fn = Function('Vue', 'params', code).bind(null, Vue);
         typeMap[typeKey] = fn;
         return fn;
     }
 }
 
 // 初始化整个应用的构造器
-export function initApplicationConstructor(dataTypesMap) {
+export function initApplicationConstructor(dataTypesMap, Vue) {
     if (dataTypesMap) {
         for (const typeKey in dataTypesMap) {
-            genConstructor(typeKey, dataTypesMap[typeKey]);
+            genConstructor(typeKey, dataTypesMap[typeKey], Vue);
         }
     }
 }
@@ -376,6 +398,10 @@ const isTypeMatch = (typeKey, value) => {
  * @returns
  */
 export const genInitData = (typeKey, defaultValue, parentLevel) => {
+    // 已经实例化过的值，直接返回
+    if (isInstanceOf(defaultValue, typeKey)) {
+        return defaultValue;
+    }
     let level = 1;
     if (parentLevel !== undefined) {
         level = parentLevel + 1;
@@ -387,7 +413,7 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         parsedValue = defaultValue ?? undefined;
     }
     const typeDefinition = typeDefinitionMap[typeKey];
-    const { concept, typeKind, typeNamespace, typeName, typeArguments } = typeDefinition || {};
+    const { concept, typeKind, typeNamespace, typeName, typeArguments, properties } = typeDefinition || {};
     if (
         defaultValueType === '[object String]'
         && (
@@ -442,6 +468,9 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
                 && !['primitive', 'union'].includes(typeKind)
                 && concept !== 'Enum'
             ) {
+                if (concept === 'Structure' && Object.prototype.toString.call(parsedValue) === '[object Object]') {
+                    parsedValue = jsonNameReflection(properties, parsedValue);
+                }
                 const instance = new TypeConstructor({
                     defaultValue: parsedValue,
                     level,
@@ -487,9 +516,14 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
     let str = '';
     const isPrimitive = isDefPrimitive(typeKey);
     if (isPrimitive) { // 基础类型
+        // todo: 这里需要改  variable 是【object object】
         str = '' + variable;
         // >=8位有效数字时，按小e
         if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) {
+            if (variable instanceof NaslDecimal) {
+                str = '' + variable.value.toString();
+            }
+
             const varArr = str.split('.');
             let count = 0;
             varArr.forEach((varStr) => {
@@ -724,7 +758,7 @@ function isValidDate(dateString, reg) {
 
 export const fromString = (variable, typeKey) => {
     const typeDefinition = typeDefinitionMap[typeKey];
-    const isPrimitive = isDefPrimitive(typeKey, isPrimitive);
+    const isPrimitive = isDefPrimitive(typeKey);
     const { typeName } = typeDefinition || {};
     // 日期
     if (typeName === 'DateTime' && isValidDate(variable, DateTimeReg)) {
@@ -747,7 +781,10 @@ export const fromString = (variable, typeKey) => {
             Long: 9223372036854775807,
         };
         const numberVar = +variable;
-        if ((numberVar > 0 && numberVar < maxMap[typeName]) || (numberVar < 0 && numberVar > -maxMap[typeName])) {
+        if (
+            numberVar < maxMap[typeName]
+            && numberVar > -maxMap[typeName]
+        ) {
             return numberVar;
         }
     }
@@ -763,4 +800,16 @@ export function toastAndThrowError(err) {
     // 全局提示toast
     UToast?.error(err);
     throw new Error(err);
+}
+
+function jsonNameReflection(properties, parsedValue) {
+    if (!Array.isArray(properties))
+        return parsedValue;
+    properties.forEach(({ jsonName, name }) => {
+        if (jsonName === name || jsonName === undefined || jsonName === null || jsonName === '')
+            return;
+        parsedValue[name] = parsedValue[jsonName];
+        delete parsedValue[jsonName];
+    });
+    return parsedValue;
 }
