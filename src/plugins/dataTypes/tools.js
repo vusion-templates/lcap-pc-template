@@ -608,13 +608,21 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
                     if (typeName === 'List') {
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const arrStr = variable.map((varItem) => `${indent(tabSize + 1)}${toString(varItem, itemTypeKey, tabSize + 1, collection)}`).join(',\n');
-                        str = `[\n${arrStr}\n${indent(tabSize)}]`;
+                        if (variable.length) {
+                            str = `[\n${arrStr}\n${indent(tabSize)}]`;
+                        } else {
+                            str = '[]';
+                        }
                     } else if (typeName === 'Map') {
                         const keys = Object.keys(variable);
                         const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
                         const arrStr = keys.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1, collection)} -> ${toString(variable[key], itemTypeKey, tabSize + 1, collection)}`).join(',\n');
-                        str = `{\n${arrStr}\n${indent(tabSize)}}`;
+                        if (keys.length) {
+                            str = `{\n${arrStr}\n${indent(tabSize)}}`;
+                        } else {
+                            str = '{}';
+                        }
                     }
                 } else {
                     // 处理一些范型数据结构的情况
