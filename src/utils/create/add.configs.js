@@ -12,8 +12,17 @@ function httpCode(response, params, requestInfo) {
     }
     const data = response.data; // cloneDeep(response.data, (value) => value === null ? undefined : value);
     const code = data.code || data.Code;
+    const noRepeatHrefChange = (path) => {
+        if (!location.pathname.includes(path)) {
+            location.href = path;
+        }
+    };
     if ((code === undefined) || (code === 'Success') || (code + '').startsWith('2')) {
         return response;
+    } else if (String(code) === '401') {
+        noRepeatHrefChange('/login');
+    } else if (String(code) === '403') {
+        noRepeatHrefChange('/noAuth');
     }
     return Promise.reject({
         code,
