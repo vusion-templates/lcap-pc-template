@@ -44,6 +44,9 @@ export default {
             options.frontendVariables.forEach((frontendVariable) => {
                 const { name, typeAnnotation, defaultValue, localCache } = frontendVariable;
                 localCache && localCacheVariableSet.add(name); // 本地存储的全局变量集合
+                if (`${defaultValue}` == 'undefined' || `${defaultValue}` == 'null') {
+                    defaultValue = '';
+                }
                 frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
             });
         }
