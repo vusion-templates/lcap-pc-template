@@ -639,14 +639,14 @@ export const utils = {
     },
     CurrDate(tz) {
         if (!tz) {
-            return null;
+            return this.CurrDate('global');
         }
         const localDate = convertJSDateInTargetTimeZone(new Date(), tz);
         return moment(localDate).format('YYYY-MM-DD');
     },
     CurrTime(tz) {
         if (!tz) {
-            return null;
+            return this.CurrTime('global');
         }
         const localDate = convertJSDateInTargetTimeZone(new Date(), tz);
         return moment(localDate).format('HH:mm:ss');
@@ -789,7 +789,7 @@ export const utils = {
             return '-';
         }
         if (!tz) {
-            return null;
+            return this.FormatDateTime(value, formatter, 'global');
         }
         const date = convertJSDateInTargetTimeZone(value, tz);
         return dateFnsFormat(date, formatter);
@@ -876,14 +876,14 @@ export const utils = {
         }
         return value;
     },
-    ToString(value, typeKey, tz) {
+    ToString(typeKey, value, tz) {
         // v3.3 老应用升级的场景，使用全局配置（全局配置一般默认是‘用户时区’）
         // v3.4 新应用，使用默认时区时选项，tz 为空
         if (typeKey === 'nasl.core.DateTime' && !tz) {
-            return toString(value, typeKey, 'global');
+            return toString(typeKey, value, 'global');
         } else {
             // v3.4 新应用，指定了默认值之外的时区选项，必然有时区参数 tz
-            return toString(value, typeKey, getAppTimezone(tz));
+            return toString(typeKey, value, getAppTimezone(tz));
         }
     },
     FromString(value, typeKey) {

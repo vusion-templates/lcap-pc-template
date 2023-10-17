@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.9.0",
+  "version": "0.8.1",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "gen:bundle": "node --experimental-modules demo/gen/index.mjs",
