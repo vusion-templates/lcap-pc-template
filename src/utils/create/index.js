@@ -9,7 +9,6 @@ import { instance } from './errHandles';
 import { getFilenameFromContentDispositionHeader } from './tools';
 import paramsSerializer from './paramsSerializer';
 import { formatMicroFrontUrl } from '@/plugins/router/microFrontUrl';
-import { getAppTimezone } from '@/plugins/utils/timezone';
 
 const formatContentType = function (contentType, data) {
     const map = {
@@ -117,8 +116,8 @@ const requester = function (requestInfo) {
     if (window.appInfo?.frontendName)
         headers['LCAP-FRONTEND'] = window.appInfo?.frontendName;
 
-    // 时区信息，默认是user
-    headers.TimeZone = getAppTimezone();
+    // 用户本地时区信息，传递给后端
+    headers.TimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     if (config.download) {
         return download(url);
