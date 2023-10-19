@@ -67,46 +67,6 @@ export const httpError = {
     },
 };
 
-export const httpErrorCustom = {
-    reject(err, params, requestInfo) {
-        const errHandles = window.errHandles;
-        const { url, config = {} } = requestInfo;
-        const { method, body = {}, headers = {} } = url;
-        // 处理code
-        if (err === 'expired request') {
-            throw err;
-        }
-        let handle;
-        if (!err.response) {
-            handle = errHandles.remoteError;
-        } else if (err.code === undefined) {
-            if (err.response) {
-                const code = err.response.data && (err.response.data.code || err.response.data.Code);
-                if (typeof code === 'number') {
-                    const status = err.response.status;
-                    handle = errHandles[code] || errHandles[status] || errHandles.remoteError;
-                } else {
-                    handle = errHandles.remoteError;
-                }
-            } else {
-                handle = errHandles.remoteError;
-            }
-        } else {
-            const code = err.response && err.response.status || err.code;
-            handle = errHandles[code];
-            if (!handle)
-                handle = errHandles.defaults;
-        }
-        const handleOut = handle({
-            config, baseURL: (config.baseURL || ''), url, method, body, headers,
-        }, err.response && err.response.data || err);
-
-        if (isPromise(handleOut))
-            return handleOut;
-
-        throw err;
-    },
-};
 export function addConfigs(service) {
     if (process.env.NODE_ENV === 'development') {
         service.preConfig.set('baseURL', (requestInfo, baseURL) => {

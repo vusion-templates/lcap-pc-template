@@ -28,8 +28,11 @@ const parseCookie = (str) =>
             return acc;
         }, {});
 const foramtCookie = (cookieStr) => {
-    const obj = parseCookie(cookieStr);
     const result = {};
+    if (document.cookie.length <= 0) {
+        return result;
+    }
+    const obj = parseCookie(cookieStr);
     Object.keys(obj).forEach((key) => {
         result[key] = {
             name: key,
@@ -42,6 +45,7 @@ const foramtCookie = (cookieStr) => {
             maxAge: '',
         };
     });
+    return result;
 };
 
 /**
@@ -112,8 +116,8 @@ const requester = function (requestInfo) {
     if (window.appInfo?.frontendName)
         headers['LCAP-FRONTEND'] = window.appInfo?.frontendName;
 
-    // 时区信息，默认是user
-    headers.TimeZone = window.appInfo?.appTimeZone || 'user';
+    // 用户本地时区信息，传递给后端
+    headers.TimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     if (config.download) {
         return download(url);
@@ -214,20 +218,11 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
                     return Promise.reject();
                 }
                 const status = 'success';
-                console.log('自定义接口请求后事件 success: ', response);
                 const { config } = requestInfo;
                 const serviceType = config?.serviceType;
                 if (serviceType && serviceType === 'external') {
                     return response;
                 }
-                // const data = response.data;
-                // const code = data.code || data.Code;
-                // if ((code === undefined) || (code === 'Success') || (code + '').startsWith('2')) {
-                //     return response;
-                // }
-                // 这里是200return responese 给下一个  else reject 给下一个
-                // 需要改写为一个函数里 处理这两种情况 : 不行错误是强制写在另一个钩子里的
-
                 const HttpResponse = {
                     status: response.status + '',
                     body: JSON.stringify(response.data),
@@ -240,7 +235,6 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
         });
         service.postConfig.set('postRequestError', {
             reject(response, params, requestInfo) {
-                console.log('自定义接口请求后事件 fail: ', response);
                 response.Code = response.code || response.status;
                 const status = 'error';
                 const err = response;

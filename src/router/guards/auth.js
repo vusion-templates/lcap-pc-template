@@ -39,26 +39,8 @@ export function filterAuthResources(resources) {
     };
     return resources.filter((item) => isValidPath(item.resourceValue));
 }
+
 export const getAuthGuard = (router, routes, authResourcePaths, appConfig, baseResourcePaths) => async (to, from, next) => {
-    const userInfo = Vue.prototype.$global.userInfo || {};
-    const $auth = Vue.prototype.$auth;
-    const redirectedFrom = parsePath(to.redirectedFrom);
-    const toPath = redirectedFrom?.path || to.path;
-    const toQuery = to.query;
-    const authPath = authResourcePaths.find((authResourcePath) => {
-        if (authResourcePath === toPath || `${authResourcePath}/` === toPath) {
-            return true;
-        }
-        return false;
-    });
-
-    function concatResourcesRoutes(resources, baseRoutes) {
-        return resources.concat(baseRoutes.map((route) => ({
-            resourceValue: route,
-            // 如果后续需要区分路由类型，这里也需要补充 resourceType
-        })));
-    }
-
     function addAuthRoutes(resources) {
         if (Array.isArray(resources) && resources.length) {
             const userResourcePaths = (resources || []).map((resource) => resource?.resourceValue || resource?.ResourceValue);
@@ -73,8 +55,27 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig, baseR
             });
         }
     }
+    function concatResourcesRoutes(resources, baseRoutes) {
+        return resources.concat(baseRoutes.map((route) => ({
+            resourceValue: route,
+            // 如果后续需要区分路由类型，这里也需要补充 resourceType
+        })));
+    }
+
+    const userInfo = Vue.prototype.$global.userInfo || {};
+    const $auth = Vue.prototype.$auth;
+    const redirectedFrom = parsePath(to.redirectedFrom);
+    const toPath = redirectedFrom?.path || to.path;
+    const toQuery = to.query;
+    const authPath = authResourcePaths.find((authResourcePath) => {
+        if (authResourcePath === toPath || `${authResourcePath}/` === toPath) {
+            return true;
+        }
+        return false;
+    });
 
     const noAuthView = findNoAuthView(routes);
+
     if (authPath) {
         if (!$auth.isInit()) {
             if (!userInfo.UserId) {

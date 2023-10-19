@@ -1,11 +1,13 @@
-export const getAppTimezone = () => {
+export const getAppTimezone = (inputTz) => {
     const _appTimeZone = window?.appInfo?.appTimeZone;
-    const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    // 用户本地时区
-    if (_appTimeZone === 'user' || !_appTimeZone) {
-        return localTimeZone;
+    const tz = inputTz === 'global' ? _appTimeZone : inputTz;
+
+    if (tz && tz !== 'user') {
+        // 指定的固定的时区
+        return tz;
     } else {
-        return _appTimeZone;
+        // 用户本地时区，包括 tz 是 null 的场景
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 };
 

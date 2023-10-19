@@ -12,7 +12,7 @@ import App from './App.vue';
 import { filterRoutes, parsePath } from '@/utils/route';
 import { getBasePath } from '@/utils/encodeUrl';
 import { filterAuthResources, findNoAuthView } from '@/router/guards/auth';
-
+import { instance } from '@/utils/create/errHandles';
 window.appVue = Vue;
 window.Vue = Vue;
 window.CloudUI = CloudUI;
@@ -35,10 +35,6 @@ Vue.mixin(CloudUI.MPubSub);
 
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
 const init = (appConfig, platformConfig, routes, metaData) => {
-    // console.log('appConfig: ', appConfig);
-    // console.log('platformConfig: ', platformConfig);
-    // console.log('routes: ', routes);
-    // console.log('metaData: ', metaData);
     // 应用初始化之前 不能访问应用中的任何逻辑
     evalWrap.bind(window)(metaData, 'rendered');
     ['preRequest', 'postRequest'].forEach((fnName) => {
@@ -83,6 +79,12 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             console.error(err);
         }
     };
+    if (window?.rendered) {
+        if (!window?.$toast) {
+            window.$toast = instance;
+        }
+        window.rendered();
+    }
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
     const authResourcePaths = platformConfig.authResourcePaths || [];
     const baseRoutes = filterRoutes(routes, null, (route, ancestorPaths) => {
@@ -100,24 +102,23 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     const fnName = 'beforeRouter';
     if (fnName && metaData.frontendEvents[fnName]) {
         evalWrap.bind(window)(metaData, fnName);
-        console.log(fnName, window[fnName]);
         Vue.prototype[fnName] = window[fnName];
     }
     const beforeRouter = Vue.prototype.beforeRouter;
-    const getAuthGuard = (router, routes, authResourcePaths, appConfig, beforeRouter) => async (to, from, next) => {
+    const getAuthGuard = (router, routes, authResourcePaths, appConfig, baseResourcePaths, beforeRouter) => async (to, from, next) => {
         try {
             if (beforeRouter) {
                 const event = {
+                    baseResourcePaths,
                     router, routes, authResourcePaths, appConfig, beforeRouter,
                     to, from, next, parsePath, getBasePath, filterAuthResources, findNoAuthView, filterRoutes,
                 };
-                console.log('自定义beforeRouter: ', event);
                 await beforeRouter(event);
             }
         } catch (err) { }
         next();
     };
-    beforeRouter && router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, window.beforeRouter));
+    beforeRouter && router.beforeEach(getAuthGuard(router, routes, authResourcePaths, appConfig, baseResourcePaths, window.beforeRouter));
     router.beforeEach(getTitleGuard(appConfig));
     router.beforeEach(microFrontend);
 
@@ -135,7 +136,6 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             const fnName = fnList[index];
             if (fnName && metaData.frontendEvents[fnName]) {
                 evalWrap.bind(app)(metaData, fnName);
-                console.log(fnName, window[fnName]);
                 Vue.prototype[fnName] = window[fnName];
             }
         }
