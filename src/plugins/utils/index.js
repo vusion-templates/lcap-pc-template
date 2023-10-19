@@ -1014,9 +1014,9 @@ export const utils = {
         const hasValue = (value, typeKey) => {
             const typeDefinition = typeDefinitionMap[typeKey] || {};
 
-            if (['nasl.core.Null'].includes(value) || value === undefined || value === null) {
+            if (['nasl.core.Null'].includes(typeKey) || value === undefined || value === null) {
                 return false;
-            } else if (['nasl.core.Boolean'].includes(value) || value === true || value === false) {
+            } else if (['nasl.core.Boolean'].includes(typeKey) || value === true || value === false) {
                 return true;
             } else if (isDefString(typeKey)) {
                 return value.trim() !== '';
@@ -1032,7 +1032,8 @@ export const utils = {
                 return !isNaN(value);
             } else if (Array.isArray(value)) {
                 return value && value.length > 0;
-            } else { // structure/entity
+            } else {
+                // structure/entity
                 return !Object.keys(value).every((key) => {
                     const v = value[key];
                     return v === null || v === undefined;
@@ -1043,7 +1044,7 @@ export const utils = {
         let isValid = true;
 
         for (let i = 0; i < values.length; i += 1) {
-            const { value, type } = values[i];
+            const { value, type } = values[i] || {};
 
             if (!hasValue(value, type)) {
                 isValid = false;
