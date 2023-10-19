@@ -117,8 +117,8 @@ function genConstructor(typeKey, definition, Vue) {
                 const {
                     name: propertyName,
                     typeAnnotation,
-                    defaultValue,
                 } = property || {};
+                const defaultValue = property.defaultCode;
                 const defaultValueType = Object.prototype.toString.call(defaultValue);
                 const typeKey = genSortedTypeKey(typeAnnotation);
                 const typeDefinition = typeDefinitionMap[typeKey];
