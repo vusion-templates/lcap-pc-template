@@ -114,18 +114,18 @@ export const utils = {
             // v3.3 老应用升级的场景，UTC 零时区，零时区展示上用 'Z'，后向兼容
             // v3.4 新应用，使用默认时区时选项，tz 为空
             if (!tz) {
-                const d = momentTZ.tz(v, 'UTC').format('YYYY-MM-DDTHH:mm:ss') + 'Z';
+                const d = momentTZ.tz(v, 'UTC').format('YYYY-MM-DDTHH:mm:ss.SSS') + 'Z';
                 return JSON.stringify(d);
             }
             // 新应用，设置为零时区，零时区展示上用 'Z'，后向兼容.
             if (tz === 'UTC') {
                 // TODO: 想用 "+00:00" 展示零时区
-                const d = momentTZ.tz(v, 'UTC').format('YYYY-MM-DDTHH:mm:ss') + 'Z';
+                const d = momentTZ.tz(v, 'UTC').format('YYYY-MM-DDTHH:mm:ss.SSS') + 'Z';
                 return JSON.stringify(d);
             }
             // 新应用，设置为其他时区
             if (tz) {
-                const d = momentTZ.tz(v, getAppTimezone(tz)).format('YYYY-MM-DDTHH:mm:ssZ');
+                const d = momentTZ.tz(v, getAppTimezone(tz)).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                 return JSON.stringify(d);
             }
         } else if (typeof v === 'string' && /^\d{2}:\d{2}:\d{2}$/.test(v)) {
