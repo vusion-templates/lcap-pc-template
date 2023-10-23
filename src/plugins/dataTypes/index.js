@@ -327,6 +327,22 @@ export default {
                 });
                 return res;
             },
+            setI18nLocale(newLocale) {
+                console.log('setI18nLocale', newLocale, this);
+                // 修改local中的存储的语言标识
+                localStorage.i18nLocale = newLocale;
+                // 修改当前template的语言
+                $global.i18nInfo.locale = newLocale;
+                // 调用UI库更新当前语言
+                $i18n.locale = newLocale;
+            },
+            getI18nList() {
+                // 在ide中拼接好
+                return this.$global.i18nInfo.I18nList;
+            },
+            getUserLanguage() {
+                return navigator.language || navigator.userLanguage;
+            },
         };
         Object.keys(porcessPorts).forEach((service) => {
             $global[service] = porcessPorts[service];
@@ -396,8 +412,7 @@ export default {
         Vue.prototype.$isLooseEqualFn = isLooseEqualFn;
         const enumsMap = options.enumsMap || {};
         Vue.prototype.$enums = (key, value) => {
-            if (!key || !value)
-                return '';
+            if (!key || !value) return '';
             if (enumsMap[key]) {
                 return enumsMap[key][value];
             } else {
@@ -445,8 +460,7 @@ export default {
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
         function resolveRequestData(root) {
-            if (!root)
-                return;
+            if (!root) return;
             // console.log(root.concept)
             delete root.folded;
 

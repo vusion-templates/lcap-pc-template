@@ -21,10 +21,6 @@ const evalWrap = function (metaData, fnName) {
     // eslint-disable-next-line no-eval
     metaData && fnName && metaData?.frontendEvents[fnName] && eval(metaData.frontendEvents[fnName]);
 };
-Vue.use(VueI18n);
-Vue.i18n = new VueI18n({
-    locale: localStorage.i18nLocale || 'zh-CN',
-});
 
 // 预览沙箱不需要调用init来初始化，但是需要使用到CloudUI和Vant组件，所以放在外边
 installOptions(Vue);
@@ -122,12 +118,16 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     router.beforeEach(getTitleGuard(appConfig));
     router.beforeEach(microFrontend);
 
+    const i18nInfo = appConfig.i18nInfo;
+    const i18n = new VueI18n({
+        locale: localStorage.i18nLocale || i18nInfo.locale || 'zh-CN',
+        messages: i18nInfo.messages,
+    });
+
     const app = new Vue({
         name: 'app',
         router,
-        i18n: {
-            locale: localStorage.i18nLocale || 'zh-CN',
-        },
+        i18n,
         ...App,
     });
 
