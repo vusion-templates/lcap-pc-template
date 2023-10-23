@@ -40,6 +40,8 @@ export default {
         const $global = {
             // 用户信息
             userInfo: {},
+            // 国际化信息
+            i18nInfo: {},
             // 前端全局变量
             frontendVariables,
             // 加
@@ -328,17 +330,16 @@ export default {
                 return res;
             },
             setI18nLocale(newLocale) {
-                console.log('setI18nLocale', newLocale, this);
                 // 修改local中的存储的语言标识
                 localStorage.i18nLocale = newLocale;
                 // 修改当前template的语言
                 $global.i18nInfo.locale = newLocale;
                 // 调用UI库更新当前语言
-                $i18n.locale = newLocale;
+                Vue.$i18n.locale = newLocale;
             },
             getI18nList() {
                 // 在ide中拼接好
-                return this.$global.i18nInfo.I18nList;
+                return $global.i18nInfo.I18nList;
             },
             getUserLanguage() {
                 return navigator.language || navigator.userLanguage;
