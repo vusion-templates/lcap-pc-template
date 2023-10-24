@@ -334,12 +334,14 @@ export default {
                 localStorage.i18nLocale = newLocale;
                 // 修改当前template的语言
                 $global.i18nInfo.locale = newLocale;
+                // 修改当前语言名称
+                $global.i18nInfo.localeName = this.getI18nList().find((item) => item.id === newLocale)?.name;
                 // 调用UI库更新当前语言
                 appVM.$i18n.locale = newLocale;
             },
             getI18nList() {
                 // 在ide中拼接好
-                return $global.i18nInfo.I18nList;
+                return $global.i18nInfo.I18nList || [];
             },
             getUserLanguage() {
                 return navigator.language || navigator.userLanguage;

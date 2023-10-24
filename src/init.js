@@ -51,6 +51,15 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     installFilters(Vue, filters);
     installComponents(Vue, Components);
 
+    // 处理当前语言
+    const locale = localStorage.i18nLocale || i18nInfo.locale || 'zh-CN'
+    if (appConfig.i18nInfo) {
+        // 重置当前生效语言
+        appConfig.i18nInfo.locale = locale;
+        // 设置当前语言名称
+        appConfig.i18nInfo.localeName = appConfig.i18nInfo?.I18nList?.find((item) => item.id === locale)?.name;
+    }
+
     Vue.use(LogicsPlugin, metaData);
     Vue.use(RouterPlugin);
     Vue.use(ServicesPlugin, metaData);
@@ -120,7 +129,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
 
     const i18nInfo = appConfig.i18nInfo;
     const i18n = new VueI18n({
-        locale: localStorage.i18nLocale || i18nInfo.locale || 'zh-CN',
+        locale: locale,
         messages: i18nInfo.messages,
     });
 
