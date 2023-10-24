@@ -15,7 +15,7 @@ const aesKey = ';Z#^$;8+yhO!AhGo';
 export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
-
+        const i18nInfo = options.i18nInfo || {};
         initApplicationConstructor(dataTypesMap, Vue);
 
         const genInitFromSchema = (typeKey, defaultValue, level) => genInitData(typeKey, defaultValue, level);
@@ -41,7 +41,7 @@ export default {
             // 用户信息
             userInfo: {},
             // 国际化信息
-            i18nInfo: {},
+            i18nInfo: i18nInfo,
             // 前端全局变量
             frontendVariables,
             // 加

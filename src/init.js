@@ -55,7 +55,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     Vue.use(RouterPlugin);
     Vue.use(ServicesPlugin, metaData);
     Vue.use(AuthPlugin);
-    Vue.use(DataTypesPlugin, metaData);
+    Vue.use(DataTypesPlugin, { ...metaData, i18nInfo: appConfig.i18nInfo });
     Vue.use(UtilsPlugin, metaData);
 
     // 已经获取过权限接口
