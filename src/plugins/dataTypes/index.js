@@ -335,7 +335,7 @@ export default {
                 // 修改当前template的语言
                 $global.i18nInfo.locale = newLocale;
                 // 调用UI库更新当前语言
-                Vue.$i18n.locale = newLocale;
+                appVM.appVM.$i18n.locale = newLocale;
             },
             getI18nList() {
                 // 在ide中拼接好
