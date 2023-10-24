@@ -1,5 +1,8 @@
 import { format, formatISO } from 'date-fns';
 import { UToast } from 'cloud-ui.vusion';
+import { getAppTimezone } from '../utils/timezone';
+const momentTZ = require('moment-timezone');
+const moment = require('moment');
 
 function tryJSONParse(str) {
     let result;
@@ -24,7 +27,8 @@ export function genSortedTypeKey(typeAnnotation) {
     if (typeKind === 'union') { // 联合类型
         if (Array.isArray(typeArguments)) {
             // 按返回的每个具体项排序
-            const childTypeArgs = typeArguments.map((typeArg) => genSortedTypeKey(typeArg)).sort((name1, name2) => name1 > name2 ? 1 : -1);
+            const childTypeArgs = typeArguments.map((typeArg) =>
+                    genSortedTypeKey(typeArg)).sort((name1, name2) => name1 > name2 ? 1 : -1);
             typeKeyArr.push(childTypeArgs.join(' | '));
         }
     } else if (typeKind === 'anonymousStructure') { // 匿名数据结构
@@ -223,7 +227,7 @@ export function isInstanceOf(variable, typeKey) {
                 return actualStrType === typeKey;
             } else if (
                 [
-                    'nasl.core.String', 'nasl.core.Text', 'nasl.core.Binary',
+                    'nasl.core.String', 'nasl.core.Binary',
                 ].includes(typeKey)
             ) {
                 return true;
@@ -231,7 +235,7 @@ export function isInstanceOf(variable, typeKey) {
         } else if (
             varStr === '[object Number]'
             && [
-                'nasl.core.Integer', 'nasl.core.Long', 'nasl.core.Double',
+                'nasl.core.Long',
                 'nasl.core.Decimal',
             ].includes(typeKey)
         ) {
@@ -289,9 +293,7 @@ export function isInstanceOf(variable, typeKey) {
 // 类型定义是否属于基础类型
 const isDefPrimitive = (typeKey) => [
     'nasl.core.Boolean',
-    'nasl.core.Integer',
     'nasl.core.Long',
-    'nasl.core.Double',
     'nasl.core.Decimal',
     'nasl.core.String',
     'nasl.core.Text',
@@ -315,9 +317,7 @@ export const isDefString = (typeKey) => [
 
 // 类型定义是否属于数字大类
 export const isDefNumber = (typeKey) => [
-    'nasl.core.Integer',
     'nasl.core.Long',
-    'nasl.core.Double',
     'nasl.core.Decimal',
 ].includes(typeKey);
 
@@ -437,8 +437,10 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
             return initVal;
         }
         if (typeName === 'DateTime' && parsedValue !== undefined) {
-            const date = new Date(parsedValue);
-            parsedValue = formatISO(date, { format: 'extended', fractionDigits: 3 });
+            if (parsedValue instanceof Date) {
+                parsedValue = moment(Date).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+            }
+            return parsedValue;
         } else if (typeKey) {
             const TypeConstructor = typeMap[typeKey];
             if (
@@ -475,11 +477,12 @@ function indent(tabSize) {
  * 变量转字符串
  * @param {*} variable
  * @param {*} typeKey
+ * @param {*} timeZone
  * @param {*} tabSize
  * @param {Set} collection 收集的已处理的对象
  * @returns
  */
-export const toString = (variable, typeKey, tabSize = 0, collection = new Set()) => {
+export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Set()) => {
     if (variable instanceof Error) {
         return variable;
     }
@@ -509,9 +512,10 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
                 str = variable;
             }
         }
-        // 日期处理
+
+        // 日期时间处理
         if (typeKey === 'nasl.core.Date') {
-            str = format(new Date(variable), 'yyyy-MM-dd');
+            str = momentTZ.tz(new Date(variable), getAppTimezone(tz)).format('YYYY-MM-DD');
         } else if (typeKey === 'nasl.core.Time') {
             const timeRegex = /^([01]?\d|2[0-3])(?::([0-5]?\d)(?::([0-5]?\d))?)?$/;
             // 纯时间 12:30:00
@@ -539,12 +543,12 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
                     }
                     varArr.push(varItem || '00');
                 });
-                str = format(new Date('2022-01-01 ' + varArr.join(':')), formatArr.join(':'));
+                str = momentTZ.tz(new Date('2022-01-01 ' + varArr.join(':')), getAppTimezone(tz)).format(formatArr.join(':'));
             } else {
-                str = format(new Date(variable), 'HH:mm:ss');
+                str = momentTZ.tz(new Date(variable), getAppTimezone(tz).format('HH:mm:ss'));
             }
         } else if (typeKey === 'nasl.core.DateTime') {
-            str = format(new Date(variable), 'yyyy-MM-dd HH:mm:ss');
+            str = momentTZ.tz(new Date(variable), getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss');
         }
         if (tabSize > 0) {
             if (['nasl.core.String', 'nasl.core.Text'].includes(typeKey)) {
@@ -566,7 +570,7 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
             if (Array.isArray(typeArguments) && typeArguments.length) {
                 const typeArg = typeArguments.find((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
                 if (typeArg) {
-                    str = toString(variable, genSortedTypeKey(typeArg), tabSize, collection);
+                    str = toString(genSortedTypeKey(typeArg), variable, tz, tabSize, collection);
                 }
             }
         } else if (concept === 'Enum') {
@@ -607,7 +611,10 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
                 if (typeKind === 'generic' && typeNamespace === 'nasl.collection') {
                     if (typeName === 'List') {
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
-                        const arrStr = variable.map((varItem) => `${indent(tabSize + 1)}${toString(varItem, itemTypeKey, tabSize + 1, collection)}`).join(',\n');
+                        const tmp = variable.map((varItem) => {
+                            return `${indent(tabSize + 1)}${toString(itemTypeKey, varItem, tz, tabSize + 1, collection)}`
+                        });
+                        const arrStr = tmp.join(',\n');
                         if (variable.length) {
                             str = `[\n${arrStr}\n${indent(tabSize)}]`;
                         } else {
@@ -617,7 +624,7 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
                         const keys = Object.keys(variable);
                         const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
-                        const arrStr = keys.map((key) => `${indent(tabSize + 1)}${toString(key, keyTypeKey, tabSize + 1, collection)} -> ${toString(variable[key], itemTypeKey, tabSize + 1, collection)}`).join(',\n');
+                        const arrStr = keys.map((key) => `${indent(tabSize + 1)}${toString(keyTypeKey, key, tz, tabSize + 1, collection)} -> ${toString(itemTypeKey, variable[key], tz, tabSize + 1, collection)}`).join(',\n');
                         if (keys.length) {
                             str = `{\n${arrStr}\n${indent(tabSize)}}`;
                         } else {
@@ -663,7 +670,7 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
                             const { name: propName, typeAnnotation: propTypeAnnotation } = property || {};
                             const propVal = variable[propName];
                             const propTypeKey = genSortedTypeKey(propTypeAnnotation);
-                            const propValStr = toString(propVal, propTypeKey, tabSize + 1, collection);
+                            const propValStr = toString(propTypeKey, propVal, tz, tabSize + 1, collection);
                             return `${indent(tabSize + 1)}${propName}: ${propValStr}`;
                         }).join(',\n');
                     }
@@ -684,7 +691,7 @@ export const toString = (variable, typeKey, tabSize = 0, collection = new Set())
                 const propStr = [];
                 for (const key in variable) {
                     const propVal = variable[key];
-                    const propValStr = toString(propVal, undefined, tabSize + 1, collection);
+                    const propValStr = toString(undefined, propVal, tz, tabSize + 1, collection);
                     propStr.push(`${indent(tabSize + 1)}${key}: ${propValStr}`);
                 }
                 str += propStr.join(',\n');
@@ -748,9 +755,10 @@ export const fromString = (variable, typeKey) => {
         const outputDate = formatISO(date, { format: 'extended', fractionDigits: 3 });
         return outputDate;
     } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
-        return format(new Date(variable), 'yyyy-MM-dd');
+        return (new Date(variable)).format('YYYY-MM-dd');
     } else if (typeName === 'Time' && TimeReg.test(variable)) {
-        return format(new Date('2022-01-01 ' + variable), 'HH:mm:ss');
+        // ???
+        return moment(new Date('2022-01-01 ' + variable)).format('HH:mm:ss');
     }
     // 浮点数
     else if (['Decimal', 'Double'].includes(typeName) && FloatNumberReg.test(variable)) {
