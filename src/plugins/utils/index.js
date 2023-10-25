@@ -251,9 +251,9 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null :
-                nullRemoved.reduce((prev, cur) =>
-                    // decimal 可解决 0.1 + 0.2 的精度问题，下同
-                    new Decimal(cur + '').plus(prev), new Decimal('0')).toNumber();
+            nullRemoved.reduce((prev, cur) =>
+                // decimal 可解决 0.1 + 0.2 的精度问题，下同
+                new Decimal(cur + '').plus(prev), new Decimal('0')).toNumber();
     },
     ListProduct: (arr) => {
         if (!Array.isArray(arr)) {
@@ -261,8 +261,8 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null :
-                nullRemoved.reduce((prev, cur) =>
-                    new Decimal(cur + '').mul(prev), new Decimal('1')).toNumber();
+            nullRemoved.reduce((prev, cur) =>
+                new Decimal(cur + '').mul(prev), new Decimal('1')).toNumber();
     },
     ListAverage: (arr) => {
         if (!Array.isArray(arr)) {
@@ -270,7 +270,7 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null :
-                new Decimal(utils.ListSum(nullRemoved)).div(nullRemoved.length).toNumber();
+            new Decimal(utils.ListSum(nullRemoved)).div(nullRemoved.length).toNumber();
     },
     ListMax: (arr) => {
         if (!Array.isArray(arr)) {
@@ -278,7 +278,7 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null :
-                nullRemoved.reduce((prev, cur) => prev >= cur ? prev : cur, nullRemoved[0]);
+            nullRemoved.reduce((prev, cur) => prev >= cur ? prev : cur, nullRemoved[0]);
     },
     ListMin: (arr) => {
         if (!Array.isArray(arr)) {
@@ -286,7 +286,7 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null :
-                nullRemoved.reduce((prev, cur) => prev <= cur ? prev : cur, nullRemoved[0]);
+            nullRemoved.reduce((prev, cur) => prev <= cur ? prev : cur, nullRemoved[0]);
     },
     ListReverse(arr) {
         if (Array.isArray(arr)) {
@@ -782,6 +782,7 @@ export const utils = {
         if (!value) {
             return '-';
         }
+
         return dateFormatter.format(naslDateToLocalDate(value), formatter);
     },
     FormatDateTime(value, formatter, tz) {
