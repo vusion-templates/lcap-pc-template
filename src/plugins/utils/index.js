@@ -13,10 +13,10 @@ import {
     differenceInSeconds,
     getDayOfYear, getWeekOfMonth, getQuarter, startOfWeek, getMonth, getWeek, getDate, startOfQuarter,
     addSeconds, addMinutes, addHours, addQuarters, addYears, addWeeks,
-    eachDayOfInterval, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday, parseISO,
-    format as dateFnsFormat,
+    eachDayOfInterval, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday
 } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
+import { dateFormatter } from '@/plugins/Formatters';
 
 const moment = require('moment');
 const momentTZ = require('moment-timezone');
@@ -782,7 +782,8 @@ export const utils = {
         if (!value) {
             return '-';
         }
-        return dateFnsFormat(naslDateToLocalDate(value), formatter);
+
+        return dateFormatter.format(naslDateToLocalDate(value), formatter);
     },
     FormatDateTime(value, formatter, tz) {
         if (!value) {
@@ -792,7 +793,7 @@ export const utils = {
             return this.FormatDateTime(value, formatter, 'global');
         }
         const date = convertJSDateInTargetTimeZone(value, tz);
-        return dateFnsFormat(date, formatter);
+        return dateFormatter.format(date, formatter);
     },
     Clone(obj) {
         return cloneDeep(obj);
