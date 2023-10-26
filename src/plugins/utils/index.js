@@ -408,7 +408,9 @@ export const utils = {
     // 随着 PageOf 失效，可删除
     ListSliceToPageOf(arr, page, size) {
         if (Array.isArray(arr) && page) {
-            const content = arr.slice((page - 1) * size, size);
+            const start = (page - 1) * size;
+            const end = start + size;
+            const content = arr.slice(start, end);
             const total = arr.length;
             const totalPages = Math.ceil(total / size);
             return {
@@ -426,7 +428,9 @@ export const utils = {
     },
     SliceToListPage(arr, page, size) {
         if (Array.isArray(arr) && page) {
-            const list = arr.slice((page - 1) * size, size);
+            const start = (page - 1) * size;
+            const end = start + size;
+            const list = arr.slice(start, end);
             const total = arr.length;
             return { list, total };
         } else {
