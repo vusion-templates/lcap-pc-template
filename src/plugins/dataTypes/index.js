@@ -44,6 +44,10 @@ export default {
             frontendVariables,
             // 加
             add(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    // 支持高精度和number/string相加 不限制被加数
+                    return x.add(y);
+                }
                 if (typeof x !== 'number' || typeof y !== 'number') {
                     return x + y;
                 }
@@ -59,6 +63,9 @@ export default {
             },
             // 减
             minus(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return x.minus(y);
+                }
                 if (!x) {
                     x = 0;
                 }
@@ -71,6 +78,9 @@ export default {
             },
             // 乘
             multiply(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return x.multiply(y);
+                }
                 if (!x) {
                     x = 0;
                 }
@@ -83,6 +93,9 @@ export default {
             },
             // 除
             divide(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return x.divide(y);
+                }
                 if (!x) {
                     x = 0;
                 }
@@ -95,39 +108,54 @@ export default {
             },
             // 相等
             isEqual(x, y) {
-                // eslint-disable-next-line eqeqeq
-                return x == y;
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return x.equals(y);
+                }
+                if (!x || !y) {
+                    return false;
+                } else {
+                    // eslint-disable-next-line eqeqeq
+                    return x == y;
+                }
             },
             // // 不相等
-            // isNotEqual(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX != actualY;
-            // },
-            // // 大于
-            // isGreater(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX > actualY;
-            // },
-            // // 大于等于
-            // isGreaterOrEqual(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX >= actualY;
-            // },
-            // // 小于
-            // isLess(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX < actualY;
-            // },
-            // // 小于等于
-            // isLessOrEqual(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX <= actualY;
-            // },
+            isNotEqual(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return !x.equals(y);
+                }
+            },
+            // 大于
+            greaterThan(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return !x.gt(y);
+                }
+
+                return x > y;
+            },
+            // 大于等于
+            greaterThanOrEqual(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return !x.gte(y);
+                }
+
+                return x >= y;
+            },
+            // 小于
+            lessThan(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return !x.lt(y);
+                }
+
+                return x < y;
+            },
+            // 小于等于
+            lessThanOrEqual(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return !x.lte(y);
+                }
+
+                return x <= y;
+            },
             // // 与
             // isAnd(x, y) {
             //    const actualX = getActualValue(x);
