@@ -37,7 +37,7 @@ export class NaslDecimal {
     }
 
     set value(v) {
-        if (typeof v === 'string') {
+        if (typeof v === 'string' || typeof v === 'number') {
             this.__value = new Decimal(v);
         } else {
             this.__value = v;
@@ -49,7 +49,6 @@ export class NaslDecimal {
     }
 
     toString() {
-        // const result = window.$utils.ToString(this.value, 'nasl.core.Decimal');
         const result = window.$utils.ToString('nasl.core.Decimal', this.__str || this.value);
         return result;
     }
@@ -187,9 +186,9 @@ export class NaslLong {
     }
 
     set value(v) {
-        if (typeof v === 'string') {
+        if (typeof v === 'string' || typeof v === 'number') {
             // 双向绑定触发 到这里会自动再实例化
-            this.__value = new Long(v);
+            this.__value = Long.fromString(String(v));
         } else {
             this.__value = v;
         }
@@ -200,8 +199,6 @@ export class NaslLong {
     }
 
     toString() {
-        // const result = window.$utils.ToString(this.value, 'nasl.core.Long');
-        // const result = window.$utils.ToString('nasl.core.Long', this.value);
         const result = window.$utils.ToString('nasl.core.Long', this.__str || this.value);
         return result;
     }
@@ -252,7 +249,8 @@ export class NaslLong {
             vStr = v.toString();
             result = operationCb((new NaslLong(v.toString()).value));
         }
-        const resultStr = result.toFixed(Math.max(getPrecision(vStr), precision || getPrecision(this.__str)));
+        // const resultStr = result.toFixed(Math.max(getPrecision(vStr), precision || getPrecision(this.__str)));
+        const resultStr = result.toString();
 
         return new NaslLong(resultStr);
     }

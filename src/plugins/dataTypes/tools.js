@@ -172,7 +172,6 @@ function genConstructor(typeKey, definition, Vue) {
                 }
                 // code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined) ? ${parsedValue} : defaultValue && defaultValue.${propertyName}`;
                 // parsedValue = defaultValue?.expression?.toJS?.() ?? undefined;// 需要看下为啥这里可以用 toJS
-                console.log('parsedValue: ', parsedValue);
 
                 if (isNaslNumber) {
                     const consMap = {
@@ -547,13 +546,10 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
     let str = '';
     const isPrimitive = isDefPrimitive(typeKey);
     if (isPrimitive) { // 基础类型
-        //      todo: 这里需要改  variable 是【object object】
-
         str = '' + variable;
         // >=8位有效数字时，按小e
         if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) {
             if (variable instanceof NaslDecimal) {
-                console.log('NaslDecimal variable: ', variable.value, variable.__str);
                 str = '' + variable.__str; // 这里是为了展示后缀0
             }
             const varArr = str.split('.');
@@ -570,7 +566,7 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
         }
         if (['nasl.core.Integer', 'nasl.core.Long'].includes(typeKey)) {
             if (variable instanceof NaslLong) {
-                str = '' + variable.value.toString();
+                str = '' + variable.__str;
             }
         }
         // 日期时间处理
