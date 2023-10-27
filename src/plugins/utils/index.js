@@ -782,7 +782,6 @@ export const utils = {
         if (!value) {
             return '-';
         }
-
         return dateFormatter.format(naslDateToLocalDate(value), formatter);
     },
     FormatDateTime(value, formatter, tz) {
