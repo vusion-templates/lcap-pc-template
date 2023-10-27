@@ -482,7 +482,7 @@ function indent(tabSize) {
  * @param {Set} collection 收集的已处理的对象
  * @returns
  */
-export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Set()) => {
+export const toReadableString = (typeKey, variable, tz, tabSize = 0, collection = new Set()) => {
     if (variable instanceof Error) {
         return variable;
     }
@@ -570,7 +570,7 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
             if (Array.isArray(typeArguments) && typeArguments.length) {
                 const typeArg = typeArguments.find((typeArg) => isInstanceOf(variable, genSortedTypeKey(typeArg)));
                 if (typeArg) {
-                    str = toString(genSortedTypeKey(typeArg), variable, tz, tabSize, collection);
+                    str = toReadableString(genSortedTypeKey(typeArg), variable, tz, tabSize, collection);
                 }
             }
         } else if (concept === 'Enum') {
@@ -612,7 +612,7 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
                     if (typeName === 'List') {
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const tmp = variable.map((varItem) => {
-                            return `${indent(tabSize + 1)}${toString(itemTypeKey, varItem, tz, tabSize + 1, collection)}`
+                            return `${indent(tabSize + 1)}${toReadableString(itemTypeKey, varItem, tz, tabSize + 1, collection)}`
                         });
                         const arrStr = tmp.join(',\n');
                         if (variable.length) {
@@ -624,7 +624,7 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
                         const keys = Object.keys(variable);
                         const keyTypeKey = genSortedTypeKey(typeArguments?.[0]);
                         const itemTypeKey = genSortedTypeKey(typeArguments?.[1]);
-                        const arrStr = keys.map((key) => `${indent(tabSize + 1)}${toString(keyTypeKey, key, tz, tabSize + 1, collection)} -> ${toString(itemTypeKey, variable[key], tz, tabSize + 1, collection)}`).join(',\n');
+                        const arrStr = keys.map((key) => `${indent(tabSize + 1)}${toReadableString(keyTypeKey, key, tz, tabSize + 1, collection)} -> ${toReadableString(itemTypeKey, variable[key], tz, tabSize + 1, collection)}`).join(',\n');
                         if (keys.length) {
                             str = `{\n${arrStr}\n${indent(tabSize)}}`;
                         } else {
@@ -670,7 +670,7 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
                             const { name: propName, typeAnnotation: propTypeAnnotation } = property || {};
                             const propVal = variable[propName];
                             const propTypeKey = genSortedTypeKey(propTypeAnnotation);
-                            const propValStr = toString(propTypeKey, propVal, tz, tabSize + 1, collection);
+                            const propValStr = toReadableString(propTypeKey, propVal, tz, tabSize + 1, collection);
                             return `${indent(tabSize + 1)}${propName}: ${propValStr}`;
                         }).join(',\n');
                     }
@@ -691,7 +691,7 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
                 const propStr = [];
                 for (const key in variable) {
                     const propVal = variable[key];
-                    const propValStr = toString(undefined, propVal, tz, tabSize + 1, collection);
+                    const propValStr = toReadableString(undefined, propVal, tz, tabSize + 1, collection);
                     propStr.push(`${indent(tabSize + 1)}${key}: ${propValStr}`);
                 }
                 str += propStr.join(',\n');

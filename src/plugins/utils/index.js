@@ -22,7 +22,7 @@ const moment = require('moment');
 const momentTZ = require('moment-timezone');
 
 import Vue from 'vue';
-import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
+import { toReadableString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
@@ -782,7 +782,6 @@ export const utils = {
         if (!value) {
             return '-';
         }
-
         return dateFormatter.format(naslDateToLocalDate(value), formatter);
     },
     FormatDateTime(value, formatter, tz) {
@@ -853,11 +852,9 @@ export const utils = {
     },
     Convert(value, typeAnnotation) {
         if (typeAnnotation && typeAnnotation.typeKind === 'primitive') {
-            if (['DateTime', 'Date', 'Time'].includes(typeAnnotation.typeName)) {
-                return null;
-            }
-            if (typeAnnotation.typeName === 'DateTime')
+            if (typeAnnotation.typeName === 'DateTime'){
                 return formatRFC3339(new Date(value));
+            }
             else if (typeAnnotation.typeName === 'Date')
                 return moment(new Date(value)).format('YYYY-MM-DD');
             else if (typeAnnotation.typeName === 'Time') {
@@ -877,14 +874,15 @@ export const utils = {
         }
         return value;
     },
-    ToString(typeKey, value, tz) {
+    ToString(compilerAdded, value, tz) {
+        const { typeKey } = compilerAdded;
         // v3.3 老应用升级的场景，使用全局配置（全局配置一般默认是‘用户时区’）
         // v3.4 新应用，使用默认时区时选项，tz 为空
         if (typeKey === 'nasl.core.DateTime' && !tz) {
-            return toString(typeKey, value, 'global');
+            return toReadableString(typeKey, value, 'global');
         } else {
             // v3.4 新应用，指定了默认值之外的时区选项，必然有时区参数 tz
-            return toString(typeKey, value, getAppTimezone(tz));
+            return toReadableString(typeKey, value, getAppTimezone(tz));
         }
     },
     FromString(value, typeKey) {
