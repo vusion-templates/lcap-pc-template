@@ -786,7 +786,6 @@ export const utils = {
         if (!value) {
             return '-';
         }
-
         return dateFormatter.format(naslDateToLocalDate(value), formatter);
     },
     FormatDateTime(value, formatter, tz) {
@@ -857,12 +856,9 @@ export const utils = {
     },
     Convert(value, typeAnnotation) {
         if (typeAnnotation && typeAnnotation.typeKind === 'primitive') {
-            if (['DateTime', 'Date', 'Time'].includes(typeAnnotation.typeName)) {
-                return null;
-            }
-            if (typeAnnotation.typeName === 'DateTime')
+            if (typeAnnotation.typeName === 'DateTime') {
                 return formatRFC3339(new Date(value));
-            else if (typeAnnotation.typeName === 'Date')
+            } else if (typeAnnotation.typeName === 'Date')
                 return moment(new Date(value)).format('YYYY-MM-DD');
             else if (typeAnnotation.typeName === 'Time') {
                 if (/^\d{2}:\d{2}:\d{2}$/.test(value)) // 纯时间 12:30:00
