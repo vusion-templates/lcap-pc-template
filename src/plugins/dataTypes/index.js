@@ -48,6 +48,9 @@ export default {
                     // 支持高精度和number/string相加 不限制被加数
                     return x.add(y);
                 }
+                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
+                    y = y.toString();
+                }
                 if (typeof x !== 'number' || typeof y !== 'number') {
                     return x + y;
                 }
@@ -66,6 +69,9 @@ export default {
                 if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
                     return x.minus(y);
                 }
+                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
+                    y = y.toString();
+                }
                 if (!x) {
                     x = 0;
                 }
@@ -80,6 +86,9 @@ export default {
             multiply(x, y) {
                 if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
                     return x.multiply(y);
+                }
+                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
+                    y = y.toString();
                 }
                 if (!x) {
                     x = 0;
@@ -96,6 +105,9 @@ export default {
                 if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
                     return x.divide(y);
                 }
+                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
+                    y = y.toString();
+                }
                 if (!x) {
                     x = 0;
                 }
@@ -105,6 +117,23 @@ export default {
                 const xx = new Decimal(x + '');
                 const yy = new Decimal(y + '');
                 return xx.div(yy).toNumber();
+            },
+            remainder(x, y) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                    return x.mod(y);
+                }
+                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
+                    y = y.toString();
+                }
+                if (!x) {
+                    x = 0;
+                }
+                if (!y) {
+                    y = 0;
+                }
+                const xx = new Decimal(x + '');
+                const yy = new Decimal(y + '');
+                return xx.mod(yy).toNumber(); // 20位
             },
             // 相等
             isEqual(x, y) {

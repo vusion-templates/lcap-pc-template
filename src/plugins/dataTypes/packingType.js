@@ -11,7 +11,7 @@ export class NaslDecimal {
 
     constructor(v) {
         //  兼容 undefined 空 数字 字符串  包装类本身 和其他包装类互转
-        if (v === undefined || !v) {
+        if (v === undefined || v === 'undefined' || !v) {
             v = '0';
         } else if (v instanceof NaslDecimal) {
             this.fixedNum = v.fixedNum;
@@ -158,7 +158,7 @@ export class NaslLong {
 
     constructor(v) {
         //  兼容 undefined 空 数字 2.21 字符串 ‘2.21’ 包装类本身 和其他包装类互转如NaslIneger
-        if (v === undefined || !v) {
+        if (v === undefined || v === 'undefined' || !v) {
             v = '0'; // Decimal 不支持传 空字符串
             // 之前的默认值是 ''  空字符串  我这要是改成空字符串是不是运算有问题
             // 之前的运算'' + ''  ='' 再转number 变成了NaN 保持一致即可

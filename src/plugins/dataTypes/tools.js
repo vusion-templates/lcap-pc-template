@@ -64,7 +64,17 @@ export function genSortedTypeKey(typeAnnotation) {
     }
     return typeKeyArr.join('');
 }
+function parseNumberValue(defaultValue, typeAnnotation) {
+    const { typeKind, typeName } = typeAnnotation;
+    // if (typeAnnotation.typeKind === 'primitive' && ['Decimal', 'Long'].includes(typeAnnotation.typeName)) {
+    const isNaslNumber = typeKind === 'primitive' && ['Decimal', 'Long', 'Double', 'Int'].includes(typeName);
 
+    if (isNaslNumber) {
+        return String(defaultValue);
+    } else {
+        return tryJSONParse(defaultValue) ?? defaultValue;
+    }
+}
 // 生成构造函数
 function genConstructor(typeKey, definition, Vue) {
     if (typeMap[typeKey]) {
@@ -108,6 +118,7 @@ function genConstructor(typeKey, definition, Vue) {
                 }
             }
         }
+
         let code = `
             const level = params.level;
             const defaultValue = params.defaultValue;
@@ -116,6 +127,10 @@ function genConstructor(typeKey, definition, Vue) {
                 Object.assign(this, defaultValue);
             }
         `;
+        // if (isNaslNumber) {
+        //     code += ``;
+        // }
+
         if (Array.isArray(propList)) {
             propList.forEach((property) => {
                 const {
@@ -125,14 +140,7 @@ function genConstructor(typeKey, definition, Vue) {
                 const defaultValue = property.defaultCode;
 
                 const isNaslNumber = typeAnnotation?.typeKind === 'primitive' && ['Decimal', 'Long', 'Double', 'Int'].includes(typeAnnotation?.typeName);
-                function parseNumberValue(defaultValue, property) {
-                    // if (typeAnnotation.typeKind === 'primitive' && ['Decimal', 'Long'].includes(typeAnnotation.typeName)) {
-                    if (isNaslNumber) {
-                        return String(defaultValue);
-                    } else {
-                        return tryJSONParse(defaultValue) ?? defaultValue;
-                    }
-                }
+
                 const defaultValueType = Object.prototype.toString.call(defaultValue);
                 const typeKey = genSortedTypeKey(typeAnnotation);
                 const typeDefinition = typeDefinitionMap[typeKey];
@@ -158,7 +166,7 @@ function genConstructor(typeKey, definition, Vue) {
                         parsedValue = undefined;
                     } else {
                         // parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
-                        parsedValue = parseNumberValue(defaultValue, property);
+                        parsedValue = parseNumberValue(defaultValue, typeAnnotation);
                     }
                 }
                 if (!isNaslNumber && Object.prototype.toString.call(parsedValue) === '[object String]') {
@@ -455,8 +463,8 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
         if ([''].includes(defaultValue)) {
             parsedValue = undefined;
         } else {
-            parsedValue = tryJSONParse(defaultValue) !== undefined ? tryJSONParse(defaultValue) : defaultValue;
-            // parsedValue = parseNumberValue(defaultValue, property);
+            // parsedValue = tryJSONParse(defaultValue) !== undefined ? tryJSONParse(defaultValue) : defaultValue;
+            parsedValue = parseNumberValue(defaultValue, typeDefinition);
         }
     }
     if (level > 2 && [undefined, null].includes(parsedValue)) {
@@ -546,7 +554,8 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
     let str = '';
     const isPrimitive = isDefPrimitive(typeKey);
     if (isPrimitive) { // 基础类型
-        str = '' + variable;
+        // str = '' + variable;
+        str = String(variable);
         // >=8位有效数字时，按小e
         if (['nasl.core.Double', 'nasl.core.Decimal'].includes(typeKey)) {
             if (variable instanceof NaslDecimal) {
@@ -752,7 +761,7 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
                 str += `\n}`;
             }
         } else {
-            str = '' + variable;
+            str = String(variable);
         }
     }
     return str;
