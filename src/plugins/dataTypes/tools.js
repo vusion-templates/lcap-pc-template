@@ -72,7 +72,7 @@ function parseNumberValue(defaultValue, typeAnnotation) {
     if (isNaslNumber) {
         return String(defaultValue);
     } else {
-        return tryJSONParse(defaultValue) ?? defaultValue;
+        return tryJSONParse(defaultValue) !== undefined ? tryJSONParse(defaultValue) : defaultValue;
     }
 }
 // 生成构造函数

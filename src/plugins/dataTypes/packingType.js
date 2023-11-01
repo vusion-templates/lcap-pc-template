@@ -31,7 +31,7 @@ export class NaslDecimal {
     }
 
     get length() {
-        return this.__str.length;
+        return this.__str?.length || 0;
     }
 
     get value() {
@@ -183,7 +183,7 @@ export class NaslLong {
     }
 
     get length() {
-        return this.__str.length;
+        return this.__str?.length || 0;
     }
 
     get value() {
