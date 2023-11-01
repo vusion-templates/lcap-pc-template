@@ -66,9 +66,7 @@ export function genSortedTypeKey(typeAnnotation) {
 }
 function parseNumberValue(defaultValue, typeAnnotation) {
     const { typeKind, typeName } = typeAnnotation;
-    // if (typeAnnotation.typeKind === 'primitive' && ['Decimal', 'Long'].includes(typeAnnotation.typeName)) {
     const isNaslNumber = typeKind === 'primitive' && ['Decimal', 'Long', 'Double', 'Int'].includes(typeName);
-
     if (isNaslNumber) {
         return String(defaultValue);
     } else {
@@ -190,11 +188,14 @@ function genConstructor(typeKey, definition, Vue) {
                     // ? new NaslDecimal(`\'2.100\'`)
                     parsedValue = String(parsedValue);
                     const consName = consMap[typeAnnotation.typeName];
+                    //  ? new ${consName}('${parsedValue}')
                     code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined)
-                        ? new ${consName}('${parsedValue}')
+                        ? defaultValue && defaultValue.${propertyName}
                         : defaultValue && new ${consName}(defaultValue.${propertyName})`;
                 } else {
-                    code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined) ? ${parsedValue} : defaultValue && defaultValue.${propertyName}`;
+                    code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined)
+                        ? ${parsedValue}
+                        : defaultValue && defaultValue.${propertyName}`;
                 }
                 if (needGenInitFromSchema) {
                     code += `, level)`;
