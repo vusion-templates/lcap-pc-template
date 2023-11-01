@@ -137,7 +137,7 @@ function genConstructor(typeKey, definition, Vue) {
                     name: propertyName,
                     typeAnnotation,
                 } = property || {};
-                const defaultValue = property.defaultCode;
+                const defaultValue = property.defaultValue;
 
                 const isNaslNumber = typeAnnotation?.typeKind === 'primitive' && ['Decimal', 'Long', 'Double', 'Int'].includes(typeAnnotation?.typeName);
 
@@ -165,7 +165,6 @@ function genConstructor(typeKey, definition, Vue) {
                     if ([''].includes(defaultValue)) {
                         parsedValue = undefined;
                     } else {
-                        // parsedValue = tryJSONParse(defaultValue) ?? defaultValue;
                         parsedValue = parseNumberValue(defaultValue, typeAnnotation);
                     }
                 }
@@ -192,7 +191,7 @@ function genConstructor(typeKey, definition, Vue) {
                     parsedValue = String(parsedValue);
                     const consName = consMap[typeAnnotation.typeName];
                     code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined)
-                        ? new ${consName}(${parsedValue})
+                        ? new ${consName}('${parsedValue}')
                         : defaultValue && new ${consName}(defaultValue.${propertyName})`;
                 } else {
                     code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined) ? ${parsedValue} : defaultValue && defaultValue.${propertyName}`;
