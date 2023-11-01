@@ -52,7 +52,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     installComponents(Vue, Components);
 
     // 处理当前语言
-    let locale
+    let locale = 'zh-CN';
     if (appConfig.i18nInfo) {
         locale = localStorage.i18nLocale || appConfig.i18nInfo.locale || 'zh-CN'
         // 如果local里没有就读主应用的默认语言
