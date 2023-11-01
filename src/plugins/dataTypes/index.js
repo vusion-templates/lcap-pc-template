@@ -15,7 +15,7 @@ const aesKey = ';Z#^$;8+yhO!AhGo';
 export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
-
+        const i18nInfo = options.i18nInfo || {};
         initApplicationConstructor(dataTypesMap, Vue);
 
         const genInitFromSchema = (typeKey, defaultValue, level) => genInitData(typeKey, defaultValue, level);
@@ -40,6 +40,8 @@ export default {
         const $global = {
             // 用户信息
             userInfo: {},
+            // 国际化信息
+            i18nInfo: i18nInfo,
             // 前端全局变量
             frontendVariables,
             // 加
@@ -327,6 +329,23 @@ export default {
                 });
                 return res;
             },
+            setI18nLocale(newLocale) {
+                // 修改local中的存储的语言标识
+                localStorage.i18nLocale = newLocale;
+                // 修改当前template的语言
+                $global.i18nInfo.locale = newLocale;
+                // 修改当前语言名称
+                $global.i18nInfo.localeName = this.getI18nList().find((item) => item.id === newLocale)?.name;
+                // 调用UI库更新当前语言
+                appVM.$i18n.locale = newLocale;
+            },
+            getI18nList() {
+                // 在ide中拼接好
+                return $global.i18nInfo.I18nList || [];
+            },
+            getUserLanguage() {
+                return navigator.language || navigator.userLanguage;
+            },
         };
         Object.keys(porcessPorts).forEach((service) => {
             $global[service] = porcessPorts[service];
@@ -396,8 +415,7 @@ export default {
         Vue.prototype.$isLooseEqualFn = isLooseEqualFn;
         const enumsMap = options.enumsMap || {};
         Vue.prototype.$enums = (key, value) => {
-            if (!key || !value)
-                return '';
+            if (!key || !value) return '';
             if (enumsMap[key]) {
                 return enumsMap[key][value];
             } else {
@@ -445,8 +463,7 @@ export default {
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
         function resolveRequestData(root) {
-            if (!root)
-                return;
+            if (!root) return;
             // console.log(root.concept)
             delete root.folded;
 

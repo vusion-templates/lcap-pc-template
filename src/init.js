@@ -21,10 +21,6 @@ const evalWrap = function (metaData, fnName) {
     // eslint-disable-next-line no-eval
     metaData && fnName && metaData?.frontendEvents[fnName] && eval(metaData.frontendEvents[fnName]);
 };
-Vue.use(VueI18n);
-Vue.i18n = new VueI18n({
-    locale: localStorage.i18nLocale || 'zh-CN',
-});
 
 // 预览沙箱不需要调用init来初始化，但是需要使用到CloudUI和Vant组件，所以放在外边
 installOptions(Vue);
@@ -55,11 +51,25 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     installFilters(Vue, filters);
     installComponents(Vue, Components);
 
+    // 处理当前语言
+    let locale = 'zh-CN';
+    if (appConfig.i18nInfo) {
+        locale = localStorage.i18nLocale || appConfig.i18nInfo.locale || 'zh-CN'
+        // 如果local里没有就读主应用的默认语言
+        if (!appConfig.i18nInfo?.messages?.[locale]) {
+            locale = appConfig.i18nInfo.locale || 'zh-CN';
+        }
+        // 重置当前生效语言
+        appConfig.i18nInfo.locale = locale;
+        // 设置当前语言名称
+        appConfig.i18nInfo.localeName = appConfig.i18nInfo?.I18nList?.find((item) => item.id === locale)?.name;
+    }
+
     Vue.use(LogicsPlugin, metaData);
     Vue.use(RouterPlugin);
     Vue.use(ServicesPlugin, metaData);
     Vue.use(AuthPlugin);
-    Vue.use(DataTypesPlugin, metaData);
+    Vue.use(DataTypesPlugin, { ...metaData, i18nInfo: appConfig.i18nInfo });
     Vue.use(UtilsPlugin, metaData);
 
     // 已经获取过权限接口
@@ -122,12 +132,16 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     router.beforeEach(getTitleGuard(appConfig));
     router.beforeEach(microFrontend);
 
+    const i18nInfo = appConfig.i18nInfo;
+    const i18n = new VueI18n({
+        locale: locale,
+        messages: i18nInfo.messages,
+    });
+
     const app = new Vue({
         name: 'app',
         router,
-        i18n: {
-            locale: localStorage.i18nLocale || 'zh-CN',
-        },
+        i18n,
         ...App,
     });
 
