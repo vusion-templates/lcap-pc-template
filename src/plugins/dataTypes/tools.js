@@ -189,8 +189,11 @@ function genConstructor(typeKey, definition, Vue) {
                     parsedValue = String(parsedValue);
                     const consName = consMap[typeAnnotation.typeName];
                     //  ? new ${consName}('${parsedValue}')
+                    // ? defaultValue && defaultValue.${propertyName}
+                    const isNil = (val) => val === undefined || val === null || val === 'undefined' || val === 'null';
+                    const getNilExp = () => isNil(parsedValue) ? `(defaultValue && defaultValue.${propertyName})` : `new ${consName}('${parsedValue}')`;
                     code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined)
-                        ? defaultValue && defaultValue.${propertyName}
+                        ? ${getNilExp()}
                         : defaultValue && new ${consName}(defaultValue.${propertyName})`;
                 } else {
                     code += `((defaultValue && defaultValue.${propertyName}) === null || (defaultValue && defaultValue.${propertyName}) === undefined)
