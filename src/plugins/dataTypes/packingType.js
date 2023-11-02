@@ -176,6 +176,16 @@ export class NaslLong {
             this.__str = v.__str;
             this.value = v.__str; // 用新的包装类在初始化字符串一次
         } else {
+            if (v === true || v === 'true')
+                v = '1';
+            if (v === false || v === 'false')
+                v = '0';
+            if (v instanceof Date) {
+                v = String(+v);
+            }
+            if (v.includes('.') && v.split('.')?.length === 2) {
+                v = v.split('.')[0];
+            }
             this.fixedNum = typeof v === 'string' ? v.length : v.toString().length;
             this.__str = v.toString();
             this.value = v;
@@ -205,8 +215,8 @@ export class NaslLong {
     toString() {
         if (!this.__str || this.__str === undefined)
             return undefined;
-        const result = window.$utils.ToString('nasl.core.Long', this.__str || this.value);
-        return result;
+        const longValue = this.__str.includes('.') ? this.value.toString() : (this.__str || this.value);
+        return window.$utils.ToString('nasl.core.Long', longValue);
     }
 
     toJSON() {
@@ -285,3 +295,4 @@ export class NaslLong {
         return this.value.lte(new NaslLong(target).value);
     }
 }
+
