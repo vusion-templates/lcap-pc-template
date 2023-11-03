@@ -161,6 +161,12 @@ export class NaslLong {
     fixedNum = 0
 
     constructor(v) {
+        if (v === true || v === 'true') {
+            v = '1';
+        }
+        if (v === false || v === 'false') {
+            v = '0';
+        }
         //  兼容 undefined 空 数字 2.21 字符串 ‘2.21’ 包装类本身 和其他包装类互转如NaslIneger
         if (v === undefined || v === 'undefined' || v === 'null' || !v) {
             v = '0'; // Decimal 不支持传 空字符串
@@ -176,16 +182,13 @@ export class NaslLong {
             this.__str = v.__str;
             this.value = v.__str; // 用新的包装类在初始化字符串一次
         } else {
-            if (v === true || v === 'true')
-                v = '1';
-            if (v === false || v === 'false')
-                v = '0';
             if (v instanceof Date) {
                 v = String(+v);
             }
-            if (v.includes('.') && v.split('.')?.length === 2) {
-                v = v.split('.')[0];
+            if (String(v).includes('.') && String(v).split('.')?.length === 2) {
+                v = String(v).split('.')[0];
             }
+
             this.fixedNum = typeof v === 'string' ? v.length : v.toString().length;
             this.__str = v.toString();
             this.value = v;
