@@ -12,8 +12,7 @@ import { porcessPorts } from '../router/processService';
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 const adaptType = (value) => typeof value === 'number' ? value : Number(value);
-const isNumberStr = (str) => /^[0-9.]+$/.test(str);
-
+const isNumberStr = (str) => /^[-+]?\d+(\.\d+)?$/.test(str);
 export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
