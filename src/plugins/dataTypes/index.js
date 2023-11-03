@@ -46,7 +46,10 @@ export default {
             frontendVariables,
             // 加
             add(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong || (isNumberStr(x) && isNumberStr(y))) {
+                if (isNumberStr(x) && isNumberStr(y)) {
+                    x = new window.NaslDecimal(x);
+                }
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
                     // 支持高精度和number/string相加 不限制被加数
                     return x.add(y);
                 }
