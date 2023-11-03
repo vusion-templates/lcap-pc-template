@@ -54,15 +54,27 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     // 处理当前语言
     let locale = 'zh-CN';
     if (appConfig.i18nInfo) {
-        locale = localStorage.i18nLocale || appConfig.i18nInfo.locale || 'zh-CN'
+        const { I18nList, messages } = appConfig?.i18nInfo || {};
+        locale = localStorage.i18nLocale;
         // 如果local里没有就读主应用的默认语言
-        if (!appConfig.i18nInfo?.messages?.[locale]) {
-            locale = appConfig.i18nInfo.locale || 'zh-CN';
+        if (!messages[locale]) {
+            // 如果当前浏览器的设置也没有，就读取主应用的默认语言
+            locale = navigator.language || navigator.userLanguage;
+            if (!messages[locale]) {
+                locale = appConfig.i18nInfo.locale || 'zh-CN';
+            }
         }
         // 重置当前生效语言
         appConfig.i18nInfo.locale = locale;
         // 设置当前语言名称
-        appConfig.i18nInfo.localeName = appConfig.i18nInfo?.I18nList?.find((item) => item.id === locale)?.name;
+        appConfig.i18nInfo.localeName = I18nList?.find((item) => item.id === locale)?.name;
+        // 设置当前语言的翻译信息
+        window.Vue.prototype.$CloudUILang = locale;
+
+        window.Vue.prototype.$CloudUIMessages = {
+            ...window.Vue.prototype.$CloudUIMessages,
+            ...(messages || {}),
+        };
     }
 
     Vue.use(LogicsPlugin, metaData);
