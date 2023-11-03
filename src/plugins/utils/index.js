@@ -434,11 +434,14 @@ export const utils = {
         }
     },
     // 不修改原 list，返回新 list
-    ListDistinctBy(arr, getVal) {
+    ListDistinctBy(arr, listGetVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        if (!Array.isArray(arr) || typeof getVal !== 'function') {
+        // listGetVal: getVal 这样的函数组成的 list
+
+        if (!Array.isArray(arr)) {
             return null;
         }
+        // item => List[item.userName, item.id]
         if (arr.length === 0) {
             return arr;
         }
@@ -446,7 +449,10 @@ export const utils = {
         const res = [];
         const vis = new Set();
         for (const item of arr) {
-            const hash = getVal(item);
+            // eslint-disable-next-line no-return-await
+            const hashArr = listGetVal.map((fn) => fn(item));
+            // eslint-disable-next-line no-await-in-loop
+            const hash = (hashArr).join('');
             if (!vis.has(hash)) {
                 vis.add(hash);
                 res.push(item);
