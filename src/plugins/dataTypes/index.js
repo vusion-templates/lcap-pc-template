@@ -12,6 +12,7 @@ import { porcessPorts } from '../router/processService';
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 const adaptType = (value) => typeof value === 'number' ? value : Number(value);
+const isNumberStr = (str) => /^[0-9.]+$/.test(str);
 
 export default {
     install(Vue, options = {}) {
@@ -45,7 +46,7 @@ export default {
             frontendVariables,
             // 加
             add(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
+                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong || (isNumberStr(x) && isNumberStr(y))) {
                     // 支持高精度和number/string相加 不限制被加数
                     return x.add(y);
                 }
