@@ -338,6 +338,8 @@ export default {
                 $global.i18nInfo.localeName = this.getI18nList().find((item) => item.id === newLocale)?.name;
                 // 调用UI库更新当前语言
                 appVM.$i18n.locale = newLocale;
+                // 调用UI库更新当前语言
+                window.Vue.prototype.$CloudUILang = newLocale;
             },
             getI18nList() {
                 // 在ide中拼接好
