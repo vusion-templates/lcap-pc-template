@@ -823,8 +823,6 @@ export const utils = {
                 if (obj.hasOwnProperty(key))
                     obj[key] = null;
             }
-        } else {
-            obj = undefined;
         }
         return obj;
     },
