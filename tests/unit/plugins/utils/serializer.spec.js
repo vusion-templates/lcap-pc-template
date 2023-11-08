@@ -88,6 +88,20 @@ describe('序列化函数', () => {
             expect(codewaveUtils.ToString('nasl.core.DateTime', noSummerTime1, 'Asia/Shanghai'))
                 .toBe('2016-03-13 14:59:59');
         }
+
+        {
+            expect(codewaveUtils.ToString('nasl.core.Time', '01:59:59'))
+                .toBe('01:59:59');
+            expect(codewaveUtils.ToString('nasl.core.Time', '14:59:59'))
+                .toBe('14:59:59');
+        }
+
+        {
+            expect(codewaveUtils.ToString('nasl.core.Time', '2016-03-13 01:59:59'))
+                .toBe('01:59:59');
+            expect(codewaveUtils.ToString('nasl.core.Time', '2016-03-13 14:59:59'))
+                .toBe('14:59:59');
+        }
     });
 
     test('ToString 时区格式化测试 2，字符串输入', () => {

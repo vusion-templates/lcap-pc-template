@@ -37,8 +37,8 @@ describe('当前日期时间系列函数', () => {
     });
 
     test('CurrentTime', () => {
-        const nycTime = codewaveUtils.CurrTime('US/Eastern');
-        const a = momentTZ.tz(nycTime, 'HH:mm:ss', 'US/Eastern').hours();
+        const nycTime = codewaveUtils.CurrTime('Etc/GMT+4');
+        const a = momentTZ.tz(nycTime, 'HH:mm:ss', 'Etc/GMT+4').hours();
 
         const shTime = codewaveUtils.CurrTime('Asia/Shanghai');
         const b = momentTZ.tz(shTime, 'HH:mm:ss', 'Asia/Shanghai').hours();
