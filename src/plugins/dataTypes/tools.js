@@ -1,11 +1,11 @@
-import { formatISO } from 'date-fns';
 import { UToast } from 'cloud-ui.vusion';
-import { getAppTimezone } from '../utils/timezone';
-const momentTZ = require('moment-timezone');
-const moment = require('moment');
+import { getAppTimezone, isValidDate, naslDateToLocalDate } from '../utils/timezone';
 import { NaslLong, NaslDecimal } from './packingType.js';
 window.NaslLong = NaslLong;
 window.NaslDecimal = NaslDecimal;
+
+import momentTZ from 'moment-timezone';
+import moment from 'moment';
 
 function tryJSONParse(str) {
     let result;
@@ -781,75 +781,42 @@ const FloatNumberReg = /^(-?\d+)(\.\d+)?$/;
 // (长)整型
 const IntegerReg = /^-?\d+$/;
 
-/**
- * 判断字符串日期是否合法
- * yyyy-MM-dd yyyy/MM/dd HH:mm:ss yyyy.MM.dd 3种格式
- * @param {*} dateString
- * @returns
- */
-function isValidDate(dateString, reg) {
-    if (!reg.test(dateString)) {
-        return false;
-    }
-    // 验证日期是否真实存在
-    const date = new Date(dateString);
-    if (date.toString() === 'Invalid Date') {
-        return false;
-    }
-    let splitChar;
-    if (dateString.includes('-')) {
-        splitChar = '-';
-    } else if (dateString.includes('/')) {
-        splitChar = '/';
-    } else if (dateString.includes('.')) {
-        splitChar = '.';
-    }
-    const [year, month, day] = dateString.split(' ')?.[0]?.split(splitChar).map(Number);
-    if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
-        return false;
-    }
-    return true;
-}
 
-export const fromString = (variable, typeKey) => {
+export const fromString = (v, typeKey) => {
     const typeDefinition = typeDefinitionMap[typeKey];
-    const isPrimitive = isDefPrimitive(typeKey);
-    const { typeName } = typeDefinition || {};
+    let { typeName } = typeDefinition || {};
+    typeName = typeName || typeKey; // CI 单元测试用。报错信息也好看点。
     // 日期
-    if (typeName === 'DateTime' && isValidDate(variable, DateTimeReg)) {
-        const date = new Date(variable);
-        const outputDate = formatISO(date, { format: 'extended', fractionDigits: 3 });
-        return outputDate;
-    } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
-        return moment(new Date(variable)).format('YYYY-MM-DD');
-    } else if (typeName === 'Time' && TimeReg.test(variable)) {
-        // ???
-        return moment(new Date('2022-01-01 ' + variable)).format('HH:mm:ss');
+    if (typeName === 'DateTime' && isValidDate(v, DateTimeReg)) {
+        return momentTZ.tz(v, getAppTimezone('user')).tz('UTC')
+                .format('YYYY-MM-DDTHH:mm:ss.SSS') + 'Z';
+    } else if (typeName === 'Date' && isValidDate(v, DateReg)) {
+        return momentTZ.tz(naslDateToLocalDate(v), getAppTimezone('user'))
+                .format('YYYY-MM-DD');
+    } else if (typeName === 'Time' && TimeReg.test(v)) {
+        return momentTZ(naslDateToLocalDate(new Date('2022-01-01 ' + v)), getAppTimezone('user'))
+                .format('HH:mm:ss');
     }
     // 浮点数
-    else if (['Decimal', 'Double'].includes(typeName) && FloatNumberReg.test(variable)) {
-        // return parseFloat(+variable);
-        return new NaslDecimal(variable);
+    else if (['Decimal', 'Double'].includes(typeName) && FloatNumberReg.test(v)) {
+        return new NaslDecimal(v);
     }
     // 整数
-    else if (['Integer', 'Long'].includes(typeName) && IntegerReg.test(variable)) {
+    else if (['Integer', 'Long'].includes(typeName) && IntegerReg.test(v)) {
         const maxMap = {
             Integer: 2147483647,
             Long: 9223372036854775807,
         };
-        const numberVar = +variable;
-        if (
-            numberVar < maxMap[typeName]
-            && numberVar > -maxMap[typeName]
-        ) {
+        const numberVar = +v;
+        if (numberVar < maxMap[typeName] && numberVar > -maxMap[typeName]) {
             // return numberVar;
             return new NaslLong(numberVar);
         }
     }
     // 布尔
     else if (typeName === 'Boolean') {
-        if (['true', 'false'].includes(variable)) {
-            return JSON.parse(variable);
+        if (['true', 'false'].includes(v)) {
+            return JSON.parse(v);
         }
     }
     toastAndThrowError(`${typeName}格式不正确`);

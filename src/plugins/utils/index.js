@@ -18,25 +18,15 @@ import {
 import { formatInTimeZone } from 'date-fns-tz';
 import { dateFormatter } from '@/plugins/Formatters';
 
-const moment = require('moment');
-const momentTZ = require('moment-timezone');
+import moment from 'moment';
+import momentTZ from 'moment-timezone';
 
 import Vue from 'vue';
 import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
-import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
+import { getAppTimezone, isValidTimezoneIANAString, naslDateToLocalDate, convertJSDateInTargetTimeZone } from './timezone';
 let enumsMap = {};
-
-function naslDateToLocalDate(date) {
-    const localTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const localDate = momentTZ.tz(date, 'YYYY-MM-DD', localTZ);
-    return new Date(localDate.format('YYYY-MM-DD HH:mm:ss'));
-}
-
-function convertJSDateInTargetTimeZone(date, tz) {
-    return new Date(momentTZ.tz(date, getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss.SSS'));
-}
 
 function toValue(date, typeKey) {
     if (!date)
