@@ -141,7 +141,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         locale: locale,
         messages: i18nInfo.messages,
     });
-
+    window.$i18n = i18n;
     const app = new Vue({
         name: 'app',
         router,
