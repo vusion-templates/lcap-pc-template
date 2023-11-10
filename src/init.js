@@ -33,8 +33,16 @@ installComponents(Vue, CloudUI);
 Vue.mixin(CloudUI.MEmitter);
 Vue.mixin(CloudUI.MPubSub);
 
+const installBusinessComponent = function (components) {
+    components.forEach((item) => {
+        const { component } = item;
+
+        Vue.component(component.name, component);
+    });
+};
+
 // 需要兼容老应用的制品，因此新版本入口函数参数不做改变
-const init = (appConfig, platformConfig, routes, metaData) => {
+const init = (appConfig, platformConfig, routes, metaData, businessComponents) => {
     // 应用初始化之前 不能访问应用中的任何逻辑
     evalWrap.bind(window)(metaData, 'rendered');
     ['preRequest', 'postRequest'].forEach((fnName) => {
@@ -54,6 +62,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
 
     installFilters(Vue, filters);
     installComponents(Vue, Components);
+    installBusinessComponent(businessComponents);
 
     Vue.use(LogicsPlugin, metaData);
     Vue.use(RouterPlugin);
