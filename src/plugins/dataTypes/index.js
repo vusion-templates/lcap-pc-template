@@ -55,14 +55,14 @@ export default {
                 if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
                     y = y.toString();
                 }
-                if (typeof x !== 'number' || typeof y !== 'number') {
-                    return x + y;
-                }
                 if (!x) {
                     x = 0;
                 }
                 if (!y) {
                     y = 0;
+                }
+                if (typeof x !== 'number' || typeof y !== 'number') {
+                    return x + y;
                 }
                 const xx = new Decimal(x + '');
                 const yy = new Decimal(y + '');
