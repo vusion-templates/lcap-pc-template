@@ -1,6 +1,6 @@
 import Long from 'long';
 import { Decimal } from 'decimal.js';
-const getPrecision = (str) => (str.split('.')[1] || '').length;
+const getPrecision = (str) => (str?.split('.')[1] || '').length;
 window.Long = Long;
 window.Decimal = Decimal;
 export class NaslDecimal {
