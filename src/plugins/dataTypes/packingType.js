@@ -12,7 +12,7 @@ export class NaslDecimal {
 
     constructor(v) {
         //  兼容 undefined 空 数字 字符串  包装类本身 和其他包装类互转
-        if (v === undefined || v === 'undefined' || v === 'null' || !v) {
+        if (v === undefined || v === 'undefined' || v === 'null' || (v !== 0 && !v)) {
             v = '0';
             this.__str = undefined;
         } else if (v instanceof NaslDecimal) {
