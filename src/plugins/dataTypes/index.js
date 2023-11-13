@@ -144,12 +144,8 @@ export default {
                 if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
                     return x.equals(y);
                 }
-                if (!x || !y) {
-                    return false;
-                } else {
-                    // eslint-disable-next-line eqeqeq
-                    return x == y;
-                }
+                // eslint-disable-next-line eqeqeq
+                return x == y;
             },
             // // 不相等
             isNotEqual(x, y) {
