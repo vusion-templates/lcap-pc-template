@@ -1,6 +1,8 @@
 import Long from 'long';
 import { Decimal } from 'decimal.js';
 const getPrecision = (str) => (str?.split('.')[1] || '').length;
+const isNil = (v) => v === undefined || v === null || v === 'undefined' || v === 'null' || (v !== 0 && !v);
+
 window.Long = Long;
 window.Decimal = Decimal;
 export class NaslDecimal {
@@ -12,7 +14,7 @@ export class NaslDecimal {
 
     constructor(v) {
         //  兼容 undefined 空 数字 字符串  包装类本身 和其他包装类互转
-        if (v === undefined || v === null || v === 'undefined' || v === 'null' || (v !== 0 && !v)) {
+        if (isNil(v)) {
             v = '0';
             this.__str = undefined;
         } else if (v instanceof NaslDecimal) {
@@ -129,10 +131,15 @@ export class NaslDecimal {
     }
 
     equals(target) {
+        if (isNil(target)) {
+            return target === this.__str || String(target) === this.__str;
+        }
         if (target instanceof NaslDecimal || typeof target === 'string') {
             const targetValue = new NaslDecimal(target).value;
             const targetLength = new NaslDecimal(target).length;
             return this.value.equals(targetValue) && targetLength === this.length;
+        } else {
+            return String(target) === this.__str;
         }
     }
 
@@ -168,11 +175,9 @@ export class NaslLong {
             v = '0';
         }
         //  兼容 undefined 空 数字 2.21 字符串 ‘2.21’ 包装类本身 和其他包装类互转如NaslIneger
-        if (v === undefined || v === null || v === 'undefined' || v === 'null' || (v !== 0 && !v)) {
+        if (isNil(v)) {
             v = '0'; // Decimal 不支持传 空字符串
             this.__str = undefined;// 用包装类实现原生语言的空值
-            // 之前的默认值是 ''  空字符串  我这要是改成空字符串是不是运算有问题
-            // 之前的运算'' + ''  ='' 再转number 变成了NaN 保持一致即可
         } else if (v instanceof NaslLong) {
             this.fixedNum = v.fixedNum;
             this.__str = v.__str;
@@ -275,10 +280,15 @@ export class NaslLong {
     }
 
     equals(target) {
+        if (isNil(target)) {
+            return target === this.__str || String(target) === this.__str;
+        }
         if (target instanceof NaslLong || typeof target === 'string') {
             const targetValue = new NaslLong(target).value;
             const targetLength = new NaslLong(target).length;
             return this.value.equals(targetValue) && targetLength === this.length;
+        } else {
+            return String(target) === this.__str;
         }
     }
 
