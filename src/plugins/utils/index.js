@@ -193,7 +193,7 @@ export const utils = {
             } else if (ele instanceof window.NaslDecimal || ele instanceof window.NaslLong) {
                 return ele.equals(item);
             } else {
-                let numItem;
+                let numItem = item;
                 if (isNumberStr(item)) {
                     numItem = Number(item);
                 }
@@ -220,7 +220,16 @@ export const utils = {
     },
     Remove(arr, item) {
         if (Array.isArray(arr)) {
-            const index = arr.indexOf(item);
+            let numItem;
+            if (isNumberStr(item)) {
+                numItem = Number(item);
+            }
+            let index;
+            if (numItem) {
+                index = Math.max(arr.indexOf(numItem), arr.indexOf(item));
+            } else {
+                index = arr.indexOf(item);
+            }
             ~index && arr.splice(index, 1);
         }
     },
