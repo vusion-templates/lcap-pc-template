@@ -247,8 +247,9 @@ export class NaslLong {
         if (String(v) === '0') {
             throw new Error('除数不能为 0');
         }
-        const result = this.binaryOperations(v, (targetValue) => this.value.div(targetValue), 20);
-        return new NaslDecimal(result.__str);
+        //   export function divide(left: Long, right: Long): Decimal;
+        const result = new NaslDecimal(this.__str).divide(new NaslDecimal(String(v)));
+        return result;
     }
 
     mod(v) {

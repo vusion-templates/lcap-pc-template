@@ -36,6 +36,19 @@ function sExp(symbol, a, b, className, targetClassName) {
 describe('global/app/packingType', () => {
     test('binaryOperations', () => {
         const errMsg = '除数不能为 0';
+
+        expect(sExp('/', '10', '2', 'NaslLong')?.__str).toBe('5');
+        expect(sExp('/', '10', '3', 'NaslLong')?.__str).toBe('3.33333333333333333330');
+        expect(() => sExp('/', '1', '0', 'NaslLong')).toThrow(errMsg);
+        expect(() => sExp('/', '-0', '0', 'NaslLong')).toThrow(errMsg);
+        expect(() => sExp('%', '0', '0', 'NaslLong')).toThrow(errMsg);
+
+        expect(sExp('/', '10', '2', 'NaslLong', 'String')?.__str).toBe('5');
+        expect(sExp('/', '1', '3', 'NaslLong', 'String')?.__str).toBe('0.33333333333333333333');
+        expect(() => sExp('/', '1', '0', 'NaslLong', 'String')).toThrow(errMsg);
+        expect(() => sExp('/', '-0', '0', 'NaslLong', 'String')).toThrow(errMsg);
+        expect(() => sExp('%', '0', '0', 'NaslLong', 'String')).toThrow(errMsg);
+
         expect(sExp('+', '0.06', '0.04', 'NaslDecimal')?.__str).toBe('0.10');
         expect(sExp('+', '0.05', '-0.05', 'NaslDecimal')?.__str).toBe('0.00');
         expect(sExp('+', '-0.05', '0.05', 'NaslDecimal')?.__str).toBe('0.00');
