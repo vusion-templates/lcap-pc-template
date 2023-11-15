@@ -77,12 +77,20 @@ export class NaslDecimal {
             v = '0';
         }
         let result;
+        let vStr;
         if (v instanceof NaslDecimal) {
+            vStr = v.__str;
             result = operationCb(v.value);
         } else {
+            // js 原生类型 number
+            vStr = v.toString();
             result = operationCb((new NaslDecimal(v.toString()).value));
         }
-        const resultStr = String(result);
+        let resultStr = String(result);
+
+        // 操作数精度相加，作为结果的精度
+        resultStr = result.toFixed(getPrecision(this.__str) + getPrecision(vStr));
+
         return new NaslDecimal(resultStr);
     }
 
@@ -91,28 +99,25 @@ export class NaslDecimal {
         if (String(v) === '0') {
             throw new Error('除数不能为 0');
         }
-        const precision = 20;
+
         const operationCb = (targetValue) => this.value.div(targetValue);
         if (v === undefined || !v) {
             v = '0';
         }
         let vStr = '';
         let result;
-        let resultStr;
         if (v instanceof NaslDecimal) {
             vStr = v.__str;
             result = operationCb(v.value);
         } else {
+            // js 原生类型 number
             vStr = v.toString();
             result = operationCb((new NaslDecimal(v.toString()).value));
         }
 
-        const isInt = !result.toString().includes('.');
-        if (!isInt) {
-            resultStr = result.toFixed(Math.max(getPrecision(vStr), precision || getPrecision(this.__str)));
-        } else {
-            resultStr = result.toString();
-        }
+        // 操作数精度相减，并和结果中的精度取较大者
+        const resultStr = result.toFixed(Math.max(getPrecision(String(result)),
+                                                  getPrecision(this.__str) - getPrecision(vStr)));
         return new NaslDecimal(resultStr);
     }
 

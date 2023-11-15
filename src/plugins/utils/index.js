@@ -17,15 +17,16 @@ import {
 } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { dateFormatter } from '@/plugins/Formatters';
-import { isNumberStr } from '../dataTypes/index';
+import { isNumberStr, isNaslNumber } from '../dataTypes/index';
 const moment = require('moment');
 const momentTZ = require('moment-timezone');
 
 import Vue from 'vue';
-import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
+import { toString, fromString, toastError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
+import { NaslDecimal } from '../dataTypes/packingType';
 let enumsMap = {};
 
 function naslDateToLocalDate(date) {
@@ -56,16 +57,21 @@ function isArrayOutBounds(arr, index) {
         index = Number(index);
     } catch (error) {
         console.error('error: ', error);
+        return false;
     }
 
-    if (!Array.isArray(arr))
-        toastAndThrowError('传入内容不是数组');
+    if (!Array.isArray(arr)) {
+        toastError('传入内容不是数组');
+        return false;
+    }
     if (typeof index !== 'number' || isNaN(index)) {
-        toastAndThrowError('传入下标不是数字');
+        toastError('传入下标不是数字');
+        return false;
     }
     // 传入要找的下标，大于数组长度
     if ((index + 1) > arr.length) {
-        toastAndThrowError(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
+        toastError(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
+        return false;
     }
     return true;
 }
@@ -144,16 +150,14 @@ export const utils = {
             return JSON.stringify(v);
         }
     },
-    Split(str, seperator) {
+    Split(str, sep) {
         if (Object.prototype.toString.call(str) === '[object String]') {
-            return str.split(seperator);
+            return str.split(sep);
         }
         return [];
     },
-    Join(arr, seperator) {
-        if (Array.isArray(arr)) {
-            return arr.join(seperator);
-        }
+    Join(arr, sep) {
+        return Array.isArray(arr) ? arr.join(sep) : null;
     },
     Concat(...arr) {
         return arr.join('');
@@ -177,20 +181,19 @@ export const utils = {
         return str && str.trim();
     },
     Get(arr, index) {
-        if (isArrayOutBounds(arr, index)) {
-            return arr[index];
-        }
+        return isArrayOutBounds(arr, index) ? arr[index] : null;
     },
     Set(arr, index, item) {
-        if (isArrayOutBounds(arr, index)) {
-            return utils.Vue.set(arr, index, item);
-        }
+        return isArrayOutBounds(arr, index) ? utils.Vue.set(arr, index, item) : null;
     },
     Contains(arr, item) {
+        if (!arr) {
+            return false;
+        }
         return typeof arr.find((ele) => {
-            if (item instanceof window.NaslDecimal || item instanceof window.NaslLong) {
+            if (isNaslNumber(item)) {
                 return item.equals(ele);
-            } else if (ele instanceof window.NaslDecimal || ele instanceof window.NaslLong) {
+            } else if (isNaslNumber(ele)) {
                 return ele.equals(item);
             } else {
                 let numItem = item;
@@ -232,11 +235,10 @@ export const utils = {
             }
             ~index && arr.splice(index, 1);
         }
+        return null;
     },
     RemoveAt(arr, index) {
-        if (isArrayOutBounds(arr, index)) {
-            return arr.splice(index, 1)[0];
-        }
+        return isArrayOutBounds(arr, index) ? arr.splice(index, 1)[0] : null;
     },
     ListHead(arr) {
         if (!Array.isArray(arr) || arr.length === 0) {
@@ -260,11 +262,7 @@ export const utils = {
         }
     },
     ListTransform(arr, trans) {
-        if (Array.isArray(arr)) {
-            return arr.map((elem) => trans(elem));
-        } else {
-            return null;
-        }
+        return Array.isArray(arr) ? arr.map((elem) => trans(elem)) : null;
     },
     async ListTransformAsync(arr, trans) {
         if (Array.isArray(arr)) {
@@ -279,9 +277,7 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) =>
-                // decimal 可解决 0.1 + 0.2 的精度问题，下同
-                new Decimal(cur + '').plus(prev), new Decimal('0')).toNumber();
+            : nullRemoved.reduce((prev, cur) => prev.add(cur), new NaslDecimal('0'));
     },
     ListProduct: (arr) => {
         if (!Array.isArray(arr)) {
@@ -289,16 +285,14 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) =>
-                new Decimal(cur + '').mul(prev), new Decimal('1')).toNumber();
+            : nullRemoved.reduce((prev, cur) => prev.multiply(cur), new NaslDecimal('1'));
     },
     ListAverage: (arr) => {
         if (!Array.isArray(arr)) {
             return null;
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
-        return nullRemoved.length === 0 ? null
-            : new Decimal(utils.ListSum(nullRemoved)).div(nullRemoved.length).toNumber();
+        return nullRemoved.length === 0 ? null : utils.ListSum(nullRemoved).divide(nullRemoved.length);
     },
     ListMax: (arr) => {
         if (!Array.isArray(arr)) {
@@ -306,7 +300,7 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) => prev >= cur ? prev : cur, nullRemoved[0]);
+            : nullRemoved.reduce((prev, cur) => prev.gte(cur) ? prev : cur, nullRemoved[0]);
     },
     ListMin: (arr) => {
         if (!Array.isArray(arr)) {
@@ -314,7 +308,7 @@ export const utils = {
         }
         const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) => prev <= cur ? prev : cur, nullRemoved[0]);
+            : nullRemoved.reduce((prev, cur) => prev.lte(cur) ? prev : cur, nullRemoved[0]);
     },
     ListReverse(arr) {
         if (Array.isArray(arr)) {
@@ -344,6 +338,8 @@ export const utils = {
                     }
                 });
             }
+        } else {
+            return null;
         }
     },
     async ListSortAsync(arr, callback, sort) {
@@ -371,12 +367,11 @@ export const utils = {
         }
     },
     ListFind(arr, by) {
-        if (Array.isArray(arr)) {
-            if (typeof by === 'function') {
-                const value = arr.find(by);
-                return (typeof value === 'undefined') ? null : value;
-            }
+        if (!Array.isArray(arr) || typeof by !== 'function') {
+            return null;
         }
+        const value = arr.find(by);
+        return (typeof value === 'undefined') ? null : value;
     },
     async ListFindAsync(arr, by) {
         if (Array.isArray(arr)) {
@@ -399,11 +394,7 @@ export const utils = {
         return await filterAsync(arr, by);
     },
     ListFindIndex(arr, callback) {
-        if (Array.isArray(arr)) {
-            if (typeof callback === 'function') {
-                return arr.findIndex(callback);
-            }
-        }
+        return Array.isArray(arr) && typeof callback === 'function' ? arr.findIndex(callback) : null;
     },
     async ListFindIndexAsync(arr, callback) {
         if (Array.isArray(arr)) {
@@ -416,6 +407,8 @@ export const utils = {
         // 由于 slice 的特性，end 要校验的是长度，而不是下标，所以要减 1
         if (isArrayOutBounds(arr, start) && isArrayOutBounds(arr, end - 1)) {
             return arr.slice(start, end);
+        } else {
+            return null;
         }
     },
     ListDistinct(arr) {
@@ -432,6 +425,7 @@ export const utils = {
                 i++;
             }
         }
+        return null;
     },
     // 随着 PageOf 失效，可删除
     ListSliceToPageOf(arr, page, size) {
@@ -450,6 +444,8 @@ export const utils = {
                 first: page === 1,
                 empty: total,
             };
+        } else {
+            return null;
         }
     },
     SliceToListPage(arr, page, size) {
@@ -754,11 +750,11 @@ export const utils = {
     },
     GetSpecificDaysOfWeek(startdatetr, enddatetr, arr, tz) {
         if (!startdatetr)
-            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：startDate不能为空`);
+            toastError(`内置函数GetSpecificDaysOfWeek入参错误：startDate不能为空`);
         if (!enddatetr)
-            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：endDate不能为空`);
+            toastError(`内置函数GetSpecificDaysOfWeek入参错误：endDate不能为空`);
         if (!Array.isArray(arr)) {
-            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：参数“指定”非合法数组`);
+            toastError(`内置函数GetSpecificDaysOfWeek入参错误：参数“指定”非合法数组`);
         }
 
         let startDate;
@@ -964,9 +960,9 @@ export const utils = {
     */
     DateDiff(dateTime1, dateTime2, calcType, isAbs = true) {
         if (!dateTime1)
-            toastAndThrowError(`内置函数DateDiff入参错误：dateTime1不能为空`);
+            toastError(`内置函数DateDiff入参错误：dateTime1不能为空`);
         if (!dateTime2)
-            toastAndThrowError(`内置函数DateDiff入参错误：dateTime2不能为空`);
+            toastError(`内置函数DateDiff入参错误：dateTime2不能为空`);
         // Time
         const timeReg = /^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
         if (timeReg.test(dateTime1) && timeReg.test(dateTime2)) {
@@ -994,13 +990,13 @@ export const utils = {
     // 时区转换
     ConvertTimezone(dateTime, tz) {
         if (!dateTime) {
-            toastAndThrowError(`内置函数ConvertTimezone入参错误：指定日期为空`);
+            toastError(`内置函数ConvertTimezone入参错误：指定日期为空`);
         }
         if (!isValid(new Date(dateTime))) {
-            toastAndThrowError(`内置函数ConvertTimezone入参错误：指定日期不是合法日期类型`);
+            toastError(`内置函数ConvertTimezone入参错误：指定日期不是合法日期类型`);
         }
         if (!isValidTimezoneIANAString(tz)) {
-            toastAndThrowError(`内置函数ConvertTimezone入参错误：传入时区${tz}不是合法时区字符`);
+            toastError(`内置函数ConvertTimezone入参错误：传入时区${tz}不是合法时区字符`);
         }
         return formatInTimeZone(dateTime, tz, "yyyy-MM-dd'T'HH:mm:ssxxx");
     },
