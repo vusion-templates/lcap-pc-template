@@ -871,3 +871,23 @@ function jsonNameReflection(properties, parsedValue) {
     });
     return parsedValue;
 }
+
+// 移除变量内部的包装类
+export const rmWrapClass = (variable) => {
+    let newVariable = variable;
+    const variableType = Object.prototype.toString.call(variable);
+    if (Array.isArray(variable)) {
+        newVariable = variable.map((variableItem) => {
+            return rmWrapClass(variableItem);
+        });
+    } else if (variable instanceof window.NaslLong || variable instanceof window.NaslDecimal) {
+        newVariable = variable.value.toNumber();
+    } else if (variableType === '[object Object]') {
+        newVariable = {};
+        for (const key in variable) {
+            newVariable[key] = rmWrapClass(variable[key]);
+        }
+    }
+    console.log(variable, newVariable);
+    return newVariable;
+};

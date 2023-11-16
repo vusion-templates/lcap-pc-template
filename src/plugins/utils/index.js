@@ -22,7 +22,10 @@ const moment = require('moment');
 const momentTZ = require('moment-timezone');
 
 import Vue from 'vue';
-import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
+import { 
+    toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap, rmWrapClass,
+    genInitData,
+} from '../dataTypes/tools';
 import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
@@ -923,6 +926,12 @@ export const utils = {
     },
     FromString(value, typeKey) {
         return fromString(value, typeKey);
+    },
+    RmWrapClass(value) {
+        return rmWrapClass(value);
+    },
+    AddWrapClass(typeKey, value) {
+        return genInitData(typeKey, value);
     },
     /**
      * 数字格式化
