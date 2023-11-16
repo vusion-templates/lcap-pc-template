@@ -17,7 +17,6 @@ import {
 } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { dateFormatter } from '@/plugins/Formatters';
-import { isNumberStr, isNaslNumber } from '../dataTypes/index';
 const moment = require('moment');
 const momentTZ = require('moment-timezone');
 
@@ -29,7 +28,10 @@ import {
 import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
-import { NaslDecimal } from '../dataTypes/packingType';
+import { NaslDecimal, NaslLong } from '../dataTypes/packingType';
+import { naslAdd, naslMinus, naslTimes, naslDividedBy, naslModulo, naslGreaterThan, naslGreaterThanOrEqual,
+        naslLessThan, naslLessThanOrEqual, naslEquals, naslNotEqual, isNaslNumber } from '../dataTypes/operations';
+
 let enumsMap = {};
 
 function naslDateToLocalDate(date) {
@@ -55,7 +57,7 @@ function toValue(date, typeKey) {
         return date;
 }
 
-function isArrayOutBounds(arr, index) {
+function isArrayInBounds(arr, index) {
     try {
         index = Number(index);
     } catch (error) {
@@ -77,6 +79,24 @@ function isArrayOutBounds(arr, index) {
         return false;
     }
     return true;
+}
+
+const removeNulls = (list) => list.filter((elem) => elem !== null && elem !== undefined);
+
+const getElemHash = (e) => {
+    if (e instanceof NaslDecimal || e instanceof NaslLong) {
+        return Number(e.__str);
+    } else {
+        return e;
+    }
+};
+
+const recoverFromHash = (e) => {
+    if (typeof e === 'number') {
+        return new NaslDecimal('' + e);
+    } else {
+        return e;
+    }
 }
 
 export const utils = {
@@ -184,29 +204,16 @@ export const utils = {
         return str && str.trim();
     },
     Get(arr, index) {
-        return isArrayOutBounds(arr, index) ? arr[index] : null;
+        return isArrayInBounds(arr, index) ? arr[index] : null;
     },
     Set(arr, index, item) {
-        return isArrayOutBounds(arr, index) ? utils.Vue.set(arr, index, item) : null;
+        return isArrayInBounds(arr, index) ? utils.Vue.set(arr, index, item) : null;
     },
     Contains(arr, item) {
         if (!arr) {
             return false;
         }
-        return typeof arr.find((ele) => {
-            if (isNaslNumber(item)) {
-                return item.equals(ele);
-            } else if (isNaslNumber(ele)) {
-                return ele.equals(item);
-            } else {
-                let numItem = item;
-                if (isNumberStr(item)) {
-                    numItem = Number(item);
-                }
-                return isEqual(ele, item) || isEqual(ele, numItem);
-            }
-        }) !== 'undefined';
-        // return typeof arr.find((ele) => isEqual(ele, item)) !== 'undefined';
+        return undefined !== (arr.find((ele) => naslEquals(ele, item)));
     },
     Add(arr, item) {
         if (Array.isArray(arr)) {
@@ -220,28 +227,19 @@ export const utils = {
         }
     },
     Insert(arr, index, item) {
-        if (isArrayOutBounds(arr, index)) {
+        if (isArrayInBounds(arr, index)) {
             arr.splice(index, 0, item);
         }
     },
     Remove(arr, item) {
         if (Array.isArray(arr)) {
-            let numItem;
-            if (isNumberStr(item)) {
-                numItem = Number(item);
-            }
-            let index;
-            if (numItem) {
-                index = Math.max(arr.indexOf(numItem), arr.indexOf(item));
-            } else {
-                index = arr.indexOf(item);
-            }
+            const index = arr.indexOf(item);
             ~index && arr.splice(index, 1);
         }
         return null;
     },
     RemoveAt(arr, index) {
-        return isArrayOutBounds(arr, index) ? arr.splice(index, 1)[0] : null;
+        return isArrayInBounds(arr, index) ? arr.splice(index, 1)[0] : null;
     },
     ListHead(arr) {
         if (!Array.isArray(arr) || arr.length === 0) {
@@ -278,30 +276,30 @@ export const utils = {
         if (!Array.isArray(arr)) {
             return null;
         }
-        const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
+        const nullRemoved = removeNulls(arr);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) => prev.add(cur), new NaslDecimal('0'));
+            : nullRemoved.reduce((prev, cur) => naslAdd(prev, cur), new NaslDecimal('0'));
     },
     ListProduct: (arr) => {
         if (!Array.isArray(arr)) {
             return null;
         }
-        const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
+        const nullRemoved = removeNulls(arr);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) => prev.multiply(cur), new NaslDecimal('1'));
+            : nullRemoved.reduce((prev, cur) => naslTimes(prev, cur), new NaslDecimal('1'));
     },
     ListAverage: (arr) => {
         if (!Array.isArray(arr)) {
             return null;
         }
-        const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
-        return nullRemoved.length === 0 ? null : utils.ListSum(nullRemoved).divide(nullRemoved.length);
+        const nullRemoved = removeNulls(arr);
+        return nullRemoved.length === 0 ? null : naslDividedBy(utils.ListSum(nullRemoved), new NaslDecimal(nullRemoved.length));
     },
     ListMax: (arr) => {
         if (!Array.isArray(arr)) {
             return null;
         }
-        const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
+        const nullRemoved = removeNulls(arr);
         return nullRemoved.length === 0 ? null
             : nullRemoved.reduce((prev, cur) => {
                 if (isNaslNumber(prev)) {
@@ -315,7 +313,7 @@ export const utils = {
         if (!Array.isArray(arr)) {
             return null;
         }
-        const nullRemoved = utils.ListFilter(arr, (elem) => elem !== null && elem !== undefined);
+        const nullRemoved = removeNulls(arr);
         return nullRemoved.length === 0 ? null
             : nullRemoved.reduce((prev, cur) => {
                 if (isNaslNumber(prev)) {
@@ -339,7 +337,7 @@ export const utils = {
                     if (Number.isNaN(valueA) || Number.isNaN(valueB) || typeof valueA === 'undefined' || typeof valueB === 'undefined' || valueA === null || valueB === null) {
                         return 1;
                     } else {
-                        if (valueA >= valueB) {
+                        if (naslGreaterThanOrEqual(valueA, valueB)) {
                             if (sort) {
                                 return 1;
                             }
@@ -419,8 +417,11 @@ export const utils = {
         }
     },
     ListSlice(arr, start, end) {
+        if (!Array.isArray(arr)) {
+            return null;
+        }
         // 由于 slice 的特性，end 要校验的是长度，而不是下标，所以要减 1
-        if (isArrayOutBounds(arr, start) && isArrayOutBounds(arr, end - 1)) {
+        if (isArrayInBounds(arr, start) && isArrayInBounds(arr, end - 1)) {
             return arr.slice(start, end);
         } else {
             return null;
@@ -431,11 +432,11 @@ export const utils = {
             const map = new Map();
             let i = 0;
             while (i < arr.length) {
-                if (map.get(arr[i])) {
+                if (map.get(getElemHash(arr[i]))) {
                     arr.splice(i, 1);
                     i--;
                 } else {
-                    map.set(arr[i], true);
+                    map.set(getElemHash(arr[i]), true);
                 }
                 i++;
             }
@@ -567,32 +568,35 @@ export const utils = {
         return res;
     },
     MapGet(map, key) {
-        if (isObject(map)) {
-            const value = map[key];
-            return (typeof value === 'undefined') ? null : value;
+        if (!isObject(map)) {
+            return null;
         }
+        const value = map[getElemHash(key)];
+        return (typeof value === 'undefined') ? null : value;
     },
     MapPut(map, key, value) {
-        if (isObject(map)) {
-            Vue.prototype.$set(map, key, value);
+        if (!isObject(map)) {
+            return null;
         }
+        Vue.prototype.$set(map, getElemHash(key), value);
     },
     MapRemove(map, key) {
-        if (isObject(map)) {
-            utils.Vue.delete(map, key);
+        if (!isObject(map)) {
+            return null;
         }
+        utils.Vue.delete(map, getElemHash(key));
     },
     MapContains(map, key) {
-        if (isObject(map)) {
-            return key in map;
+        if (!isObject(map)) {
+            return false;
         }
-        return false;
+        return getElemHash(key) in map;
     },
     MapKeys(map) {
-        if (isObject(map)) {
-            return Object.keys(map);
+        if (!isObject(map)) {
+            return null;
         }
-        return 0;
+        return Object.keys(map);
     },
     MapValues(map) {
         if (!isObject(map)) {
@@ -946,32 +950,32 @@ export const utils = {
      * @param {digits} 小数点保留个数
      * @param {showGroup} 是否显示千位分割（默认逗号分隔）
     */
-    FormatNumber(value, digits, showGroup) {
-        if (!value)
-            return value;
-        if (parseFloat(value) === 0)
+    FormatNumber(v, digits, showGroup) {
+        if (!v)
+            return v;
+        if (parseFloat(v) === 0)
             return '0';
-        if (isNaN(parseFloat(value)) || isNaN(parseInt(digits)))
+        if (isNaN(parseFloat(v)) || isNaN(parseInt(digits)))
             return;
         if (digits !== undefined) {
             // value = Number(value).toFixed(parseInt(digits));
-            if (value instanceof window.NaslDecimal || value instanceof window.NaslLong) {
-                value = value.value.toFixed(parseInt(digits)); // 修改后得还是naslDecimal __str 变更
+            if (isNaslNumber(v)) {
+                v = v.value.toFixed(parseInt(digits)); // 修改后得还是naslDecimal __str 变更
             } else {
-                value = Number(value).toFixed(parseInt(digits)); // value  之前是个字符串
+                v = Number(v).toFixed(parseInt(digits)); // value  之前是个字符串
             }
         }
         if (showGroup) {
-            const temp = ('' + value).split('.');
+            const temp = ('' + v).split('.');
             const right = temp[1];
             let left = temp[0].split('').reverse().join('').match(/(\d{1,3})/g).join(',').split('').reverse().join('');
             if (temp[0][0] === '-')
                 left = '-' + left;
             if (right)
                 left = left + '.' + right;
-            value = left;
+            v = left;
         }
-        return '' + value;
+        return '' + v;
     },
     /**
      * 时间差

@@ -50,6 +50,12 @@ describe('List arithmetic (aggregation) functions', () => {
         }
 
         {
+            const list = ['123', 'abc', 'abb'];
+            expect(utils.ListMax(list)).toBe('abc');
+            expect(utils.ListMin(list)).toBe('123');
+        }
+
+        {
             const list = ['111', 'aa', 'ab'];
             expect(utils.ListMax(list)).toBe('ab');
             expect(utils.ListMin(list)).toBe('111');

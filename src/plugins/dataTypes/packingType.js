@@ -1,7 +1,8 @@
 import Long from 'long';
 import { Decimal } from 'decimal.js';
+import { naslDividedBy, naslModulo } from './operations';
 const getPrecision = (str) => (str?.split('.')[1] || '').length;
-const isNil = (v) => v === undefined || v === null || v === 'undefined' || v === 'null' || (v !== 0 && !v);
+export const isNil = (v) => v === undefined || v === null || v === 'undefined' || v === 'null' || (v !== 0 && !v);
 
 window.Long = Long;
 window.Decimal = Decimal;
@@ -15,8 +16,9 @@ export class NaslDecimal {
     constructor(v) {
         //  兼容 undefined 空 数字 字符串  包装类本身 和其他包装类互转
         if (isNil(v)) {
-            v = '0';
-            this.__str = undefined;
+            // this.__str = String(v);
+            // this.__value = new Decimal(v);
+            return v;
         } else if (v instanceof NaslDecimal) {
             this.fixedNum = v.fixedNum;
             this.__str = v.__str;
@@ -71,7 +73,7 @@ export class NaslDecimal {
         return this.binaryOperations(v, (targetValue) => this.value.sub(targetValue));
     }
 
-    multiply(v) {
+    times(v) {
         const operationCb = (targetValue) => this.value.mul(targetValue);
         if (v === undefined || !v) {
             v = '0';
@@ -94,11 +96,10 @@ export class NaslDecimal {
         return new NaslDecimal(resultStr);
     }
 
-    divide(v) {
-        // return this.binaryOperations(v, (targetValue) => this.value.div(targetValue));
-        if (String(v) === '0') {
-            throw new Error('除数不能为 0');
-        }
+    dividedBy(v) {
+        // if (String(v) === '0') {
+        //     throw new Error('除数不能为 0');
+        // }
 
         const operationCb = (targetValue) => this.value.div(targetValue);
         if (v === undefined || !v) {
@@ -118,15 +119,17 @@ export class NaslDecimal {
         // 操作数精度相减，并和结果中的精度取较大者
         const resultStr = result.toFixed(Math.max(getPrecision(String(result)),
             getPrecision(this.__str) - getPrecision(vStr)));
-        return new NaslDecimal(resultStr);
+
+        return ['Infinity', '-Infinity', 'NaN', 'undefined', 'null'].includes(resultStr)
+            ? eval(resultStr) // 去掉引号
+            : new NaslDecimal(resultStr);
     }
 
-    mod(v) {
-        if (String(v) === '0') {
-            throw new Error('除数不能为 0');
-        }
-        // return this.binaryOperations(v, (targetValue) => this.value.mod(targetValue));
-        const operationCb = (targetValue) => this.value.mod(targetValue);
+    modulo(v) {
+        // if (String(v) === '0') {
+        //     throw new Error('除数不能为 0');
+        // }
+        const operationCb = (targetValue) => this.value.modulo(targetValue);
         if (v === undefined || !v) {
             v = '0';
         }
@@ -137,7 +140,9 @@ export class NaslDecimal {
             result = operationCb((new NaslDecimal(v.toString()).value));
         }
         const resultStr = String(result);
-        return new NaslDecimal(resultStr);
+        return ['Infinity', '-Infinity', 'NaN', 'undefined', 'null'].includes(resultStr)
+                ? eval(resultStr) // 去掉引号
+                : new NaslDecimal(resultStr);
     }
 
     binaryOperations(v, operationCb, precision = 0) {
@@ -196,24 +201,13 @@ export class NaslLong {
     fixedNum = 0
 
     constructor(v) {
-        if (v === true || v === 'true') {
-            v = '1';
-        }
-        if (v === false || v === 'false') {
-            v = '0';
-        }
-        //  兼容 undefined 空 数字 2.21 字符串 ‘2.21’ 包装类本身 和其他包装类互转如NaslIneger
+        //  兼容 undefined 空 数字 2.21 字符串 ‘2.21’ 包装类本身 和其他包装类互转如NaslInteger
         if (isNil(v)) {
-            v = '0'; // Decimal 不支持传 空字符串
-            this.__str = undefined;// 用包装类实现原生语言的空值
+            return v;
         } else if (v instanceof NaslLong) {
             this.fixedNum = v.fixedNum;
             this.__str = v.__str;
             this.value = v.value;
-        } else if (v instanceof NaslDecimal) {
-            this.fixedNum = v.fixedNum || 0; // 整数转小数  要默认保留几位小数？
-            this.__str = v.__str;
-            this.value = v.__str; // 用新的包装类在初始化字符串一次
         } else {
             if (v instanceof Date) {
                 v = String(+v);
@@ -261,25 +255,24 @@ export class NaslLong {
     }
 
     add(v) {
-        // 整数 + 小数： 将整数扩充精度 当作小数*小数运算
-        if (String(v).includes('.') || v instanceof NaslDecimal) {
-            return new NaslDecimal(this.__str).add(new NaslDecimal(String(v)));
-        }
+        // // 整数 + 小数： 将整数扩充精度 当作小数*小数运算
+        // if (String(v).includes('.') || v instanceof NaslDecimal) {
+        //     return new NaslDecimal(this.__str).add(new NaslDecimal(String(v)));
+        // }
         return this.binaryOperations(v, (targetValue) => this.value.add(targetValue));
     }
 
     minus(v) {
-        if (String(v).includes('.') || v instanceof NaslDecimal) {
-            return new NaslDecimal(this.__str).minus(new NaslDecimal(String(v)));
-        }
+        // if (String(v).includes('.') || v instanceof NaslDecimal) {
+        //     return new NaslDecimal(this.__str).minus(new NaslDecimal(String(v)));
+        // }
         return this.binaryOperations(v, (targetValue) => this.value.sub(targetValue));
     }
 
-    multiply(v) {
-        if (String(v).includes('.') || v instanceof NaslDecimal) {
-            return new NaslDecimal(this.__str).multiply(new NaslDecimal(String(v)));
-        }
-        // return this.binaryOperations(v, (targetValue) => this.value.mul(targetValue));
+    times(v) {
+        // if (String(v).includes('.') || v instanceof NaslDecimal) {
+        //     return new NaslDecimal(this.__str).times(new NaslDecimal(String(v)));
+        // }
         const operationCb = (targetValue) => this.value.mul(targetValue);
         if (v === undefined || !v) {
             v = '0';
@@ -295,52 +288,49 @@ export class NaslLong {
         return new NaslLong(resultStr);
     }
 
-    divide(v) {
-        if (String(v) === '0') {
-            throw new Error('除数不能为 0');
-        }
-        const result = new NaslDecimal(this.__str).divide(new NaslDecimal(String(v)));
+    dividedBy(v) {
+        // if (String(v) === '0') {
+        //     throw new Error('除数不能为 0');
+        // }
+        const result = naslDividedBy(new NaslDecimal(this.__str), new NaslDecimal(String(v)));
         return result;
     }
 
-    mod(v) {
+    modulo(v) {
         // ，/ % 的除数是 0 时前端抛异常
-        if (String(v) === '0') {
-            throw new Error('除数不能为 0');
-        }
-        if (String(v).includes('.') || v instanceof NaslDecimal) {
-            return new NaslDecimal(this.__str).mod(new NaslDecimal(String(v)));
-        }
-        const operationCb = (targetValue) => this.value.mod(targetValue);
-        if (v === undefined || !v) {
-            v = '0';
-        }
-        let result;
-        if (v instanceof NaslLong) {
-            result = operationCb(v.value);
-        } else {
-            result = operationCb((new NaslLong(v.toString()).value));
-        }
-        const resultStr = result.toString();
-
-        return new NaslLong(resultStr);
+        // if (String(v) === '0') {
+        //     throw new Error('除数不能为 0');
+        // }
+        // if (String(v).includes('.') || v instanceof NaslDecimal) {
+        //     return new NaslDecimal(this.__str).modulo(new NaslDecimal(String(v)));
+        // }
+        // const operationCb = (targetValue) => this.value.modulo(targetValue);
+        // if (v === undefined || !v) {
+        //     v = '0';
+        // }
+        // let result;
+        // if (v instanceof NaslLong) {
+        //     result = operationCb(v.value);
+        // } else {
+        //     result = operationCb((new NaslLong(v.toString()).value));
+        // }
+        // const resultStr = result.toString();
+        // return new NaslLong(resultStr);
+        const result = naslModulo(new NaslDecimal(this.__str), new NaslDecimal(String(v)));
+        return result;
     }
 
-    binaryOperations(v, operationCb, precision = 0) {
+    binaryOperations(v, operationCb) {
         if (v === undefined || !v) {
             v = '0';
         }
-        let vStr = '';
         let result;
         if (v instanceof NaslLong) {
-            vStr = v.__str;
             result = operationCb(v.value);
         } else {
             //  数字 字符串 undefined Decimal
-            vStr = v.toString();
             result = operationCb((new NaslLong(v.toString()).value));
         }
-        // const resultStr = result.toFixed(Math.max(getPrecision(vStr), precision || getPrecision(this.__str)));
         const resultStr = result.toString();
 
         return new NaslLong(resultStr);
@@ -375,4 +365,3 @@ export class NaslLong {
         return this.value.lte(new NaslLong(target).value);
     }
 }
-
