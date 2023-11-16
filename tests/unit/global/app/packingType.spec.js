@@ -27,17 +27,15 @@ function sExp(symbol, a, b, className, targetClassName) {
     };
     const NaslA = new window[className](a);
     const NaslB = new window[targetClassName](b);
-    // console.log(new window[className](a))
-    // console.log(new window[targetClassName](b))
-    // console.log(NaslA[map[symbol]](NaslB))
     return NaslA[map[symbol]](NaslB);
 }
 
 describe('global/app/packingType', () => {
     test('binaryOperations', () => {
         const errMsg = '除数不能为 0';
-
+        expect(sExp('*', '1.2', '0.8', 'NaslDecimal')?.__str).toBe('0.96');
         expect(sExp('/', '10', '2', 'NaslLong')?.__str).toBe('5');
+        expect(sExp('/', '12', '12', 'NaslLong')?.__str).toBe('1');
         expect(sExp('/', '10', '3', 'NaslLong')?.__str).toBe('3.33333333333333333330');
         expect(() => sExp('/', '1', '0', 'NaslLong')).toThrow(errMsg);
         expect(() => sExp('/', '-0', '0', 'NaslLong')).toThrow(errMsg);
@@ -49,6 +47,7 @@ describe('global/app/packingType', () => {
         expect(() => sExp('/', '-0', '0', 'NaslLong', 'String')).toThrow(errMsg);
         expect(() => sExp('%', '0', '0', 'NaslLong', 'String')).toThrow(errMsg);
 
+        expect(sExp('/', '12', '12', 'NaslDecimal')?.__str).toBe('1');
         expect(sExp('+', '0.06', '0.04', 'NaslDecimal')?.__str).toBe('0.10');
         expect(sExp('+', '0.05', '-0.05', 'NaslDecimal')?.__str).toBe('0.00');
         expect(sExp('+', '-0.05', '0.05', 'NaslDecimal')?.__str).toBe('0.00');
@@ -61,7 +60,10 @@ describe('global/app/packingType', () => {
         expect(() => sExp('/', '-0', '0', 'NaslDecimal')).toThrow(errMsg);
         expect(() => sExp('%', '2.66', '0', 'NaslDecimal')).toThrow(errMsg);
         expect(() => sExp('%', '0', '0', 'NaslDecimal')).toThrow(errMsg);
+        // this.$global.divide(i.countday, '181')
+        // 包装类45
 
+        // e {__value: o, __str: '0', fixedNum: 1}
         expect(sExp('+', '0.06', '0.04', 'NaslDecimal', 'String')?.__str).toBe('0.10');
         expect(sExp('+', '0.05', '-0.05', 'NaslDecimal', 'String')?.__str).toBe('0.00');
         expect(sExp('+', '-0.05', '0.05', 'NaslDecimal', 'String')?.__str).toBe('0.00');

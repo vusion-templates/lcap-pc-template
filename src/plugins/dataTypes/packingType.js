@@ -72,7 +72,18 @@ export class NaslDecimal {
     }
 
     multiply(v) {
-        return this.binaryOperations(v, (targetValue) => this.value.mul(targetValue));
+        const operationCb = (targetValue) => this.value.mul(targetValue);
+        if (v === undefined || !v) {
+            v = '0';
+        }
+        let result;
+        if (v instanceof NaslDecimal) {
+            result = operationCb(v.value);
+        } else {
+            result = operationCb((new NaslDecimal(v.toString()).value));
+        }
+        const resultStr = String(result);
+        return new NaslDecimal(resultStr);
     }
 
     divide(v) {
@@ -109,7 +120,19 @@ export class NaslDecimal {
         if (String(v) === '0') {
             throw new Error('除数不能为 0');
         }
-        return this.binaryOperations(v, (targetValue) => this.value.mod(targetValue));
+        // return this.binaryOperations(v, (targetValue) => this.value.mod(targetValue));
+        const operationCb = (targetValue) => this.value.mod(targetValue);
+        if (v === undefined || !v) {
+            v = '0';
+        }
+        let result;
+        if (v instanceof NaslDecimal) {
+            result = operationCb(v.value);
+        } else {
+            result = operationCb((new NaslDecimal(v.toString()).value));
+        }
+        const resultStr = String(result);
+        return new NaslDecimal(resultStr);
     }
 
     binaryOperations(v, operationCb, precision = 0) {
@@ -240,14 +263,26 @@ export class NaslLong {
     }
 
     multiply(v) {
-        return this.binaryOperations(v, (targetValue) => this.value.mul(targetValue));
+        // return this.binaryOperations(v, (targetValue) => this.value.mul(targetValue));
+        const operationCb = (targetValue) => this.value.mul(targetValue);
+        if (v === undefined || !v) {
+            v = '0';
+        }
+        let result;
+        if (v instanceof NaslLong) {
+            result = operationCb(v.value);
+        } else {
+            result = operationCb((new NaslLong(v.toString()).value));
+        }
+        const resultStr = result.toString();
+
+        return new NaslLong(resultStr);
     }
 
     divide(v) {
         if (String(v) === '0') {
             throw new Error('除数不能为 0');
         }
-        //   export function divide(left: Long, right: Long): Decimal;
         const result = new NaslDecimal(this.__str).divide(new NaslDecimal(String(v)));
         return result;
     }
@@ -257,7 +292,19 @@ export class NaslLong {
         if (String(v) === '0') {
             throw new Error('除数不能为 0');
         }
-        return this.binaryOperations(v, (targetValue) => this.value.mod(targetValue));
+        const operationCb = (targetValue) => this.value.mod(targetValue);
+        if (v === undefined || !v) {
+            v = '0';
+        }
+        let result;
+        if (v instanceof NaslLong) {
+            result = operationCb(v.value);
+        } else {
+            result = operationCb((new NaslLong(v.toString()).value));
+        }
+        const resultStr = result.toString();
+
+        return new NaslLong(resultStr);
     }
 
     binaryOperations(v, operationCb, precision = 0) {
