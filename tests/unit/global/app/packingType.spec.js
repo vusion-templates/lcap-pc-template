@@ -45,10 +45,9 @@ describe('global/app/packingType', () => {
         expect(sExp('-', '10', '0.12', 'NaslLong', 'String')?.__str).toBe('9.88');
 
         // 同类型运算
-        expect(sExp('*', '1.2', '0.8', 'NaslDecimal')?.__str).toBe('0.96');
         expect(sExp('/', '10', '2', 'NaslLong')?.__str).toBe('5');
         expect(sExp('/', '12', '12', 'NaslLong')?.__str).toBe('1');
-        expect(sExp('/', '10', '3', 'NaslLong')?.__str).toBe('3.33333333333333333330');
+        expect(sExp('/', '10', '3', 'NaslLong')?.__str).toBe('3.3333333333333333333');
         expect(() => sExp('/', '1', '0', 'NaslLong')).toThrow(errMsg);
         expect(() => sExp('/', '-0', '0', 'NaslLong')).toThrow(errMsg);
         expect(() => sExp('%', '0', '0', 'NaslLong')).toThrow(errMsg);
@@ -60,11 +59,15 @@ describe('global/app/packingType', () => {
         expect(() => sExp('%', '0', '0', 'NaslLong', 'String')).toThrow(errMsg);
 
         expect(sExp('/', '12', '12', 'NaslDecimal')?.__str).toBe('1');
+        expect(sExp('/', '2.0', '2', 'NaslDecimal')?.__str).toBe('1.0');
         expect(sExp('+', '0.06', '0.04', 'NaslDecimal')?.__str).toBe('0.10');
         expect(sExp('+', '0.05', '-0.05', 'NaslDecimal')?.__str).toBe('0.00');
         expect(sExp('+', '-0.05', '0.05', 'NaslDecimal')?.__str).toBe('0.00');
+        expect(sExp('*', '1.2', '0.8', 'NaslDecimal')?.__str).toBe('0.96');
+        expect(sExp('*', '2.0', '2', 'NaslDecimal')?.__str).toBe('4.0');
         expect(sExp('/', '1', '3', 'NaslDecimal')?.__str).toBe('0.33333333333333333333');
         expect(sExp('/', '0.5', '0.02', 'NaslDecimal')?.__str).toBe('25');
+        expect(sExp('*', '0.19', '0.190', 'NaslDecimal')?.__str).toBe('0.03610');
         expect(sExp('%', '2.66', '-0.2', 'NaslDecimal')?.__str).toBe('0.06');
         expect(sExp('%', '-2.66', '0.2', 'NaslDecimal')?.__str).toBe('-0.06');
         expect(() => sExp('/', '1', '0', 'NaslDecimal')).toThrow(Error);

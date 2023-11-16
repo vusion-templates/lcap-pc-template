@@ -13,6 +13,8 @@ window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 const adaptType = (value) => typeof value === 'number' ? value : Number(value);
 export const isNumberStr = (str) => /^[-+]?\d+(\.\d+)?$/.test(str);
+export const isNaslNumber = (v) => v instanceof window.NaslDecimal || v instanceof window.NaslLong;
+
 export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
