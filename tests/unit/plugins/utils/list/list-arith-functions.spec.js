@@ -48,6 +48,12 @@ describe('List arithmetic (aggregation) functions', () => {
             expect(utils.ListProduct(list).__str).toBe('-8');
             expect(utils.ListSum(list).__str).toBe('3');
         }
+
+        {
+            const list = ['111', 'aa', 'ab'];
+            expect(utils.ListMax(list)).toBe('ab');
+            expect(utils.ListMin(list)).toBe('111');
+        }
     });
 
     test('测试数值精度', () => {

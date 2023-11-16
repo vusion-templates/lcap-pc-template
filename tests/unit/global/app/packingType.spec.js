@@ -35,8 +35,8 @@ describe('global/app/packingType', () => {
         const errMsg = '除数不能为 0';
 
         // 不同类型运算
-        expect(sExp('*', '10', '0.12', 'NaslLong', 'NaslDecimal')?.__str).toBe('1.2');
-        expect(sExp('*', '10', '0.12', 'NaslLong', 'String')?.__str).toBe('1.2');
+        expect(sExp('*', '10', '0.12', 'NaslLong', 'NaslDecimal')?.__str).toBe('1.20');
+        expect(sExp('*', '10', '0.12', 'NaslLong', 'String')?.__str).toBe('1.20');
 
         expect(sExp('+', '10', '0.12', 'NaslLong', 'NaslDecimal')?.__str).toBe('10.12');
         expect(sExp('+', '10', '0.12', 'NaslLong', 'String')?.__str).toBe('10.12');
