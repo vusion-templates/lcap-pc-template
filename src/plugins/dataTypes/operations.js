@@ -5,6 +5,7 @@ import { NaslDecimal, NaslLong, isNil } from '@/plugins/dataTypes/packingType';
 export const isNaslNumber = (v) => v instanceof window.NaslDecimal || v instanceof window.NaslLong;
 export const isNaslDecimal = (v) => v instanceof window.NaslDecimal;
 export const isNaslLong = (v) => v instanceof window.NaslLong;
+export const isNaNOrUndefined = (v) => v === undefined || Number.isNaN(v);
 
 // side effects. 使用副作用修改操作数
 function operandImplicitConversion(wrapper) {
@@ -36,15 +37,6 @@ const opMap = {
     lessThanOrEqual: (x, y) => x <= y,
 };
 
-// const jsCompatibleAdd(x, y) {
-//     if (typeof x === 'string') {
-//         return x + String(y);
-//     } else if (typeof y === 'string') {
-//         return String(x) + y;
-//     }
-// }
-
-
 const runJSBuiltinArithOperation = (x, y, op) => {
     let xx = isNaslNumber(x) ? eval(x.__str) : x;
     let yy = isNaslNumber(y) ? eval(y.__str) : y;
@@ -61,26 +53,6 @@ const runJSBuiltinArithOperation = (x, y, op) => {
         }
     }
     return jsBuiltInRes;
-
-    // if (isNaslDecimal(x)) {
-    //     x = Number(x.__str);
-    //     return new NaslDecimal('' + opMap[op](x, y));
-    // }
-    // if (isNaslLong(x)) {
-    //     // Nasl 要求操作数类型相同，NaslLong(1) * '0.3' 这种视为未定义行为，返回 NaslDecimal 都是给面子了
-    //     x = Number(x.__str);
-    //     return new NaslDecimal('' + opMap[op](x, y));
-    // }
-
-    // if (isNaslDecimal(y)) {
-    //     y = Number(y.__str);
-    //     return new NaslDecimal('' + opMap[op](x, y));
-    // }
-    // if (isNaslLong(y)) {
-    //     y = Number(y.__str);
-    //     return new NaslDecimal('' + opMap[op](x, y));
-    // }
-    // return jsBuiltInRes;
 };
 
 const runJSBuiltInRelationalOperation = (x, y, op) => {
@@ -90,6 +62,10 @@ const runJSBuiltInRelationalOperation = (x, y, op) => {
 };
 
 export function naslAdd(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltinArithOperation(x, y, 'add');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         // 支持高精度和number/string相加 不限制被加数
@@ -100,6 +76,10 @@ export function naslAdd(x, y) {
 
 // 减
 export function naslMinus(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltinArithOperation(x, y, 'minus');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return xx.minus(yy);
@@ -110,6 +90,10 @@ export function naslMinus(x, y) {
 
 // 乘
 export function naslTimes(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltinArithOperation(x, y, 'times');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return xx.times(yy);
@@ -120,6 +104,10 @@ export function naslTimes(x, y) {
 
 // 除
 export function naslDividedBy(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltinArithOperation(x, y, 'divideBy');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return xx.dividedBy(yy);
@@ -130,6 +118,10 @@ export function naslDividedBy(x, y) {
 
 // 取余
 export function naslModulo(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltinArithOperation(x, y, 'modulo');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return xx.modulo(yy);
@@ -140,6 +132,10 @@ export function naslModulo(x, y) {
 
 // 相等
 export function naslEquals(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltinArithOperation(x, y, 'equals');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return x.equals(yy);
@@ -149,6 +145,10 @@ export function naslEquals(x, y) {
 
 // 不相等
 export function naslNotEqual(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltinArithOperation(x, y, 'notEqual');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return !x.equals(yy);
@@ -158,6 +158,10 @@ export function naslNotEqual(x, y) {
 
 // 大于
 export function naslGreaterThan(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltInRelationalOperation(x, y, 'greaterThan');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return xx.gt(yy);
@@ -167,6 +171,10 @@ export function naslGreaterThan(x, y) {
 
 // 大于等于
 export function naslGreaterThanOrEqual(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltInRelationalOperation(x, y, 'greaterThanOrEqual');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return xx.gte(yy);
@@ -176,6 +184,10 @@ export function naslGreaterThanOrEqual(x, y) {
 
 // 小于
 export function naslLessThan(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltInRelationalOperation(x, y, 'lessThan');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return xx.lt(yy);
@@ -185,6 +197,10 @@ export function naslLessThan(x, y) {
 
 // 小于等于
 export function naslLessThanOrEqual(x, y) {
+    if (isNaslNumber(x) && isNaslNumber(y) &&
+        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
+        return runJSBuiltInRelationalOperation(x, y, 'lessThanOrEqual');
+    }
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
         return xx.lte(yy);
