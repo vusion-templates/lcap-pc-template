@@ -135,7 +135,7 @@ function genConstructor(typeKey, definition, Vue) {
                     name: propertyName,
                     typeAnnotation,
                 } = property || {};
-                const defaultValue = property.defaultValue;
+                const defaultValue = property.defaultCode;
 
                 const isNaslNumber = typeAnnotation?.typeKind === 'primitive' && ['Decimal', 'Long', 'Double', 'Int'].includes(typeAnnotation?.typeName);
 
