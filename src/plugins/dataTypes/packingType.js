@@ -161,8 +161,8 @@ export class NaslDecimal {
         }
         const resultStr = String(result);
         return ['Infinity', '-Infinity', 'NaN', 'undefined', 'null'].includes(resultStr)
-                ? eval(resultStr) // 去掉引号
-                : new NaslDecimal(resultStr);
+            ? eval(resultStr) // 去掉引号
+            : new NaslDecimal(resultStr);
     }
 
     binaryOperations(v, operationCb, precision = 0) {
@@ -236,7 +236,7 @@ export class NaslLong {
             }
             if (String(v).includes('.') && String(v).split('.')?.length === 2) {
                 // v = String(v).split('.')[0];
-                v = String(Number(v).toFixed(0)); // 整数类型传入小数 先取整再赋值
+                v = String(new NaslDecimal(String(v)).value.toFixed(0)); // 整数类型传入小数 先取整再赋值
             }
 
             this.fixedNum = typeof v === 'string' ? v.length : v.toString().length;
