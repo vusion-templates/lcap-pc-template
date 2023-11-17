@@ -50,6 +50,12 @@ describe('List arithmetic (aggregation) functions', () => {
         }
 
         {
+            const list = ['123', 'abc', 'abb'];
+            expect(utils.ListMax(list)).toBe('abc');
+            expect(utils.ListMin(list)).toBe('123');
+        }
+
+        {
             const list = ['111', 'aa', 'ab'];
             expect(utils.ListMax(list)).toBe('ab');
             expect(utils.ListMin(list)).toBe('111');
@@ -62,6 +68,9 @@ describe('List arithmetic (aggregation) functions', () => {
         expect(utils.ListSum(list).__str).toBe('2.0');
         expect(utils.ListProduct(list).__str).toBe('0.96');
         expect(utils.ListAverage(list).__str).toBe('1.0');
+
+        const list2 = ['1.2', '2.4', '6.4'];
+        expect(utils.ListSum(list2)).toEqual(new NaslDecimal('10.0'));
     });
 
     test('QA 给的用例', () => {

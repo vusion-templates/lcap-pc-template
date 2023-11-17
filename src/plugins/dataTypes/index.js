@@ -1,4 +1,3 @@
-import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
 import cookie from '@/utils/cookie';
 
@@ -8,12 +7,11 @@ import { initService as ioInitService } from '@/apis/io';
 import authService from '../auth/authService';
 import { initApplicationConstructor, genSortedTypeKey, genInitData, isInstanceOf } from './tools';
 import { porcessPorts } from '../router/processService';
+import { naslAdd, naslMinus, naslTimes, naslDividedBy, naslModulo, naslGreaterThan, naslGreaterThanOrEqual,
+    naslLessThan, naslLessThanOrEqual, naslEquals, naslNotEqual } from '../dataTypes/operations';
 
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
-const adaptType = (value) => typeof value === 'number' ? value : Number(value);
-export const isNumberStr = (str) => /^[-+]?\d+(\.\d+)?$/.test(str);
-export const isNaslNumber = (v) => v instanceof window.NaslDecimal || v instanceof window.NaslLong;
 
 export default {
     install(Vue, options = {}) {
@@ -46,182 +44,17 @@ export default {
             // 前端全局变量
             frontendVariables,
             // 加
-            add(x, y) {
-                if (isNumberStr(x) && isNumberStr(y)) {
-                    x = new window.NaslDecimal(x);
-                }
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    // 支持高精度和number/string相加 不限制被加数
-                    return x.add(y);
-                }
-                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
-                    y = y.toString();
-                }
-                // 前后都有问题 要么是 在前边 '0' + null = o null   要么是  在后边 undefinde+ 'xx'  = '0xx'
-                if (isNumberStr(x)) {
-                    x = Number(x);
-                }
-                if (isNumberStr(y)) {
-                    y = Number(y);
-                }
-                if (typeof x !== 'number' || typeof y !== 'number') {
-                    return x + y;
-                }
-                if (!x) {
-                    x = 0;
-                }
-                if (!y) {
-                    y = 0;
-                }
-                const xx = new Decimal(x + '');
-                const yy = new Decimal(y + '');
-                return xx.plus(yy).toNumber();
-            },
-            // 减
-            minus(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.minus(y);
-                }
-                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
-                    y = y.toString();
-                }
-                if (!x) {
-                    x = 0;
-                }
-                if (!y) {
-                    y = 0;
-                }
-                const xx = new Decimal(x + '');
-                const yy = new Decimal(y + '');
-                return xx.minus(yy).toNumber();
-            },
-            // 乘
-            multiply(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.multiply(y);
-                }
-                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
-                    y = y.toString();
-                }
-                if (!x) {
-                    x = 0;
-                }
-                if (!y) {
-                    y = 0;
-                }
-                const xx = new Decimal(x + '');
-                const yy = new Decimal(y + '');
-                return xx.mul(yy).toNumber();
-            },
-            // 除
-            divide(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.divide(y);
-                }
-                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
-                    y = y.toString();
-                }
-                if (!x) {
-                    x = 0;
-                }
-                if (!y) {
-                    y = 0;
-                }
-                const xx = new Decimal(x + '');
-                const yy = new Decimal(y + '');
-                return xx.div(yy).toNumber();
-            },
-            remainder(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.mod(y);
-                }
-                if (y instanceof window.NaslDecimal || y instanceof window.NaslLong) {
-                    y = y.toString();
-                }
-                if (!x) {
-                    x = 0;
-                }
-                if (!y) {
-                    y = 0;
-                }
-                const xx = new Decimal(x + '');
-                const yy = new Decimal(y + '');
-                return xx.mod(yy).toNumber(); // 20位
-            },
-            // 相等
-            isEqual(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.equals(y);
-                }
-                // const entureNumber =()=>
-                // if (isNumberStr(x)) {
-                //     x = Number(x);
-                // }
-                // if (isNumberStr(y)) {
-                //     y = Number(y);
-                // }
-                // eslint-disable-next-line eqeqeq
-                return x == y;
-            },
-            // // 不相等
-            isNotEqual(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return !x.equals(y);
-                }
-            },
-            // 大于
-            greaterThan(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.gt(y);
-                }
-                x = adaptType(x);
-                y = adaptType(y);
-                return x > y;
-            },
-            // 大于等于
-            greaterThanOrEqual(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.gte(y);
-                }
-                x = adaptType(x);
-                y = adaptType(y);
-                return x >= y;
-            },
-            // 小于
-            lessThan(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.lt(y);
-                }
-                x = adaptType(x);
-                y = adaptType(y);
-                return x < y;
-            },
-            // 小于等于
-            lessThanOrEqual(x, y) {
-                if (x instanceof window.NaslDecimal || x instanceof window.NaslLong) {
-                    return x.lte(y);
-                }
-                x = adaptType(x);
-                y = adaptType(y);
-                return x <= y;
-            },
-            // // 与
-            // isAnd(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX && actualY;
-            // },
-            // // 或
-            // isOr(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX || actualY;
-            // },
-            // // 非
-            // isNot(val) {
-            //    const actualVal = getActualValue(val);
-            //    return !actualVal;
-            // },
+            add: naslAdd,
+            minus: naslMinus,
+            multiply: naslTimes,
+            divide: naslDividedBy,
+            remainder: naslModulo,
+            isEqual: naslEquals,
+            isNotEqual: naslNotEqual,
+            greaterThan: naslGreaterThan,
+            greaterThanOrEqual: naslGreaterThanOrEqual,
+            lessThan: naslLessThan,
+            lessThanOrEqual: naslLessThanOrEqual,
             requestFullscreen() {
                 return document.body.requestFullscreen();
             },

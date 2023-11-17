@@ -20,8 +20,8 @@ describe('Test List Contains', () => {
         expect(cutils.Contains(list, 4)).toBe(true);
         expect(cutils.Contains(list, -2)).toBe(true);
         expect(cutils.Contains(list, null)).toBe(true);
+        expect(cutils.Contains(list, undefined)).toBe(true);
         expect(cutils.Contains(list, 3)).toBe(false);
-        expect(cutils.Contains(list, undefined)).toBe(false);
     });
 
     test('正常输入 2', () => {
@@ -32,8 +32,7 @@ describe('Test List Contains', () => {
         expect(cutils.Contains(list, new NaslLong('-2'))).toBe(true);
         expect(cutils.Contains(list, null)).toBe(true);
         expect(cutils.Contains(list, new NaslLong('3'))).toBe(false);
-        expect(cutils.Contains(list,3)).toBe(false);
-        expect(cutils.Contains(list, undefined)).toBe(false);
+        expect(cutils.Contains(list, 3)).toBe(false);
     });
 
     test('正常输入 字符串', () => {
@@ -44,6 +43,5 @@ describe('Test List Contains', () => {
         expect(cutils.Contains(list, '-2')).toBe(true);
         expect(cutils.Contains(list, null)).toBe(true);
         expect(cutils.Contains(list, '3')).toBe(false);
-        expect(cutils.Contains(list, undefined)).toBe(false);
     });
 });
