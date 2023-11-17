@@ -6,6 +6,25 @@ export const isNil = (v) => v === undefined || v === null || v === 'undefined' |
 
 window.Long = Long;
 window.Decimal = Decimal;
+
+const opMap = {
+    add: (x, y) => x + y,
+    minus: (x, y) => x - y,
+    times: (x, y) => x * y,
+    dividedBy: (x, y) => x / y,
+    modulo: (x, y) => x % y,
+    // 危险，不能冒然修改成 ===
+    equals: (x, y) => x == y,
+    // 危险，不能冒然修改成 !==
+    notEqual: (x, y) => x != y,
+    greaterThan: (x, y) => x > y,
+    greaterThanOrEqual: (x, y) => x >= y,
+    lessThan: (x, y) => x < y,
+    lessThanOrEqual: (x, y) => x <= y,
+};
+
+const runBuiltInOp = (x, y, op) => opMap[op](x, y);
+
 export class NaslDecimal {
     __value = new Decimal(0)
 
@@ -66,14 +85,23 @@ export class NaslDecimal {
     }
 
     add(v) {
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'add');
+        }
         return this.binaryOperations(v, (targetValue) => this.value.add(targetValue));
     }
 
     minus(v) {
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'minus');
+        }
         return this.binaryOperations(v, (targetValue) => this.value.sub(targetValue));
     }
 
     times(v) {
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'times');
+        }
         const operationCb = (targetValue) => this.value.mul(targetValue);
         if (v === undefined || !v) {
             v = '0';
@@ -100,7 +128,9 @@ export class NaslDecimal {
         // if (String(v) === '0') {
         //     throw new Error('除数不能为 0');
         // }
-
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'dividedBy');
+        }
         const operationCb = (targetValue) => this.value.div(targetValue);
         if (v === undefined || !v) {
             v = '0';
@@ -129,6 +159,9 @@ export class NaslDecimal {
         // if (String(v) === '0') {
         //     throw new Error('除数不能为 0');
         // }
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'modulo');
+        }
         const operationCb = (targetValue) => this.value.modulo(targetValue);
         if (v === undefined || !v) {
             v = '0';
@@ -164,6 +197,9 @@ export class NaslDecimal {
     }
 
     equals(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'equals');
+        }
         if (isNil(target)) {
             return target === this.__str || String(target) === this.__str;
         }
@@ -177,18 +213,30 @@ export class NaslDecimal {
     }
 
     gt(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'greaterThan');
+        }
         return this.value.gt(new NaslDecimal(target).value);
     }
 
     gte(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'greaterThanOrEqual');
+        }
         return this.value.gte(new NaslDecimal(target).value);
     }
 
     lt(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'lessThan');
+        }
         return this.value.lt(new NaslDecimal(target).value);
     }
 
     lte(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'lessThanOrEqual');
+        }
         return this.value.lte(new NaslDecimal(target).value);
     }
 }
@@ -204,6 +252,7 @@ export class NaslLong {
         //  兼容 undefined 空 数字 2.21 字符串 ‘2.21’ 包装类本身 和其他包装类互转如NaslInteger
         if (isNil(v)) {
             this.__str = undefined;// 用包装类实现原生语言的空值
+            this.__value = undefined;
             return v;
         } else if (v instanceof NaslLong) {
             this.fixedNum = v.fixedNum;
@@ -256,6 +305,9 @@ export class NaslLong {
     }
 
     add(v) {
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'add');
+        }
         // // 整数 + 小数： 将整数扩充精度 当作小数*小数运算
         // if (String(v).includes('.') || v instanceof NaslDecimal) {
         //     return new NaslDecimal(this.__str).add(new NaslDecimal(String(v)));
@@ -264,6 +316,9 @@ export class NaslLong {
     }
 
     minus(v) {
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'minus');
+        }
         // if (String(v).includes('.') || v instanceof NaslDecimal) {
         //     return new NaslDecimal(this.__str).minus(new NaslDecimal(String(v)));
         // }
@@ -271,6 +326,9 @@ export class NaslLong {
     }
 
     times(v) {
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'times');
+        }
         // if (String(v).includes('.') || v instanceof NaslDecimal) {
         //     return new NaslDecimal(this.__str).times(new NaslDecimal(String(v)));
         // }
@@ -290,6 +348,9 @@ export class NaslLong {
     }
 
     dividedBy(v) {
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'dividedBy');
+        }
         // if (String(v) === '0') {
         //     throw new Error('除数不能为 0');
         // }
@@ -298,6 +359,9 @@ export class NaslLong {
     }
 
     modulo(v) {
+        if (isNil(this.__str) || isNil(v)) {
+            return runBuiltInOp(this.__str, v, 'modulo');
+        }
         // ，/ % 的除数是 0 时前端抛异常
         // if (String(v) === '0') {
         //     throw new Error('除数不能为 0');
@@ -338,6 +402,9 @@ export class NaslLong {
     }
 
     equals(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'equals');
+        }
         if (isNil(target)) {
             return target === this.__str || String(target) === this.__str;
         }
@@ -351,18 +418,30 @@ export class NaslLong {
     }
 
     gt(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'greaterThan');
+        }
         return this.value.gt(new NaslLong(target).value);
     }
 
     gte(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'greaterThanOrEqual');
+        }
         return this.value.gte(new NaslLong(target).value);
     }
 
     lt(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'lessThan');
+        }
         return this.value.lt(new NaslLong(target).value);
     }
 
     lte(target) {
+        if (isNil(this.__str) || isNil(target)) {
+            return runBuiltInOp(this.__str, target, 'lessThanOrEqual');
+        }
         return this.value.lte(new NaslLong(target).value);
     }
 }

@@ -118,6 +118,8 @@ describe('global/app/packingType', () => {
         expect(sExp('-', 'NaN', '0.12', 'String', 'NaslDecimal')).toBe(NaN);
         expect(sExp('-', '0.12', 'NaN', 'NaslDecimal', 'String')).toBe(NaN);
 
+        expect(sExp('-', 'undefined', 'NaN', 'NaslLong')).toBe(NaN);
+
         expect(naslAdd(null, '1')).toBe('null1');
         expect(naslAdd('1', null)).toBe('1null');
         expect(naslAdd(undefined, '1')).toBe('undefined1');
