@@ -117,7 +117,7 @@ export class NaslDecimal {
 
         // 操作数精度相减，并和结果中的精度取较大者
         const resultStr = result.toFixed(Math.max(getPrecision(String(result)),
-                                                  getPrecision(this.__str) - getPrecision(vStr)));
+            getPrecision(this.__str) - getPrecision(vStr)));
         return new NaslDecimal(resultStr);
     }
 
@@ -219,7 +219,8 @@ export class NaslLong {
                 v = String(+v);
             }
             if (String(v).includes('.') && String(v).split('.')?.length === 2) {
-                v = String(v).split('.')[0];
+                // v = String(v).split('.')[0];
+                v = String(Number(v).toFixed(0)); // 整数类型传入小数 先取整再赋值
             }
 
             this.fixedNum = typeof v === 'string' ? v.length : v.toString().length;
