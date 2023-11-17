@@ -880,8 +880,10 @@ function jsonNameReflection(properties, parsedValue) {
 const deepAttachAndProcess = (source, target) => {
     const sourceType = Object.prototype.toString.call(source);
     if (Array.isArray(source)) {
-        if (Array.isArray(target) && source.length !== source.length) {
-            target.length = 0;
+        if (Array.isArray(target)) {
+            if (source.length !== source.length) {
+                target.length = 0;
+            }
         } else {
             target = [];
         }
@@ -905,8 +907,10 @@ const deepAttachAndProcess = (source, target) => {
 export const rmWrapClass = (variable, target, shouldAttach) => {
     const variableType = Object.prototype.toString.call(variable);
     if (Array.isArray(variable)) {
-        if (Array.isArray(target) && variable.length !== target.length) {
-            target.length = 0;
+        if (Array.isArray(target)) {
+            if (variable.length !== target.length) {
+                target.length = 0;
+            }
         } else {
             target = [];
         }
