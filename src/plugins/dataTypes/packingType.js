@@ -196,19 +196,19 @@ export class NaslDecimal {
         }
     }
 
-    gt(target) {
+    greaterThan(target) {
         return this.value.gt(new NaslDecimal(target).value);
     }
 
-    gte(target) {
+    greaterThanOrEqual(target) {
         return this.value.gte(new NaslDecimal(target).value);
     }
 
-    lt(target) {
+    lessThan(target) {
         return this.value.lt(new NaslDecimal(target).value);
     }
 
-    lte(target) {
+    lessThanOrEqual(target) {
         return this.value.lte(new NaslDecimal(target).value);
     }
 }
@@ -374,19 +374,19 @@ export class NaslLong {
         }
     }
 
-    gt(target) {
+    greaterThan(target) {
         return this.value.gt(new NaslLong(target).value);
     }
 
-    gte(target) {
+    greaterThanOrEqual(target) {
         return this.value.gte(new NaslLong(target).value);
     }
 
-    lt(target) {
+    lessThan(target) {
         return this.value.lt(new NaslLong(target).value);
     }
 
-    lte(target) {
+    lessThanOrEqual(target) {
         return this.value.lte(new NaslLong(target).value);
     }
 }

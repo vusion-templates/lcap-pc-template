@@ -21,10 +21,10 @@ function sExp(symbol, a, b, className, targetClassName) {
         '/': naslDividedBy,
         '%': naslModulo,
         equals: naslEquals,
-        gt: naslGreaterThan,
-        gte: naslGreaterThanOrEqual,
-        lt: naslLessThan,
-        lte: naslLessThanOrEqual,
+        greaterThan: naslGreaterThan,
+        greaterThanOrEqual: naslGreaterThanOrEqual,
+        lessThan: naslLessThan,
+        lessThanOrEqual: naslLessThanOrEqual,
     };
     const NaslA = new window[className](a);
     const NaslB = targetClassName === 'String' ? String(b) : new window[targetClassName](b);
@@ -89,7 +89,7 @@ describe('global/app/packingType', () => {
         const variable4 = new window.NaslDecimal('1.10');
         expect(sExp('equals', variable1, variable2, 'NaslDecimal', 'NaslDecimal')).toBe(true);
         expect(sExp('equals', variable1, variable3, 'NaslDecimal', 'NaslDecimal')).toBe(false);
-        expect(sExp('lt', variable4, variable3, 'NaslDecimal', 'NaslDecimal')).toBe(true);
+        expect(sExp('lessThan', variable4, variable3, 'NaslDecimal', 'NaslDecimal')).toBe(true);
 
         expect(naslLessThanOrEqual(new NaslDecimal('1'), 'A')).toBe(false);
         expect(naslLessThanOrEqual('1', 'A')).toBe(true);

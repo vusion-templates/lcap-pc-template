@@ -30,7 +30,7 @@ import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './h
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
 import { NaslDecimal, NaslLong } from '../dataTypes/packingType';
 import { naslAdd, naslMinus, naslTimes, naslDividedBy, naslModulo, naslGreaterThan, naslGreaterThanOrEqual,
-        naslLessThan, naslLessThanOrEqual, naslEquals, naslNotEqual, isNaslNumber } from '../dataTypes/operations';
+        naslLessThan, naslLessThanOrEqual, naslEquals, naslNotEqual, isNaslNumber, isNaslDecimal, isNaslLong } from '../dataTypes/operations';
 
 let enumsMap = {};
 
@@ -90,14 +90,6 @@ const getElemHash = (e) => {
         return e;
     }
 };
-
-const recoverFromHash = (e) => {
-    if (typeof e === 'number') {
-        return new NaslDecimal('' + e);
-    } else {
-        return e;
-    }
-}
 
 export const utils = {
     Vue: undefined,
@@ -278,7 +270,7 @@ export const utils = {
         }
         const nullRemoved = removeNulls(arr);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) => naslAdd(prev, cur), new NaslDecimal('0'));
+            : nullRemoved.reduce((prev, cur) => naslAdd(prev, cur), 0);
     },
     ListProduct: (arr) => {
         if (!Array.isArray(arr)) {
@@ -286,14 +278,14 @@ export const utils = {
         }
         const nullRemoved = removeNulls(arr);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) => naslTimes(prev, cur), new NaslDecimal('1'));
+            : nullRemoved.reduce((prev, cur) => naslTimes(prev, cur), 1);
     },
     ListAverage: (arr) => {
         if (!Array.isArray(arr)) {
             return null;
         }
         const nullRemoved = removeNulls(arr);
-        return nullRemoved.length === 0 ? null : naslDividedBy(utils.ListSum(nullRemoved), new NaslDecimal(nullRemoved.length));
+        return nullRemoved.length === 0 ? null : naslDividedBy(utils.ListSum(nullRemoved), nullRemoved.length);
     },
     ListMax: (arr) => {
         if (!Array.isArray(arr)) {
@@ -301,13 +293,7 @@ export const utils = {
         }
         const nullRemoved = removeNulls(arr);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) => {
-                if (isNaslNumber(prev)) {
-                    return prev.gte(cur) ? prev : cur;
-                } else {
-                    return prev >= cur ? prev : cur;
-                }
-            }, nullRemoved[0]);
+            : nullRemoved.reduce((prev, cur) => naslGreaterThanOrEqual(prev, cur) ? prev : cur, nullRemoved[0]);
     },
     ListMin: (arr) => {
         if (!Array.isArray(arr)) {
@@ -315,13 +301,7 @@ export const utils = {
         }
         const nullRemoved = removeNulls(arr);
         return nullRemoved.length === 0 ? null
-            : nullRemoved.reduce((prev, cur) => {
-                if (isNaslNumber(prev)) {
-                    return prev.lte(cur) ? prev : cur;
-                } else {
-                    return prev <= cur ? prev : cur;
-                }
-            }, nullRemoved[0]);
+            : nullRemoved.reduce((prev, cur) => naslLessThanOrEqual(prev, cur) ? prev : cur, nullRemoved[0]);
     },
     ListReverse(arr) {
         if (Array.isArray(arr)) {
@@ -958,8 +938,8 @@ export const utils = {
         if (isNaN(parseFloat(v)) || isNaN(parseInt(digits)))
             return;
         if (digits !== undefined) {
-            // value = Number(value).toFixed(parseInt(digits));
-            if (isNaslNumber(v)) {
+            v = isNaslLong(v) ? new NaslDecimal(String(v)) : v;
+            if (isNaslDecimal(v)) {
                 v = v.value.toFixed(parseInt(digits)); // 修改后得还是naslDecimal __str 变更
             } else {
                 v = Number(v).toFixed(parseInt(digits)); // value  之前是个字符串

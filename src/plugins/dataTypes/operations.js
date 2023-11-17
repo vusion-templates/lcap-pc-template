@@ -1,11 +1,13 @@
 'use strict';
 
-import { NaslDecimal, NaslLong, isNil } from '@/plugins/dataTypes/packingType';
+import { NaslDecimal, NaslLong } from '@/plugins/dataTypes/packingType';
 
 export const isNaslNumber = (v) => v instanceof window.NaslDecimal || v instanceof window.NaslLong;
 export const isNaslDecimal = (v) => v instanceof window.NaslDecimal;
 export const isNaslLong = (v) => v instanceof window.NaslLong;
-export const isNaNOrUndefined = (v) => v === undefined || Number.isNaN(v);
+export const isUnhandledVal = (v) => [NaN, Infinity, -Infinity, undefined].includes(v);
+const isUnhandledValStr = (v) => ['NaN', 'Infinity', '-Infinity', 'undefined'].includes(v);
+const isNumberStr = (str) => /^[-+]?\d+(\.\d+)?$/.test(str);
 
 // side effects. 使用副作用修改操作数
 function operandImplicitConversion(wrapper) {
@@ -37,19 +39,38 @@ const opMap = {
     lessThanOrEqual: (x, y) => x <= y,
 };
 
+const shouldRunJSBuiltinOperation = (x, y, op) => {
+    // 字符串 + 语义太多，包装类不处理
+    if (op === 'add' && (typeof x === 'string' || typeof y === 'string')) {
+        return true;
+    }
+    // 特殊值 NaN, Infinity, -Infinity, undefined 语义复杂，包装类不处理
+    if (isNaslNumber(x) && isUnhandledValStr(x.__str)) {
+        return true;
+    }
+    if (isNaslNumber(y) && isUnhandledValStr(y.__str)) {
+        return true;
+    }
+    return false;
+};
+
 const runJSBuiltinArithOperation = (x, y, op) => {
     let xx = isNaslNumber(x) ? eval(x.__str) : x;
     let yy = isNaslNumber(y) ? eval(y.__str) : y;
 
     const jsBuiltInRes = opMap[op](xx, yy);
-    if (['Infinity', '-Infinity', 'NaN', 'undefined', 'null'].includes(String(jsBuiltInRes))) {
+    if (isUnhandledVal(jsBuiltInRes)) {
         return jsBuiltInRes;
     }
+
+    // 尽量返回包装类
     if (typeof jsBuiltInRes === 'number') {
         if (isNaslDecimal(x) || isNaslDecimal(y)) {
             return new NaslDecimal(jsBuiltInRes);
         } else {
-            return Number.isInteger(jsBuiltInRes) ? new NaslLong(jsBuiltInRes) : new NaslDecimal(jsBuiltInRes);
+            return Number.isInteger(jsBuiltInRes)
+                ? new NaslLong(jsBuiltInRes)
+                : new NaslDecimal(jsBuiltInRes);
         }
     }
     return jsBuiltInRes;
@@ -61,149 +82,84 @@ const runJSBuiltInRelationalOperation = (x, y, op) => {
     return opMap[op](x, y);
 };
 
-export function naslAdd(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltinArithOperation(x, y, 'add');
+const dispatchBinaryArithOperation = (x, y, op) => {
+    if (isNumberStr(x) && isNumberStr(y)) {
+        x = new window.NaslDecimal(x);
+        y = new window.NaslDecimal(y);
     }
+    if (shouldRunJSBuiltinOperation(x, y, op)) {
+        return runJSBuiltinArithOperation(x, y, op);
+    }
+
     const [xx, yy] = operandImplicitConversion({ x, y });
     if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        // 支持高精度和number/string相加 不限制被加数
-        return xx.add(yy);
+        return xx[op](yy);
     }
-    return runJSBuiltinArithOperation(xx, yy, 'add');
+    return runJSBuiltinArithOperation(xx, yy, op);
+};
+
+const dispatchBinaryRelationalOperation = (x, y, op) => {
+    if (shouldRunJSBuiltinOperation(x, y, op)) {
+        return runJSBuiltInRelationalOperation(x, y, op);
+    }
+
+    const [xx, yy] = operandImplicitConversion({ x, y });
+    if (isNaslNumber(xx) && isNaslNumber(yy)) {
+        return xx[op](yy);
+    }
+    return runJSBuiltInRelationalOperation(xx, yy, op);
+};
+
+export function naslAdd(x, y) {
+    return dispatchBinaryArithOperation(x, y, 'add');
 }
 
 // 减
 export function naslMinus(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltinArithOperation(x, y, 'minus');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return xx.minus(yy);
-    }
-
-    return runJSBuiltinArithOperation(xx, yy, 'minus');
+    return dispatchBinaryArithOperation(x, y, 'minus');
 }
 
 // 乘
 export function naslTimes(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltinArithOperation(x, y, 'times');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return xx.times(yy);
-    }
-
-    return runJSBuiltinArithOperation(xx, yy, 'times');
+    return dispatchBinaryArithOperation(x, y, 'times');
 }
 
 // 除
 export function naslDividedBy(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltinArithOperation(x, y, 'divideBy');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return xx.dividedBy(yy);
-    }
-
-    return runJSBuiltinArithOperation(xx, yy, 'dividedBy');
+    return dispatchBinaryArithOperation(x, y, 'dividedBy');
 }
 
 // 取余
 export function naslModulo(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltinArithOperation(x, y, 'modulo');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return xx.modulo(yy);
-    }
-
-    return runJSBuiltinArithOperation(xx, yy, 'modulo');
+    return dispatchBinaryArithOperation(x, y, 'modulo');
 }
 
 // 相等
 export function naslEquals(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltinArithOperation(x, y, 'equals');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return x.equals(yy);
-    }
-    return runJSBuiltInRelationalOperation(xx, yy, 'equals');
+    return dispatchBinaryRelationalOperation(x, y, 'equals');
 }
 
 // 不相等
 export function naslNotEqual(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltinArithOperation(x, y, 'notEqual');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return !x.equals(yy);
-    }
-    return runJSBuiltInRelationalOperation(xx, yy, 'notEqual');
+    return dispatchBinaryRelationalOperation(x, y, 'notEqual');
 }
 
 // 大于
 export function naslGreaterThan(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltInRelationalOperation(x, y, 'greaterThan');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return xx.gt(yy);
-    }
-    return runJSBuiltInRelationalOperation(xx, yy, 'greaterThan');
+    return dispatchBinaryRelationalOperation(x, y, 'greaterThan');
 }
 
 // 大于等于
 export function naslGreaterThanOrEqual(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltInRelationalOperation(x, y, 'greaterThanOrEqual');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return xx.gte(yy);
-    }
-    return runJSBuiltInRelationalOperation(xx, yy, 'greaterThanOrEqual');
+    return dispatchBinaryRelationalOperation(x, y, 'greaterThanOrEqual');
 }
 
 // 小于
 export function naslLessThan(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltInRelationalOperation(x, y, 'lessThan');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return xx.lt(yy);
-    }
-    return runJSBuiltInRelationalOperation(xx, yy, 'lessThan');
+    return dispatchBinaryRelationalOperation(x, y, 'lessThan');
 }
 
 // 小于等于
 export function naslLessThanOrEqual(x, y) {
-    if (isNaslNumber(x) && isNaslNumber(y) &&
-        isNaNOrUndefined(eval(x.__str)) && isNaNOrUndefined(eval(y.__str))) {
-        return runJSBuiltInRelationalOperation(x, y, 'lessThanOrEqual');
-    }
-    const [xx, yy] = operandImplicitConversion({ x, y });
-    if (isNaslNumber(xx) && isNaslNumber(yy)) {
-        return xx.lte(yy);
-    }
-    return runJSBuiltInRelationalOperation(xx, yy, 'lessThanOrEqual');
+    return dispatchBinaryRelationalOperation(x, y, 'lessThanOrEqual');
 }
