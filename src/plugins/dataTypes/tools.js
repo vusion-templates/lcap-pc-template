@@ -283,7 +283,7 @@ export function isInstanceOf(variable, typeKey) {
                 'nasl.core.Decimal',
             ].includes(typeKey)
         ) {
-            return true;
+            return false;
         } else if ( // 这里数字字面量变成了 对象'[object object]' 所以都不会命中
             (varStr === '[object Object]' && variable instanceof NaslDecimal)
             && [
@@ -445,6 +445,11 @@ export const genInitData = (typeKey, defaultValue, parentLevel) => {
     }
     const defaultValueType = Object.prototype.toString.call(defaultValue);
     let parsedValue = defaultValue;
+    if (typeKey === 'nasl.core.Long') {
+        parsedValue = new NaslLong(defaultValue);
+    } else if (typeKey === 'nasl.core.Decimal') {
+        parsedValue = new NaslDecimal(defaultValue);
+    }
     // 设置成null，才能同步给后端清除该值，但是null对checkbox组件是一种特殊状态
     if (typeKey === 'nasl.core.Boolean') {
         parsedValue = defaultValue ?? undefined;
@@ -871,25 +876,57 @@ function jsonNameReflection(properties, parsedValue) {
     return parsedValue;
 }
 
+// 深度attach并处理包装类
+const deepAttachAndProcess = (source, target) => {
+    const sourceType = Object.prototype.toString.call(source);
+    if (Array.isArray(source)) {
+        if (Array.isArray(target) && source.length !== source.length) {
+            target.length = 0;
+        } else {
+            target = [];
+        }
+        source.forEach((sourceItem, index) => {
+            target[index] = deepAttachAndProcess(sourceItem, target[index]);
+        });
+    } else if (sourceType === '[object Object]' && !(source instanceof NaslLong || source instanceof NaslDecimal)) {
+        for (let prop in source) {
+            if (source.hasOwnProperty(prop)) {
+                const sourceItem = source[prop];
+                target[prop] = deepAttachAndProcess(sourceItem, target[prop]);
+            }
+        }
+    } else {
+        target = source;
+    }
+    return target;
+}
+
 // 移除变量内部的包装类
-export const rmWrapClass = (variable) => {
-    let newVariable = variable;
+export const rmWrapClass = (variable, target, shouldAttach) => {
     const variableType = Object.prototype.toString.call(variable);
     if (Array.isArray(variable)) {
-        for (let i = 0; i < variable.length; i++) {
-            let element = variable[i];
-            element = rmWrapClass(element);
+        if (Array.isArray(target) && variable.length !== target.length) {
+            target.length = 0;
+        } else {
+            target = [];
         }
-        // newVariable = variable.map((variableItem) => variableItem = rmWrapClass(variableItem));
+        variable.forEach((variableItem, index) => {
+            target[index] = rmWrapClass(variableItem, target[index], shouldAttach);
+        });
     } else if (variable instanceof window.NaslLong || variable instanceof window.NaslDecimal) {
-        newVariable = variable.value.toNumber();
+        target = variable.value.toNumber();
     } else if (variableType === '[object Object]') {
-        newVariable = {};
+        if (!target) {
+            target = {};
+        }
         for (const key in variable) {
-            newVariable[key] = rmWrapClass(variable[key]);
+            target[key] = rmWrapClass(variable[key], target[key], shouldAttach);
         }
     }
-    console.log(variable, newVariable);
-    return newVariable;
+    return target;
 };
 
+// 加上变量内部的包装类
+export const addWrapClass = (typeKey, value, target) => {
+    return deepAttachAndProcess(genInitData(typeKey, value), target);
+};
