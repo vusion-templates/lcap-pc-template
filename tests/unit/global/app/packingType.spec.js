@@ -97,6 +97,7 @@ describe('global/app/packingType', () => {
     });
 
     test('< 3.3.x 算术运算兼容性测试', () => {
+
         // < 3.3.x 兼容性，3.4 就改。傻逼 js。
         // 这些单测错了不要乱改，联系令浩或者子润。
         expect(sExp('+', '10', '0.12', 'NaslLong', 'String')).toBe('100.12');
@@ -140,10 +141,10 @@ describe('global/app/packingType', () => {
 
         expect(naslAdd(null, new NaslDecimal('1'))).toEqual(new NaslDecimal('1'));
         expect(naslAdd(new NaslDecimal('1'), null)).toEqual(new NaslDecimal('1'));
-        expect(naslAdd(null, new NaslLong('1'))).toEqual(new NaslDecimal('1'));
-        expect(naslAdd(new NaslLong('1'), null)).toEqual(new NaslDecimal('1'));
+        expect(naslAdd(null, new NaslLong('1'))).toEqual(new NaslLong('1'));
+        expect(naslAdd(new NaslLong('1'), null)).toEqual(new NaslLong('1'));
 
-        expect(naslTimes(new NaslLong('10'), null)).toEqual(new NaslDecimal('0'));
+        expect(naslTimes(new NaslLong('10'), null)).toEqual(new NaslLong('0'));
         expect(naslDividedBy(new NaslLong('10'), null)).toBe(Infinity);
 
         expect(sExp('/', '1', '0', 'NaslDecimal', 'String')).toBe(Infinity);

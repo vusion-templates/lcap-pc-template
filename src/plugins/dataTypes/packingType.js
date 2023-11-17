@@ -35,9 +35,8 @@ export class NaslDecimal {
     constructor(v) {
         //  兼容 undefined 空 数字 字符串  包装类本身 和其他包装类互转
         if (isNil(v)) {
-            this.__str = undefined;
-            // this.__value = new Decimal(v);
-            return v;
+            this.__value = String(v);
+            this.__str = String(v);
         } else if (v instanceof NaslDecimal) {
             this.fixedNum = v.fixedNum;
             this.__str = v.__str;
@@ -70,11 +69,8 @@ export class NaslDecimal {
     }
 
     valueOf() {
-        if (this.value === undefined) {
-            return undefined;
-        }
-        if (this.value === null) {
-            return null;
+        if (isNil(this.value)) {
+            return eval(this.value);
         }
         return this.value.toNumber();
     }
@@ -257,9 +253,9 @@ export class NaslLong {
     constructor(v) {
         //  兼容 undefined 空 数字 2.21 字符串 ‘2.21’ 包装类本身 和其他包装类互转如NaslInteger
         if (isNil(v)) {
-            this.__str = undefined;// 用包装类实现原生语言的空值
-            this.__value = undefined;
-            return v;
+            // 用包装类实现原生语言的空值
+            this.__value = String(v);
+            this.__str = String(v);
         } else if (v instanceof NaslLong) {
             this.fixedNum = v.fixedNum;
             this.__str = v.__str;
@@ -296,11 +292,8 @@ export class NaslLong {
     }
 
     valueOf() {
-        if (this.value === undefined) {
-            return undefined;
-        }
-        if (this.value === null) {
-            return null;
+        if (isNil(this.value)) {
+            return eval(this.value);
         }
         return this.value.toNumber();
     }
