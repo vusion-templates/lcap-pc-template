@@ -70,6 +70,12 @@ export class NaslDecimal {
     }
 
     valueOf() {
+        if (this.value === undefined) {
+            return undefined;
+        }
+        if (this.value === null) {
+            return null;
+        }
         return this.value.toNumber();
     }
 
@@ -290,6 +296,12 @@ export class NaslLong {
     }
 
     valueOf() {
+        if (this.value === undefined) {
+            return undefined;
+        }
+        if (this.value === null) {
+            return null;
+        }
         return this.value.toNumber();
     }
 

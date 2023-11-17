@@ -32,19 +32,50 @@ const opMap = {
     lessThanOrEqual: (x, y) => x <= y,
 };
 
-// const decimalJsOpMap = {
-//     add: (x, y) => x.add(y),
-//     minus: (x, y) => x.minus(y),
-//     times: (x, y) => x.times(y),
-//     dividedBy: (x, y) => x.dividedBy(y),
-//     modulo: (x, y) => x.modulo(y),
-//     equals: (x, y) => x.equals(y),
-//     notEqual: (x, y) => !x.equals(y),
-//     greaterThan: (x, y) => x.greaterThan(y),
-//     greaterThanOrEqual: (x, y) => x.greaterThanOrEqual(y),
-//     lessThan: (x, y) => x.lessThan(y),
-//     lessThanOrEqual: (x, y) => x.lessThanOrEqual(y),
-// };
+// const jsCompatibleResult = (x, y, op) => {
+//     if (op === 'add') {
+//         return jsCompatibleAdd(x, y);
+//     }
+//     if (op === 'minus') {
+//         return jsCompatibleMinus(x, y);
+//     }
+//     if (op === 'times') {
+//         return jsCompatibleTimes(x, y);
+//     }
+//     if (op === 'dividedBy') {
+//         return jsCompatibleDividedBy(x, y);
+//     }
+//     if (op === 'modulo') {
+//         return jsCompatibleModulo(x, y);
+//     }
+//     if (op === 'equals') {
+//         return jsCompatibleEquals(x, y);
+//     }
+//     if (op === 'notEqual') {
+//         return jsCompatibleNotEqual(x, y);
+//     }
+//     if (op === 'greaterThan') {
+//         return jsCompatibleGreaterThan(x, y);
+//     }
+//     if (op === 'greaterThanOrEqual') {
+//         return jsCompatibleGreaterThanOrEqual(x, y);
+//     }
+//     if (op === 'lessThan') {
+//         return jsCompatibleLessThan(x, y);
+//     }
+//     if (op === 'lessThanOrEqual') {
+//         return jsCompatibleLessThanOrEqual(x, y);
+//     }
+// }
+
+// const jsCompatibleAdd(x, y) {
+//     if (typeof x === 'string') {
+//         return x + String(y);
+//     } else if (typeof y === 'string') {
+//         return String(x) + y;
+//     }
+// }
+
 
 const runArithOperationAndWrapNaslType = (x, y, op) => {
     if (x === null) {
@@ -81,11 +112,11 @@ const runArithOperationAndWrapNaslType = (x, y, op) => {
 };
 
 const runRelationalOperationAndWrapNaslType = (x, y, op) => {
-    if (isNaslDecimal(x)) {
-        x = Number(x.__str);
+    if (isNaslNumber(x)) {
+        x = x.__str ? Number(x.__str) : eval(x.__str);
     }
-    if (isNaslDecimal(y)) {
-        y = Number(y.__str);
+    if (isNaslNumber(y)) {
+        y = y.__str ? Number(y.__str) : eval(y.__str);
     }
     return opMap[op](x, y);
 };

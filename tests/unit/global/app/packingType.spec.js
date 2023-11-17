@@ -33,7 +33,7 @@ function sExp(symbol, a, b, className, targetClassName) {
 
 describe('global/app/packingType', () => {
     test('binaryOperations', () => {
-        const errMsg = '除数不能为 0';
+        // const errMsg = '除数不能为 0';
 
         // 不同类型运算
         expect(sExp('*', '10', '0.12', 'NaslLong', 'NaslDecimal')?.__str).toBe('1.20');
@@ -119,6 +119,14 @@ describe('global/app/packingType', () => {
         expect(sExp('-', '0.12', 'NaN', 'NaslDecimal', 'String')).toBe(NaN);
 
         expect(sExp('-', 'undefined', 'NaN', 'NaslLong')).toBe(NaN);
+        expect(sExp('-', 'undefined', 'NaN', 'NaslLong', 'String')).toBe(NaN);
+        expect(sExp('-', 'undefined', 'NaN', 'NaslLong', 'String')).toBe(NaN);
+        expect(sExp('+', 'undefined', 'NaN', 'NaslLong', 'String')).toBe('undefinedNaN');
+
+        expect(sExp('-', 'undefined', 'NaN', 'NaslDecimal')).toBe(NaN);
+        expect(sExp('-', 'undefined', 'NaN', 'NaslDecimal', 'String')).toBe(NaN);
+        expect(sExp('-', 'undefined', 'NaN', 'NaslDecimal', 'String')).toBe(NaN);
+        expect(sExp('+', 'undefined', 'NaN', 'NaslDecimal', 'String')).toBe('undefinedNaN');
 
         expect(naslAdd(null, '1')).toBe('null1');
         expect(naslAdd('1', null)).toBe('1null');
@@ -145,6 +153,9 @@ describe('global/app/packingType', () => {
     });
 
     test('< 3.3.x 关系运算兼容性测试', () => {
+        expect(naslEquals(undefined, new NaslDecimal('undefined'))).toBe(true);
+        expect(naslEquals(undefined, new NaslLong('undefined'))).toBe(true);
+
         expect(naslLessThan(new NaslDecimal('1.1'), NaN)).toBe(false);
         expect(naslLessThan('1.1', NaN)).toBe(false);
         expect(naslGreaterThan(new NaslDecimal('1.1'), null)).toBe(true);
