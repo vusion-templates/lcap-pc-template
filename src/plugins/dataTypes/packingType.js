@@ -255,14 +255,24 @@ export class NaslLong {
     }
 
     add(v) {
+        // 整数 + 小数： 将整数扩充精度 当作小数*小数运算
+        if (String(v).includes('.') || v instanceof NaslDecimal) {
+            return new NaslDecimal(this.__str).add(new NaslDecimal(String(v)));
+        }
         return this.binaryOperations(v, (targetValue) => this.value.add(targetValue));
     }
 
     minus(v) {
+        if (String(v).includes('.') || v instanceof NaslDecimal) {
+            return new NaslDecimal(this.__str).minus(new NaslDecimal(String(v)));
+        }
         return this.binaryOperations(v, (targetValue) => this.value.sub(targetValue));
     }
 
     multiply(v) {
+        if (String(v).includes('.') || v instanceof NaslDecimal) {
+            return new NaslDecimal(this.__str).multiply(new NaslDecimal(String(v)));
+        }
         // return this.binaryOperations(v, (targetValue) => this.value.mul(targetValue));
         const operationCb = (targetValue) => this.value.mul(targetValue);
         if (v === undefined || !v) {
@@ -291,6 +301,9 @@ export class NaslLong {
         // ，/ % 的除数是 0 时前端抛异常
         if (String(v) === '0') {
             throw new Error('除数不能为 0');
+        }
+        if (String(v).includes('.') || v instanceof NaslDecimal) {
+            return new NaslDecimal(this.__str).mod(new NaslDecimal(String(v)));
         }
         const operationCb = (targetValue) => this.value.mod(targetValue);
         if (v === undefined || !v) {
