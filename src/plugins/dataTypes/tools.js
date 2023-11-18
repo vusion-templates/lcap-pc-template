@@ -895,7 +895,15 @@ const deepAttachAndProcess = (source, target) => {
                             || sourceItem instanceof window.NaslDecimal
                         )
                     ) {
-                        isSame = sourceItem.value.toNumber() === targetItem;
+                        const sourceItemNum = sourceItem.value.toNumber();
+                        let targetItemNum = targetItem;
+                        if (
+                            targetItem instanceof window.NaslLong 
+                            ||  targetItem instanceof window.NaslDecimal
+                        ) {
+                            targetItemNum = targetItem.value.toNumber();
+                        }
+                        isSame = sourceItemNum === targetItemNum;
                     }
                     return !isSame;
                 });
