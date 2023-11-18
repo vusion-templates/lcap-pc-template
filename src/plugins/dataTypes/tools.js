@@ -880,15 +880,44 @@ function jsonNameReflection(properties, parsedValue) {
 const deepAttachAndProcess = (source, target) => {
     const sourceType = Object.prototype.toString.call(source);
     if (Array.isArray(source)) {
+        let shouldChange = false;
         if (Array.isArray(target)) {
-            if (source.length !== source.length) {
+            if (source.length !== target.length) {
+                shouldChange = true;
+            } else {
+                const changedIndex = source.findIndex((sourceItem, index) => {
+                    const targetItem = target[index];
+                    let isSame = true;
+                    if (
+                        (sourceItem !== targetItem)
+                        && (
+                            sourceItem instanceof window.NaslLong
+                            || sourceItem instanceof window.NaslDecimal
+                        )
+                    ) {
+                        isSame = sourceItem.value.toNumber() === targetItem;
+                    }
+                    return !isSame;
+                });
+                if (changedIndex !== -1) {
+                    shouldChange = true;
+                }
+            }
+            if (shouldChange) {
                 target.length = 0;
             }
         } else {
+            shouldChange = true;
             target = [];
         }
         source.forEach((sourceItem, index) => {
-            target[index] = deepAttachAndProcess(sourceItem, target[index]);
+            const attachedTarget = deepAttachAndProcess(sourceItem, target[index]);
+            if (shouldChange) {
+                target.push(attachedTarget);
+            } else {
+                target[index] = attachedTarget;
+            }
+
         });
     } else if (sourceType === '[object Object]' && !(source instanceof NaslLong || source instanceof NaslDecimal)) {
         for (let prop in source) {
