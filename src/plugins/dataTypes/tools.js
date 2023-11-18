@@ -918,7 +918,7 @@ export const rmWrapClass = (variable, target, shouldAttach) => {
             target[index] = rmWrapClass(variableItem, target[index], shouldAttach);
         });
     } else if (variable instanceof window.NaslLong || variable instanceof window.NaslDecimal) {
-        target = variable.value.toNumber();
+        target = variable.value?.toNumber?.() || undefined
     } else if (variableType === '[object Object]') {
         if (!target) {
             target = {};
@@ -926,6 +926,8 @@ export const rmWrapClass = (variable, target, shouldAttach) => {
         for (const key in variable) {
             target[key] = rmWrapClass(variable[key], target[key], shouldAttach);
         }
+    } else {
+        target = variable
     }
     return target;
 };
@@ -934,3 +936,7 @@ export const rmWrapClass = (variable, target, shouldAttach) => {
 export const addWrapClass = (typeKey, value, target) => {
     return deepAttachAndProcess(genInitData(typeKey, value), target);
 };
+
+
+
+
