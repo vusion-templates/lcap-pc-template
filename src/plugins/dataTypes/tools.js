@@ -903,12 +903,12 @@ const deepAttachAndProcess = (source, target) => {
                     shouldChange = true;
                 }
             }
-            if (shouldChange) {
-                target.length = 0;
-            }
         } else {
             shouldChange = true;
             target = [];
+        }
+        if (shouldChange) {
+            target.length = 0;
         }
         source.forEach((sourceItem, index) => {
             const attachedTarget = deepAttachAndProcess(sourceItem, target[index]);
@@ -917,7 +917,6 @@ const deepAttachAndProcess = (source, target) => {
             } else {
                 target[index] = attachedTarget;
             }
-
         });
     } else if (sourceType === '[object Object]' && !(source instanceof NaslLong || source instanceof NaslDecimal)) {
         for (let prop in source) {
@@ -933,30 +932,58 @@ const deepAttachAndProcess = (source, target) => {
 }
 
 // 移除变量内部的包装类
-export const rmWrapClass = (variable, target, shouldAttach) => {
-    const variableType = Object.prototype.toString.call(variable);
-    if (Array.isArray(variable)) {
+export const rmWrapClass = (source, target, shouldAttach) => {
+    const sourceType = Object.prototype.toString.call(source);
+    if (Array.isArray(source)) {
+        let shouldChange = false;
         if (Array.isArray(target)) {
-            if (variable.length !== target.length) {
-                target.length = 0;
+            if (source.length !== target.length) {
+                shouldChange = true;
+            } else {
+                const changedIndex = source.findIndex((sourceItem, index) => {
+                    const targetItem = target[index];
+                    let isSame = true;
+                    if (
+                        (sourceItem !== targetItem)
+                        && (
+                            sourceItem instanceof window.NaslLong
+                            || sourceItem instanceof window.NaslDecimal
+                        )
+                    ) {
+                        isSame = sourceItem.value.toNumber() === targetItem;
+                    }
+                    return !isSame;
+                });
+                if (changedIndex !== -1) {
+                    shouldChange = true;
+                }
             }
         } else {
+            shouldChange = true;
             target = [];
         }
-        variable.forEach((variableItem, index) => {
-            target[index] = rmWrapClass(variableItem, target[index], shouldAttach);
+        if (shouldChange) {
+            target.length = 0;
+        }
+        source.forEach((sourceItem, index) => {
+            const removedTarget = rmWrapClass(sourceItem, target[index]);
+            if (shouldChange) {
+                target.push(removedTarget);
+            } else {
+                target[index] = removedTarget;
+            }
         });
-    } else if (variable instanceof window.NaslLong || variable instanceof window.NaslDecimal) {
-        target = variable.value?.toNumber?.() || undefined
-    } else if (variableType === '[object Object]') {
+    } else if (source instanceof window.NaslLong || source instanceof window.NaslDecimal) {
+        target = source.value?.toNumber?.() || undefined;
+    } else if (sourceType === '[object Object]') {
         if (!target) {
             target = {};
         }
-        for (const key in variable) {
-            target[key] = rmWrapClass(variable[key], target[key], shouldAttach);
+        for (const key in source) {
+            target[key] = rmWrapClass(source[key], target[key], shouldAttach);
         }
     } else {
-        target = variable
+        target = source;
     }
     return target;
 };
