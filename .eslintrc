@@ -1,32 +1,58 @@
 {
-  "root": true,
-  "extends": "vusion/all",
-  "env": {
-    "browser": true,
-    "node": true
-  },
-  "globals": {
-
-  },
-  "rules": {
-    "require-atomic-updates": "off",
-    "no-debugger": ["error"],
-    "no-duplicate-imports": ["error"],
-    "camelcase": ["error", { "properties": "never" }],
-    "new-cap": [ "error", { "newIsCap": true, "properties": false }],
-    "vue/no-unused-components": [2],
-    "vue/html-indent": ["error", 4, { "alignAttributesVertically": false }],
-    "vue/no-use-v-if-with-v-for": [0],
-    "linebreak-style": "off"
-  },
-  "overrides": [
-    {
-      "files": [
-        "**/__tests__/*.{j,t}s?(x)"
-      ],
-      "env": {
-        "jest": true
-      }
-    }
-  ]
+    "root": true,
+    "extends": "vusion/all",
+    "env": {
+        "browser": true,
+        "node": true
+    },
+    "globals": {},
+    "rules": {
+        "no-await-in-loop": [
+            "off"
+        ],
+        "require-atomic-updates": "off",
+        "no-debugger": [
+            "error"
+        ],
+        "no-duplicate-imports": [
+            "error"
+        ],
+        "camelcase": [
+            "error",
+            {
+                "properties": "never"
+            }
+        ],
+        "new-cap": [
+            "error",
+            {
+                "newIsCap": true,
+                "properties": false
+            }
+        ],
+        "vue/no-unused-components": [
+            2
+        ],
+        "vue/html-indent": [
+            "error",
+            4,
+            {
+                "alignAttributesVertically": false
+            }
+        ],
+        "vue/no-use-v-if-with-v-for": [
+            0
+        ],
+        "linebreak-style": "off"
+    },
+    "overrides": [
+        {
+            "files": [
+                "**/__tests__/*.{j,t}s?(x)"
+            ],
+            "env": {
+                "jest": true
+            }
+        }
+    ]
 }

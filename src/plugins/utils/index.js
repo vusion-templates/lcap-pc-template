@@ -29,8 +29,10 @@ import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
 import { NaslDecimal, NaslLong } from '../dataTypes/packingType';
-import { naslAdd, naslMinus, naslTimes, naslDividedBy, naslModulo, naslGreaterThan, naslGreaterThanOrEqual,
-        naslLessThan, naslLessThanOrEqual, naslEquals, naslNotEqual, isNaslNumber, isNaslDecimal, isNaslLong } from '../dataTypes/operations';
+import {
+    naslAdd, naslMinus, naslTimes, naslDividedBy, naslModulo, naslGreaterThan, naslGreaterThanOrEqual,
+    naslLessThan, naslLessThanOrEqual, naslEquals, naslNotEqual, isNaslNumber, isNaslDecimal, isNaslLong
+} from '../dataTypes/operations';
 
 let enumsMap = {};
 
