@@ -898,8 +898,8 @@ const deepAttachAndProcess = (source, target) => {
                         const sourceItemNum = sourceItem.value.toNumber();
                         let targetItemNum = targetItem;
                         if (
-                            targetItem instanceof window.NaslLong 
-                            ||  targetItem instanceof window.NaslDecimal
+                            targetItem instanceof window.NaslLong
+                            || targetItem instanceof window.NaslDecimal
                         ) {
                             targetItemNum = targetItem.value.toNumber();
                         }
