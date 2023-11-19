@@ -8,7 +8,12 @@ export const isNaslLong = (v) => v instanceof window.NaslLong;
 export const isUnhandledVal = (v) => [NaN, Infinity, -Infinity, undefined].includes(v);
 const isUnhandledValStr = (v) => ['NaN', 'Infinity', '-Infinity', 'undefined'].includes(v);
 const isNumberStr = (str) => /^[-+]?\d+(\.\d+)?$/.test(str);
-
+function safeEval(code) {
+    // return eval(code)
+    const modifiedCode = code.replace(/^0+(?!$)/, ''); // 删除前缀0
+    return new Function(`return ${modifiedCode}`)();
+}
+window.safeEval = safeEval
 // side effects. 使用副作用修改操作数
 function operandImplicitConversion(wrapper) {
     if (isNaslNumber(wrapper.x) && typeof wrapper.y === 'number') {
@@ -55,8 +60,8 @@ const shouldRunJSBuiltinOperation = (x, y, op) => {
 };
 
 const runJSBuiltinArithOperation = (x, y, op) => {
-    let xx = isNaslNumber(x) ? eval(x.__str) : x;
-    let yy = isNaslNumber(y) ? eval(y.__str) : y;
+    let xx = isNaslNumber(x) ? safeEval(x.__str) : x;
+    let yy = isNaslNumber(y) ? safeEval(y.__str) : y;
 
     const jsBuiltInRes = opMap[op](xx, yy);
     if (isUnhandledVal(jsBuiltInRes)) {
@@ -77,8 +82,8 @@ const runJSBuiltinArithOperation = (x, y, op) => {
 };
 
 const runJSBuiltInRelationalOperation = (x, y, op) => {
-    x = isNaslNumber(x) ? eval(x.__str) : x;
-    y = isNaslNumber(y) ? eval(y.__str) : y;
+    x = isNaslNumber(x) ? safeEval(x.__str) : x;
+    y = isNaslNumber(y) ? safeEval(y.__str) : y;
     return opMap[op](x, y);
 };
 
