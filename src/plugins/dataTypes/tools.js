@@ -913,10 +913,9 @@ const deepAttachAndProcess = (source, target) => {
             }
         } else {
             shouldChange = true;
-            target = [];
         }
         if (shouldChange) {
-            target.length = 0;
+            target = [];
         }
         source.forEach((sourceItem, index) => {
             const attachedTarget = deepAttachAndProcess(sourceItem, target[index]);
@@ -968,10 +967,9 @@ export const rmWrapClass = (source, target, shouldAttach) => {
             }
         } else {
             shouldChange = true;
-            target = [];
         }
         if (shouldChange) {
-            target.length = 0;
+            target = [];
         }
         source.forEach((sourceItem, index) => {
             const removedTarget = rmWrapClass(sourceItem, target[index]);
