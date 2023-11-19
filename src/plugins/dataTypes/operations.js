@@ -5,7 +5,7 @@ export const isNaslNumber = (v) => v instanceof window.NaslDecimal || v instance
 export const isNaslDecimal = (v) => v instanceof window.NaslDecimal;
 export const isNaslLong = (v) => v instanceof window.NaslLong;
 export const isUnhandledVal = (v) => [NaN, Infinity, -Infinity, undefined].includes(v);
-export const isDecimalString = (v) => !isNaslNumber(v) && String(v).includes('.')
+export const isDecimalString = (v) => !isNaslNumber(v) && String(v).includes('.');
 
 const isUnhandledValStr = (v) => ['NaN', 'Infinity', '-Infinity', 'undefined'].includes(v);
 const isNumberStr = (str) => /^[-+]?\d+(\.\d+)?$/.test(str);
@@ -99,9 +99,8 @@ const dispatchBinaryArithOperation = (x, y, op) => {
         if (isNaslDecimal(y) || isDecimalString(y)) {
             y = new window.NaslDecimal(y);
         } else {
-            y = new window.NaslLong(x);
+            y = new window.NaslLong(y);
         }
-
 
         // x = new window.NaslDecimal(x);
         // y = new window.NaslDecimal(y);
