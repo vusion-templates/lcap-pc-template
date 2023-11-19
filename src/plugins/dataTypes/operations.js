@@ -1,11 +1,12 @@
 'use strict';
 
 import { NaslDecimal, NaslLong } from '@/plugins/dataTypes/packingType';
-
 export const isNaslNumber = (v) => v instanceof window.NaslDecimal || v instanceof window.NaslLong;
 export const isNaslDecimal = (v) => v instanceof window.NaslDecimal;
 export const isNaslLong = (v) => v instanceof window.NaslLong;
 export const isUnhandledVal = (v) => [NaN, Infinity, -Infinity, undefined].includes(v);
+export const isDecimalString = (v) => !isNaslNumber(v) && String(v).includes('.')
+
 const isUnhandledValStr = (v) => ['NaN', 'Infinity', '-Infinity', 'undefined'].includes(v);
 const isNumberStr = (str) => /^[-+]?\d+(\.\d+)?$/.test(str);
 function safeEval(code) {
@@ -90,16 +91,17 @@ const runJSBuiltInRelationalOperation = (x, y, op) => {
 
 const dispatchBinaryArithOperation = (x, y, op) => {
     if (isNumberStr(x) && isNumberStr(y)) {
-        if (isNaslLong(x)) {
-            x = new window.NaslLong(x);
-        } else {
+        if (isNaslDecimal(x) || isDecimalString(x)) {
             x = new window.NaslDecimal(x);
-        }
-        if (isNaslLong(y)) {
-            y = new window.NaslLong(y);
         } else {
-            y = new window.NaslDecimal(y);
+            x = new window.NaslLong(x);
         }
+        if (isNaslDecimal(y) || isDecimalString(y)) {
+            y = new window.NaslDecimal(y);
+        } else {
+            y = new window.NaslLong(x);
+        }
+
 
         // x = new window.NaslDecimal(x);
         // y = new window.NaslDecimal(y);
