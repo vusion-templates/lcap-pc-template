@@ -995,5 +995,6 @@ export const rmWrapClass = (source, target, shouldAttach) => {
 };
 
 // 加上变量内部的包装类
-export const addWrapClass = (typeKey, value, target) => deepAttachAndProcess(genInitData(typeKey, value), target);
-
+export const addWrapClass = (typeKey, value, target) => {
+    return deepAttachAndProcess(genInitData(typeKey, value), target);
+};
