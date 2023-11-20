@@ -936,7 +936,7 @@ const deepAttachAndProcess = (source, target) => {
         target = source;
     }
     return target;
-}
+};
 
 // 移除变量内部的包装类
 export const rmWrapClass = (source, target, shouldAttach) => {
@@ -998,7 +998,3 @@ export const rmWrapClass = (source, target, shouldAttach) => {
 export const addWrapClass = (typeKey, value, target) => {
     return deepAttachAndProcess(genInitData(typeKey, value), target);
 };
-
-
-
-

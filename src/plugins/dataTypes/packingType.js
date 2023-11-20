@@ -2,7 +2,10 @@ import Long from 'long';
 import { Decimal } from 'decimal.js';
 import { naslDividedBy, naslModulo } from './operations';
 const getPrecision = (str) => (str?.split('.')[1] || '').length;
-export const isNil = (v) => v === undefined || v === null || v === 'undefined' || v === 'null' || (v !== 0 && !v);
+export const isNil = (v) =>
+    v === undefined || v === null || v === 'undefined' || v === 'null' || (v !== 0 && !v)
+    || (v instanceof NaslDecimal && isNil(v.__str))
+    || (v instanceof NaslLong && isNil(v.__str));
 
 window.Long = Long;
 window.Decimal = Decimal;
@@ -62,7 +65,7 @@ export class NaslDecimal {
 
     set value(v) {
         if (typeof v === 'string' || typeof v === 'number') {
-            this.__value = new Decimal(v);
+            this.__value = new Decimal(String(v));
         } else {
             this.__value = v;
         }
