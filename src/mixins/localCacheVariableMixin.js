@@ -48,7 +48,7 @@ export const localCacheVariableMixin = {
                             const currentValue = frontendVariables[localCacheVariableKey];
 
                             // 只同步写入非空值 避免 local 过多冗余数据
-                            if (isEmpty(currentValue)) {
+                            if (currentValue === undefined || currentValue === null) {
                                 storage.remove(localCacheVariableKey);
                             } else {
                                 storage.set(localCacheVariableKey, currentValue, true);
