@@ -417,6 +417,8 @@ export default {
                 appVM.$i18n.locale = newLocale;
                 // 调用UI库更新当前语言
                 window.Vue.prototype.$CloudUILang = newLocale;
+                // 重新加载页面
+                window.location.reload();
             },
             getI18nList() {
                 // 在ide中拼接好
