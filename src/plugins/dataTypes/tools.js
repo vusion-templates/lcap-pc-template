@@ -134,8 +134,9 @@ function genConstructor(typeKey, definition, Vue) {
                 const {
                     name: propertyName,
                     typeAnnotation,
+                    defaultCode,
                 } = property || {};
-                const defaultValue = property.defaultCode;
+                const defaultValue = defaultCode?.code;
 
                 const isNaslNumber = typeAnnotation?.typeKind === 'primitive' && ['Decimal', 'Long', 'Double', 'Int'].includes(typeAnnotation?.typeName);
 
@@ -166,7 +167,7 @@ function genConstructor(typeKey, definition, Vue) {
                         parsedValue = parseNumberValue(defaultValue, typeAnnotation);
                     }
                 }
-                if (!isNaslNumber && Object.prototype.toString.call(parsedValue) === '[object String]') {
+                if (!isNaslNumber && Object.prototype.toString.call(parsedValue) === '[object String]' && !defaultCode?.executeCode) {
                     parsedValue = `\`${parsedValue.replace(/['"`\\]/g, (m) => `\\${m}`)}\``;
                 }
                 const needGenInitFromSchema = typeAnnotation && !['primitive', 'union'].includes(typeAnnotation.typeKind);
