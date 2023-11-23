@@ -58,6 +58,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         locale = getUserLanguage(appConfig, messages);
         // 重置当前生效语言
         appConfig.i18nInfo.locale = locale;
+        appConfig.i18nInfo.currentLocale = locale;
         // 设置当前语言名称
         appConfig.i18nInfo.localeName = I18nList?.find((item) => item.id === locale)?.name;
         // 设置当前语言的翻译信息
