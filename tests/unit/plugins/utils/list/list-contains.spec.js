@@ -1,3 +1,5 @@
+import fc from 'fast-check';
+
 import { utils as u } from '@/plugins/utils/index.js';
 
 jest.mock('cloud-ui.vusion', () => ({ }));
@@ -30,5 +32,14 @@ describe('Test List Contains', () => {
         expect(u.Contains(list, '3')).toBe(false);
         expect(u.Contains(list, null)).toBe(true);
         expect(u.Contains(list, undefined)).toBe(true);
+    });
+});
+
+describe('ListContains property-based check', () => {
+    it('ListContains 总是包含 0 号元素和最后一个元素', () => {
+        fc.assert(
+            fc.property(fc.array(fc.integer(), { minLength: 1 }), (list) =>
+                u.Contains(list, list[0]) && u.Contains(list, list[list.length - 1])),
+        );
     });
 });
