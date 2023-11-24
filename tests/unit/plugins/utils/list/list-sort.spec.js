@@ -1,7 +1,9 @@
-import { utils as u } from '@/plugins/utils/index.js';
-jest.mock('cloud-ui.vusion', () => ({
+import isEqual from 'lodash/isEqual';
+import fc from 'fast-check';
 
-}))
+import { utils as u } from '@/plugins/utils/index.js';
+
+jest.mock('cloud-ui.vusion', () => ({ }));
 
 describe('List sort functions', () => {
     test('List sort integers', () => {
@@ -36,4 +38,33 @@ describe('List sort functions', () => {
         u.ListSort(testArr1, item => item.name, true)
         expect(JSON.stringify(ansAsc)).toEqual(JSON.stringify(testArr1))
     });
+});
+
+describe('ListSort property-based check', () => {
+    it('List sort 幂等性', () => {
+        fc.assert(
+            fc.property(fc.array(fc.integer()), (arr) => {
+                const arrCopy = JSON.parse(JSON.stringify(arr));
+                return isEqual(u.ListSort(arr), u.ListSort(u.ListSort(arrCopy)));
+            }),
+        );
+    });
+
+    it('ListSort 升序最小值等于 0 号元素', () => {
+        fc.assert(
+            fc.property(fc.array(fc.integer(), { minLength: 1 }), (arr) => {
+                u.ListSort(arr, item => item, true);
+                return u.ListMin(arr) === arr[0];
+            }),
+        );
+    });
+
+    it('ListSort 降序最大值等于 0 号元素', () => {
+      fc.assert(
+          fc.property(fc.array(fc.integer(), { minLength: 1 }), (arr) => {
+              u.ListSort(arr, item => item, false);
+              return u.ListMax(arr) === arr[0];
+          }),
+      );
+  });
 });
