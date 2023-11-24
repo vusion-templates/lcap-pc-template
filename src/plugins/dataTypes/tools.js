@@ -547,7 +547,7 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
                 });
                 str = momentTZ.tz(new Date('2022-01-01 ' + varArr.join(':')), getAppTimezone(tz)).format(formatArr.join(':'));
             } else {
-                str = momentTZ.tz(new Date(variable), getAppTimezone(tz).format('HH:mm:ss'));
+                str = momentTZ.tz(new Date(variable), getAppTimezone(tz)).format('HH:mm:ss');
             }
         } else if (typeKey === 'nasl.core.DateTime') {
             str = momentTZ.tz(new Date(variable), getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss');
@@ -789,6 +789,7 @@ export const fromString = (variable, typeKey) => {
 export function toastAndThrowError(err) {
     // 全局提示toast
     UToast?.error(err);
+    console.log(err);
     throw new Error(err);
 }
 

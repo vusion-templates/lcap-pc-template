@@ -22,7 +22,7 @@ const moment = require('moment');
 const momentTZ = require('moment-timezone');
 
 import Vue from 'vue';
-import { toString, fromString, toastAndThrowError, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
+import { toString, fromString, toastAndThrowError as toastAndThrow, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
@@ -51,15 +51,16 @@ function toValue(date, typeKey) {
         return date;
 }
 
-function isArrayOutBounds(arr, index) {
-    if (!Array.isArray(arr))
-        toastAndThrowError('传入内容不是数组');
+function isArrayInBounds(arr, index) {
+    if (!Array.isArray(arr)) {
+        toastAndThrow('传入内容不是数组');
+    }
     if (typeof index !== 'number' || isNaN(index)) {
-        toastAndThrowError('传入下标不是数字');
+        toastAndThrow('传入下标不是数字');
     }
     // 传入要找的下标，大于数组长度
     if ((index + 1) > arr.length) {
-        toastAndThrowError(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
+        toastAndThrow(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
     }
     return true;
 }
@@ -171,17 +172,20 @@ export const utils = {
         return str && str.trim();
     },
     Get(arr, index) {
-        if (isArrayOutBounds(arr, index)) {
+        if (isArrayInBounds(arr, index)) {
             return arr[index];
         }
     },
     Set(arr, index, item) {
-        if (isArrayOutBounds(arr, index)) {
+        if (isArrayInBounds(arr, index)) {
             return utils.Vue.set(arr, index, item);
         }
     },
     Contains(arr, item) {
-        return typeof arr.find((ele) => isEqual(ele, item)) !== 'undefined';
+        if (!Array.isArray(arr)) {
+            return false;
+        }
+        return arr.findIndex((e) => isEqual(e, item)) !== -1;
     },
     Add(arr, item) {
         if (Array.isArray(arr)) {
@@ -195,7 +199,7 @@ export const utils = {
         }
     },
     Insert(arr, index, item) {
-        if (isArrayOutBounds(arr, index)) {
+        if (isArrayInBounds(arr, index)) {
             arr.splice(index, 0, item);
         }
     },
@@ -206,7 +210,7 @@ export const utils = {
         }
     },
     RemoveAt(arr, index) {
-        if (isArrayOutBounds(arr, index)) {
+        if (isArrayInBounds(arr, index)) {
             return arr.splice(index, 1)[0];
         }
     },
@@ -386,7 +390,7 @@ export const utils = {
     },
     ListSlice(arr, start, end) {
         // 由于 slice 的特性，end 要校验的是长度，而不是下标，所以要减 1
-        if (isArrayOutBounds(arr, start) && isArrayOutBounds(arr, end - 1)) {
+        if (isArrayInBounds(arr, start) && isArrayInBounds(arr, end - 1)) {
             return arr.slice(start, end);
         }
     },
@@ -438,11 +442,14 @@ export const utils = {
         }
     },
     // 不修改原 list，返回新 list
-    ListDistinctBy(arr, getVal) {
+    ListDistinctBy(arr, listGetVal) {
         // getVal : <A,B> . A => B 给一个 A 类型的数据，返回 A 类型中被用户选中的 field 的 value
-        if (!Array.isArray(arr) || typeof getVal !== 'function') {
+        // listGetVal: getVal 这样的函数组成的 list
+
+        if (!Array.isArray(arr)) {
             return null;
         }
+        // item => List[item.userName, item.id]
         if (arr.length === 0) {
             return arr;
         }
@@ -450,7 +457,10 @@ export const utils = {
         const res = [];
         const vis = new Set();
         for (const item of arr) {
-            const hash = getVal(item);
+            // eslint-disable-next-line no-return-await
+            const hashArr = listGetVal.map((fn) => fn(item));
+            // eslint-disable-next-line no-await-in-loop
+            const hash = (hashArr).join('');
             if (!vis.has(hash)) {
                 vis.add(hash);
                 res.push(item);
@@ -724,11 +734,11 @@ export const utils = {
     },
     GetSpecificDaysOfWeek(startdatetr, enddatetr, arr, tz) {
         if (!startdatetr)
-            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：startDate不能为空`);
+            toastAndThrow(`内置函数GetSpecificDaysOfWeek入参错误：startDate不能为空`);
         if (!enddatetr)
-            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：endDate不能为空`);
+            toastAndThrow(`内置函数GetSpecificDaysOfWeek入参错误：endDate不能为空`);
         if (!Array.isArray(arr)) {
-            toastAndThrowError(`内置函数GetSpecificDaysOfWeek入参错误：参数“指定”非合法数组`);
+            toastAndThrow(`内置函数GetSpecificDaysOfWeek入参错误：参数“指定”非合法数组`);
         }
 
         let startDate;
@@ -925,9 +935,9 @@ export const utils = {
     */
     DateDiff(dateTime1, dateTime2, calcType, isAbs = true) {
         if (!dateTime1)
-            toastAndThrowError(`内置函数DateDiff入参错误：dateTime1不能为空`);
+            toastAndThrow(`内置函数DateDiff入参错误：dateTime1不能为空`);
         if (!dateTime2)
-            toastAndThrowError(`内置函数DateDiff入参错误：dateTime2不能为空`);
+            toastAndThrow(`内置函数DateDiff入参错误：dateTime2不能为空`);
         // Time
         const timeReg = /^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
         if (timeReg.test(dateTime1) && timeReg.test(dateTime2)) {
@@ -955,13 +965,13 @@ export const utils = {
     // 时区转换
     ConvertTimezone(dateTime, tz) {
         if (!dateTime) {
-            toastAndThrowError(`内置函数ConvertTimezone入参错误：指定日期为空`);
+            toastAndThrow(`内置函数ConvertTimezone入参错误：指定日期为空`);
         }
         if (!isValid(new Date(dateTime))) {
-            toastAndThrowError(`内置函数ConvertTimezone入参错误：指定日期不是合法日期类型`);
+            toastAndThrow(`内置函数ConvertTimezone入参错误：指定日期不是合法日期类型`);
         }
         if (!isValidTimezoneIANAString(tz)) {
-            toastAndThrowError(`内置函数ConvertTimezone入参错误：传入时区${tz}不是合法时区字符`);
+            toastAndThrow(`内置函数ConvertTimezone入参错误：传入时区${tz}不是合法时区字符`);
         }
         return formatInTimeZone(dateTime, tz, "yyyy-MM-dd'T'HH:mm:ssxxx");
     },
