@@ -1,4 +1,4 @@
-import { utils as codewaveUtils } from '@/plugins/utils/index.js';
+import { utils as u } from '@/plugins/utils/index.js';
 jest.mock('cloud-ui.vusion', () => ({
 
 }))
@@ -9,7 +9,7 @@ describe('List sort functions', () => {
         {
             const ansAsc = [-100,-100,0,0,0,100,100]
             const testArr1 = [-100, 0, 100, 0, 0, 100, -100]
-            const testArr1SortedAsc = codewaveUtils.ListSort(testArr1, item => item, true)
+            const testArr1SortedAsc = u.ListSort(testArr1, item => item, true)
             expect(JSON.stringify(ansAsc)).toEqual(JSON.stringify(testArr1))
             expect(testArr1SortedAsc).toBeUndefined
         }
@@ -18,7 +18,7 @@ describe('List sort functions', () => {
         {
             const ansDes = [100,100,0,0,0,-100,-100]
             const testArr2 = [-100, 0, 100, 0, 0, 100, -100]
-            const testArr2SortedDes = codewaveUtils.ListSort(testArr2, item => item, false)
+            const testArr2SortedDes = u.ListSort(testArr2, item => item, false)
             expect(JSON.stringify(ansDes)).toEqual(JSON.stringify(testArr2))
             expect(testArr2SortedDes).toBeUndefined
         }
@@ -33,7 +33,7 @@ describe('List sort functions', () => {
         // name 升序
         const ansAsc = [obj2, obj3, obj1]
         const testArr1 = [obj1, obj2, obj3]
-        codewaveUtils.ListSort(testArr1, item => item.name, true)
+        u.ListSort(testArr1, item => item.name, true)
         expect(JSON.stringify(ansAsc)).toEqual(JSON.stringify(testArr1))
     });
 });
