@@ -32,9 +32,9 @@ export default {
 
         if (Array.isArray(options && options.frontendVariables)) {
             options.frontendVariables.forEach((frontendVariable) => {
-                const { name, typeAnnotation, defaultValue, localCache } = frontendVariable;
+                const { name, typeAnnotation, defaultCode, localCache } = frontendVariable;
                 localCache && localCacheVariableSet.add(name); // 本地存储的全局变量集合
-                frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
+                frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultCode?.code);
             });
         }
         const $global = {
