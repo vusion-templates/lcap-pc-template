@@ -61,21 +61,18 @@ export const getAuthGuard = (router, routes, authResourcePaths, appConfig, baseR
             // 如果后续需要区分路由类型，这里也需要补充 resourceType
         })));
     }
-
     const userInfo = Vue.prototype.$global.userInfo || {};
     const $auth = Vue.prototype.$auth;
     const redirectedFrom = parsePath(to.redirectedFrom);
     const toPath = redirectedFrom?.path || to.path;
-    const toQuery = to.query;
+    const toQuery = redirectedFrom?.query || to.query;
     const authPath = authResourcePaths.find((authResourcePath) => {
         if (authResourcePath === toPath || `${authResourcePath}/` === toPath) {
             return true;
         }
         return false;
     });
-
     const noAuthView = findNoAuthView(routes);
-
     if (authPath) {
         if (!$auth.isInit()) {
             if (!userInfo.UserId) {

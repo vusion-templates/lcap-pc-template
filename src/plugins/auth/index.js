@@ -3,6 +3,7 @@ import authService from './authService';
 export default {
     install(Vue, options = {}) {
         authService.start();
+        options.allowList = [].concat([], options.allowList);
         const router = options.router;
         const base = (options.base || '').replace(/\/$/, '');
         /**
@@ -65,7 +66,7 @@ export default {
 
                 // const authPath = `${base + router.currentRoute.path}/${data.value ? data.value : vnode.data.ref}`;
                 const authPath = data.value;
-                const visible = await authService.has(authPath);
+                const visible = await authService.has(authPath, options?.domainName);
 
                 // 表格列不起作用，特殊处理
                 if (el.__vue__ && el.__vue__.$options.name === 'u-table-view-column')

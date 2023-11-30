@@ -17,16 +17,15 @@ import {
 } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { dateFormatter } from '@/plugins/Formatters';
-
-const moment = require('moment');
-const momentTZ = require('moment-timezone');
-
 import Vue from 'vue';
 import { toString, fromString, toastAndThrowError as toastAndThrow, isDefString, isDefNumber, isDefList, isDefMap, typeDefinitionMap } from '../dataTypes/tools';
 import Decimal from 'decimal.js';
 import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './helper';
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
+
 let enumsMap = {};
+const moment = require('moment');
+const momentTZ = require('moment-timezone');
 
 function naslDateToLocalDate(date) {
     const localTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -51,16 +50,28 @@ function toValue(date, typeKey) {
         return date;
 }
 
-function isArrayInBounds(arr, index) {
-    if (!Array.isArray(arr)) {
-        toastAndThrow('传入内容不是数组');
+/* 改变ios的-时间格式 */
+function fixIOSDateString(value) {
+    if (/^\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}:\d{1,2}$/.test(value) || /^\d{4}-\d{1,2}-\d{1,2}$/.test(value)) {
+        return value.replace(/-/g, '/');
+    } else {
+        return value;
     }
+}
+
+function uniqueByKey(array, key) {
+    return [...new Map(array.map((x) => [x[key], x])).values()];
+}
+
+function isArrayOutBounds(arr, index) {
+    if (!Array.isArray(arr))
+       throw toastAndThrowError('传入内容不是数组');
     if (typeof index !== 'number' || isNaN(index)) {
-        toastAndThrow('传入下标不是数字');
+       throw toastAndThrowError('传入下标不是数字');
     }
     // 传入要找的下标，大于数组长度
     if ((index + 1) > arr.length) {
-        toastAndThrow(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
+       throw toastAndThrowError(`列表访问越界，访问下标 ${index}，列表长度 ${arr.length}`);
     }
     return true;
 }
@@ -679,18 +690,18 @@ export const utils = {
     SubDays(date = new Date(), amount = 1, converter = 'json') {
         return toValue(subDays(new Date(date), amount), converter);
     },
-    GetDateCount(datetr, metric, tz) {
+    GetDateCount(dateStr, metric, tz) {
         let date;
-        if (this.isInputValidNaslDateTime(datetr) && !tz) {
+        if (this.isInputValidNaslDateTime(dateStr) && !tz) {
             // v3.3 老应用升级的场景，使用全局配置（全局配置一般默认是‘用户时区’）
             // v3.4 新应用，使用默认时区时选项，tz 为空
-            date = convertJSDateInTargetTimeZone(datetr, getAppTimezone('global'));
-        } else if (this.isInputValidNaslDateTime(datetr) && tz) {
+            date = convertJSDateInTargetTimeZone(dateStr, getAppTimezone('global'));
+        } else if (this.isInputValidNaslDateTime(dateStr) && tz) {
             // v3.4 新应用，指定了默认值之外的时区选项，必然有时区参数 tz
-            date = convertJSDateInTargetTimeZone(datetr, tz);
+            date = convertJSDateInTargetTimeZone(dateStr, tz);
         } else {
             // 针对 nasl.Date 类型
-            date = naslDateToLocalDate(datetr);
+            date = naslDateToLocalDate(dateStr);
         }
 
         const [metric1, metric2] = metric.split('-');

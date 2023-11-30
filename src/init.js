@@ -1,18 +1,21 @@
 import Vue from 'vue';
 import { installOptions, installDirectives, installFilters, installComponents } from '@vusion/utils';
 import * as CloudUI from 'cloud-ui.vusion';
-import 'cloud-ui.vusion.css';
-import VueI18n from 'vue-i18n';
-import '@/assets/css/index.css';
 import * as Components from '@/components';
+
 import filters from '@/filters';
 import { AuthPlugin, DataTypesPlugin, LogicsPlugin, RouterPlugin, ServicesPlugin, UtilsPlugin } from '@/plugins';
 import { getTitleGuard, initRouter, microFrontend } from '@/router';
-import App from './App.vue';
 import { filterRoutes, parsePath } from '@/utils/route';
 import { getBasePath } from '@/utils/encodeUrl';
 import { filterAuthResources, findNoAuthView } from '@/router/guards/auth';
 import { instance } from '@/utils/create/errHandles';
+import VueI18n from 'vue-i18n';
+import App from './App.vue';
+
+import 'cloud-ui.vusion.css';
+import '@/assets/css/index.css';
+
 window.appVue = Vue;
 window.Vue = Vue;
 window.CloudUI = CloudUI;
@@ -125,8 +128,19 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             if (beforeRouter) {
                 const event = {
                     baseResourcePaths,
-                    router, routes, authResourcePaths, appConfig, beforeRouter,
-                    to, from, next, parsePath, getBasePath, filterAuthResources, findNoAuthView, filterRoutes,
+                    router, 
+                    routes, 
+                    authResourcePaths, 
+                    appConfig, 
+                    beforeRouter,
+                    to, 
+                    from, 
+                    next, 
+                    parsePath, 
+                    getBasePath, 
+                    filterAuthResources, 
+                    findNoAuthView, 
+                    filterRoutes,
                 };
                 await beforeRouter(event);
             }
@@ -192,7 +206,7 @@ function getUserLanguage(appConfig, messages = {}) {
             let baseLang = locale.substring(0, 2);
             const languageList = Object.keys(messages);
             // 查找列表中是否有与基础语言代码相同的项
-            let match = languageList.find(lang => lang.startsWith(baseLang));
+            let match = languageList.find((lang) => lang.startsWith(baseLang));
             // 如果存在前两位一样的就用这个
             if (match) {
                 locale = match;

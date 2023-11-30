@@ -1,13 +1,13 @@
 import { Decimal } from 'decimal.js';
 import CryptoJS from 'crypto-js';
 import cookie from '@/utils/cookie';
-
 import { initService as configurationInitService } from '@/apis/configuration';
 import { initService as lowauthInitService } from '@/apis/lowauth';
 import { initService as ioInitService } from '@/apis/io';
-import authService from '../auth/authService';
 import { initApplicationConstructor, genSortedTypeKey, genInitData, isInstanceOf } from './tools';
+import authService from '../auth/authService';
 import { porcessPorts } from '../router/processService';
+import { navigateToUserInfoPage } from '../common/wx';
 
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
@@ -92,53 +92,6 @@ export default {
                 // eslint-disable-next-line eqeqeq
                 return x == y;
             },
-            // // 不相等
-            // isNotEqual(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX != actualY;
-            // },
-            // // 大于
-            // isGreater(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX > actualY;
-            // },
-            // // 大于等于
-            // isGreaterOrEqual(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX >= actualY;
-            // },
-            // // 小于
-            // isLess(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX < actualY;
-            // },
-            // // 小于等于
-            // isLessOrEqual(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX <= actualY;
-            // },
-            // // 与
-            // isAnd(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX && actualY;
-            // },
-            // // 或
-            // isOr(x, y) {
-            //    const actualX = getActualValue(x);
-            //    const actualY = getActualValue(y);
-            //    return actualX || actualY;
-            // },
-            // // 非
-            // isNot(val) {
-            //    const actualVal = getActualValue(val);
-            //    return !actualVal;
-            // },
             requestFullscreen() {
                 return document.body.requestFullscreen();
             },
@@ -233,6 +186,21 @@ export default {
                         rej({ code: 666, msg: '当前系统不支持地理定位' });
                     }
                 });
+            },
+            getIsMiniApp() {
+                return window.__wxjs_environment === 'miniprogram';
+            },
+            getWeChatOpenid() {
+                return localStorage.getItem('_wx_openid');
+            },
+            getWeChatHeadImg() {
+                return localStorage.getItem('_wx_headimg');
+            },
+            getWeChatNickName() {
+                return localStorage.getItem('_wx_nickname');
+            },
+            navigateToUserInfo() {
+                navigateToUserInfoPage();
             },
             getDistance(s1, s2) {
                 function deg2rad(deg) {
@@ -365,7 +333,7 @@ export default {
                 $global,
             },
         });
-
+        // localCacheVariableSet 只是读写并不需要加入到响应式中故 把这个变量挂载到 Vue 的原型上
         Vue.prototype.$localCacheVariableSet = localCacheVariableSet;
 
         Vue.prototype.$isInstanceOf = isInstanceOf;

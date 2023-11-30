@@ -1,4 +1,14 @@
 {
+    "getNuimsTenantLoginTypes": {
+        "url": {
+            "method": "get",
+            "path": "/gateway/nuims/nuims",
+            "query": {
+                "Action": "getNuimsTenantLoginTypes",
+                "Version": "2020-06-01"
+            }
+        }
+    },
     "GenerateExtendToken": {
         "url": {
             "method": "get",
@@ -39,6 +49,16 @@
             }
         }
     },
+    "GetNuims": {
+        "url": {
+            "method": "get",
+            "path": "/gateway/nuims/nuims",
+            "query": {
+                "Action": "GetTenantLoginTypes",
+                "Version": "2020-06-01"
+            }
+        }
+    },
     "GetUser": {
         "url": {
             "method": "get",
@@ -55,16 +75,6 @@
             "path": "/gateway/nuims/nuims",
             "query": {
                 "Action": "GetUserResources",
-                "Version": "2020-06-01"
-            }
-        }
-    },
-    "getNuimsTenantLoginTypes": {
-        "url": {
-            "method": "get",
-            "path": "/gateway/nuims/nuims",
-            "query": {
-                "Action": "getNuimsTenantLoginTypes",
                 "Version": "2020-06-01"
             }
         }
@@ -86,6 +96,25 @@
             "query": {
                 "Action": "Logout",
                 "Version": "2020-06-01"
+            }
+        }
+    },
+    "LoginH5": {
+        "url": {
+            "method": "post",
+            "path": "/gateway/nuims/nuims",
+            "query": {
+                "Action": "Login",
+                "Version": "2020-06-01"
+            }
+        }
+    },
+    "GetConfig": {
+        "url": {
+            "method": "get",
+            "path": "/api/system/config",
+            "query": {
+
             }
         }
     }

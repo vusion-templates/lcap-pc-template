@@ -1,14 +1,12 @@
 import axios from 'axios';
 import Service from 'request-pre';
 import { stringify } from 'qs';
-
 import cookie from '@/utils/cookie';
 import { addConfigs, shortResponse } from './add.configs';
-import { instance } from './errHandles';
-
 import { getFilenameFromContentDispositionHeader } from './tools';
 import paramsSerializer from './paramsSerializer';
 import { formatMicroFrontUrl } from '@/plugins/router/microFrontUrl';
+import { instance } from './errHandles';
 
 const formatContentType = function (contentType, data) {
     const map = {
@@ -18,7 +16,6 @@ const formatContentType = function (contentType, data) {
     };
     return map[contentType] ? map[contentType](data) : data;
 };
-
 const parseCookie = (str) =>
     str
         .split(';')
@@ -78,7 +75,6 @@ function download(url) {
                 },
             });
         }
-
         const downloadUrl = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
         link.href = downloadUrl;
@@ -106,7 +102,6 @@ const requester = function (requestInfo) {
     const { url, config = {} } = requestInfo;
     const { method, body = {}, headers = {}, query = {} } = url;
     const path = formatMicroFrontUrl(url.path);
-
     const baseURL = config.baseURL ? config.baseURL : '';
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
     if (!headers.Authorization && cookie.get('authorization')) {

@@ -1,8 +1,6 @@
 <template>
     <div :class="$style.freesassroot">
-        <u-iframe ref="iframe3" style="width:1px;height:1px;opacity: 0;"
-            src="https://sfsso-community1.app.codewave.163.com/sso"></u-iframe>
-
+        <u-iframe ref="iframe3" style="width:1px;height:1px;opacity: 0;" src="https://sfsso-community1.app.codewave.163.com/sso"></u-iframe>
     </div>
 </template>
 

@@ -10,7 +10,7 @@ const getErrStrack = (err) => err.StackTrace || '系统错误，请查看日志�
 export default {
     defaults({ config }, err) {
         if (!config.noErrorTip) {
-            instance.show('系统错误');
+            instance.show('系统错误，请查看日志！');
         }
     },
     500({ config }, err = {}) {

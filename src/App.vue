@@ -57,10 +57,6 @@ export default {
                 } else {
                     this.$refs.freeSassLogin.open();
                 }
-                // 删除此处 根据后端接口控制
-                // await auth.CheckExtendToken({ config: {
-                //     noErrorTip: true,
-                // } });
             } catch (error) {
                 console.error('CheckExtendToken: ', error);
                 this.$refs.freeSassLogin.open();
