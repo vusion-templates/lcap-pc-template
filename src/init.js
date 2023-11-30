@@ -74,8 +74,8 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     Vue.use(RouterPlugin);
     Vue.use(ServicesPlugin, metaData);
     Vue.use(AuthPlugin);
-    Vue.use(DataTypesPlugin, { ...metaData, i18nInfo: appConfig.i18nInfo });
     Vue.use(UtilsPlugin, metaData);
+    Vue.use(DataTypesPlugin, { ...metaData, i18nInfo: appConfig.i18nInfo });
 
     // 已经获取过权限接口
     Vue.prototype.hasLoadedAuth = false;
