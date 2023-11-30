@@ -29,14 +29,6 @@ export default {
 
         const frontendVariables = {};
         const localCacheVariableSet = new Set(); // 本地存储的全局变量集合
-
-        if (Array.isArray(options && options.frontendVariables)) {
-            options.frontendVariables.forEach((frontendVariable) => {
-                const { name, typeAnnotation, defaultCode, localCache } = frontendVariable;
-                localCache && localCacheVariableSet.add(name); // 本地存储的全局变量集合
-                frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultCode?.code);
-            });
-        }
         const $global = {
             // 用户信息
             userInfo: {},
@@ -352,6 +344,19 @@ export default {
                 return navigator.language || navigator.userLanguage;
             },
         };
+        Vue.prototype.$global = $global;
+        window.$global = $global;
+        if (Array.isArray(options && options.frontendVariables)) {
+            options.frontendVariables.forEach((frontendVariable) => {
+                const { name, typeAnnotation, defaultValueFn, defaultCode, localCache } = frontendVariable;
+                localCache && localCacheVariableSet.add(name); // 本地存储的全局变量集合
+                let defaultValue = defaultCode.code;
+                if (Object.prototype.toString.call(defaultValueFn) === '[object Function]' && defaultCode.executeCode) {
+                    defaultValue = defaultValueFn(Vue);
+                }
+                frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
+            });
+        }
         Object.keys(porcessPorts).forEach((service) => {
             $global[service] = porcessPorts[service];
         });
@@ -362,8 +367,6 @@ export default {
         });
 
         Vue.prototype.$localCacheVariableSet = localCacheVariableSet;
-        Vue.prototype.$global = $global;
-        window.$global = $global;
 
         Vue.prototype.$isInstanceOf = isInstanceOf;
 
