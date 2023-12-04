@@ -21,10 +21,6 @@ const evalWrap = function (metaData, fnName) {
     // eslint-disable-next-line no-eval
     metaData && fnName && metaData?.frontendEvents[fnName] && eval(metaData.frontendEvents[fnName]);
 };
-Vue.use(VueI18n);
-Vue.i18n = new VueI18n({
-    locale: localStorage.i18nLocale || 'zh-CN',
-});
 
 // 预览沙箱不需要调用init来初始化，但是需要使用到CloudUI和Vant组件，所以放在外边
 installOptions(Vue);
@@ -55,12 +51,31 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     installFilters(Vue, filters);
     installComponents(Vue, Components);
 
+    // 处理当前语言
+    let locale = 'zh-CN';
+    if (appConfig.i18nInfo) {
+        const { I18nList, messages } = appConfig.i18nInfo;
+        locale = getUserLanguage(appConfig, messages);
+        // 重置当前生效语言
+        appConfig.i18nInfo.locale = locale;
+        appConfig.i18nInfo.currentLocale = locale;
+        // 设置当前语言名称
+        appConfig.i18nInfo.localeName = I18nList?.find((item) => item.id === locale)?.name;
+        // 设置当前语言的翻译信息
+        window.Vue.prototype.$CloudUILang = locale;
+
+        window.Vue.prototype.$CloudUIMessages = {
+            ...window.Vue.prototype.$CloudUIMessages,
+            ...(messages || {}),
+        };
+    }
+
     Vue.use(LogicsPlugin, metaData);
     Vue.use(RouterPlugin);
     Vue.use(ServicesPlugin, metaData);
     Vue.use(AuthPlugin);
-    Vue.use(DataTypesPlugin, metaData);
     Vue.use(UtilsPlugin, metaData);
+    Vue.use(DataTypesPlugin, { ...metaData, i18nInfo: appConfig.i18nInfo });
 
     // 已经获取过权限接口
     Vue.prototype.hasLoadedAuth = false;
@@ -122,12 +137,16 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     router.beforeEach(getTitleGuard(appConfig));
     router.beforeEach(microFrontend);
 
+    const i18nInfo = appConfig.i18nInfo;
+    const i18n = new VueI18n({
+        locale: locale,
+        messages: i18nInfo.messages,
+    });
+    window.$i18n = i18n;
     const app = new Vue({
         name: 'app',
         router,
-        i18n: {
-            locale: localStorage.i18nLocale || 'zh-CN',
-        },
+        i18n,
         ...App,
     });
 
@@ -161,6 +180,30 @@ const init = (appConfig, platformConfig, routes, metaData) => {
     return app;
 };
 
+function getUserLanguage(appConfig, messages = {}) {
+    let locale = localStorage.i18nLocale;
+    // 如果local里没有就读主应用的默认语言
+    if (!messages[locale]) {
+        // 如果当前浏览器的设置也没有，就读取主应用的默认语言
+        locale = navigator.language || navigator.userLanguage;
+
+        if (!messages[locale]) {
+            // 如果不在列表中，获取语言代码的前两位
+            let baseLang = locale.substring(0, 2);
+            const languageList = Object.keys(messages);
+            // 查找列表中是否有与基础语言代码相同的项
+            let match = languageList.find(lang => lang.startsWith(baseLang));
+            // 如果存在前两位一样的就用这个
+            if (match) {
+                locale = match;
+            } else {
+            // 如果不存在，就用默认语言
+                locale = appConfig.i18nInfo.locale || 'zh-CN';
+            }
+        }
+    }
+    return locale;
+}
 export default {
     init,
 };

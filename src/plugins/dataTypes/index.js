@@ -12,21 +12,11 @@ import { porcessPorts } from '../router/processService';
 window.CryptoJS = CryptoJS;
 const aesKey = ';Z#^$;8+yhO!AhGo';
 
-// // 获取真实值
-// function getActualValue(value) {
-//    let actualValue = value;
-//    const { __isPrimitive, value: primitiveVal } = value || {};
-//    if (__isPrimitive) {
-//        actualValue = primitiveVal;
-//    }
-//    return actualValue;
-// }
-
 export default {
     install(Vue, options = {}) {
         const dataTypesMap = options.dataTypesMap || {}; // TODO 统一为  dataTypesMap
-
-        initApplicationConstructor(dataTypesMap);
+        const i18nInfo = options.i18nInfo || {};
+        initApplicationConstructor(dataTypesMap, Vue);
 
         const genInitFromSchema = (typeKey, defaultValue, level) => genInitData(typeKey, defaultValue, level);
 
@@ -39,22 +29,16 @@ export default {
 
         const frontendVariables = {};
         const localCacheVariableSet = new Set(); // 本地存储的全局变量集合
-
-        if (Array.isArray(options && options.frontendVariables)) {
-            options.frontendVariables.forEach((frontendVariable) => {
-                const { name, typeAnnotation, defaultValue, localCache } = frontendVariable;
-                localCache && localCacheVariableSet.add(name); // 本地存储的全局变量集合
-                frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
-            });
-        }
         const $global = {
             // 用户信息
             userInfo: {},
+            // 国际化信息
+            i18nInfo: i18nInfo,
             // 前端全局变量
             frontendVariables,
             // 加
             add(x, y) {
-                if (typeof (x) !== 'number' || typeof (y) !== 'number') {
+                if (typeof x !== 'number' || typeof y !== 'number') {
                     return x + y;
                 }
                 if (!x) {
@@ -161,6 +145,39 @@ export default {
             exitFullscreen() {
                 return document.exitFullscreen();
             },
+            /**
+             * 比较键盘事件
+             * @param {KeyboardEvent} event
+             * @param {String[]} target
+             */
+            compareKeyboardInput(event, target) {
+                // 将target转event
+                const targetEvent = { altKey: false, ctrlKey: false, metaKey: false, shiftKey: false, code: '' };
+                target.forEach((item) => {
+                    if (item === 'Alt') {
+                        targetEvent.altKey = true;
+                    } else if (item === 'Meta') {
+                        targetEvent.metaKey = true;
+                    } else if (item === 'Control') {
+                        targetEvent.ctrlKey = true;
+                    } else if (item === 'Shift') {
+                        targetEvent.shiftKey = true;
+                    } else {
+                        targetEvent.code = item;
+                    }
+                });
+
+                let isMatch = true;
+                for (const key in targetEvent) {
+                    if (Object.hasOwnProperty.call(targetEvent, key)) {
+                        if (targetEvent[key] !== event[key]) {
+                            isMatch = false;
+                        }
+                    }
+                }
+
+                return isMatch;
+            },
             encryptByAES({ string: message }, key = aesKey) {
                 const keyHex = CryptoJS.enc.Utf8.parse(key); //
                 const messageHex = CryptoJS.enc.Utf8.parse(message);
@@ -229,19 +246,19 @@ export default {
                 const R = 6371; // Radius of the earth in km
                 const dLat = deg2rad(lat2t - lat1t); // deg2rad below
                 const dLon = deg2rad(lng2t - lng1t);
-                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                    + Math.cos(deg2rad(lat1t)) * Math.cos(deg2rad(lat2t)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1t)) * Math.cos(deg2rad(lat2t)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                 const d = R * c; // Distance in km
                 return d * 1000;
             },
             logout() {
-                Vue.prototype.$confirm({
-                    content: '确定退出登录吗？',
-                    title: '提示',
-                    okButton: '确定',
-                    cancelButton: '取消',
-                })
+                Vue.prototype
+                    .$confirm({
+                        content: '确定退出登录吗？',
+                        title: '提示',
+                        okButton: '确定',
+                        cancelButton: '取消',
+                    })
                     .then(() => Vue.prototype.$auth.logout())
                     .then(() => {
                         cookie.erase('authorization');
@@ -250,21 +267,25 @@ export default {
                     });
             },
             async downloadFile(url, fileName) {
-                await ioInitService().downloadFiles({
-                    body: {
-                        urls: [url],
-                        fileName,
-                    },
-                }).then((res) => Promise.resolve(res))
+                await ioInitService()
+                    .downloadFiles({
+                        body: {
+                            urls: [url],
+                            fileName,
+                        },
+                    })
+                    .then((res) => Promise.resolve(res))
                     .catch((err) => Promise.resolve(err));
             },
             async downloadFiles(urls, fileName) {
-                await ioInitService().downloadFiles({
-                    body: {
-                        urls,
-                        fileName,
-                    },
-                }).then((res) => Promise.resolve(res))
+                await ioInitService()
+                    .downloadFiles({
+                        body: {
+                            urls,
+                            fileName,
+                        },
+                    })
+                    .then((res) => Promise.resolve(res))
                     .catch((err) => Promise.resolve(err));
             },
             async getCustomConfig(configKey = '') {
@@ -300,7 +321,42 @@ export default {
                 });
                 return res;
             },
+            setI18nLocale(newLocale) {
+                // 修改local中的存储的语言标识
+                localStorage.i18nLocale = newLocale;
+                // 修改当前template的语言
+                $global.i18nInfo.locale = newLocale;
+                $global.i18nInfo.currentLocale = newLocale;
+                // 修改当前语言名称
+                $global.i18nInfo.localeName = this.getI18nList().find((item) => item.id === newLocale)?.name;
+                // 调用UI库更新当前语言
+                appVM.$i18n.locale = newLocale;
+                // 调用UI库更新当前语言
+                window.Vue.prototype.$CloudUILang = newLocale;
+                // 重新加载页面
+                window.location.reload();
+            },
+            getI18nList() {
+                // 在ide中拼接好
+                return $global.i18nInfo.I18nList || [];
+            },
+            getUserLanguage() {
+                return navigator.language || navigator.userLanguage;
+            },
         };
+        Vue.prototype.$global = $global;
+        window.$global = $global;
+        if (Array.isArray(options && options.frontendVariables)) {
+            options.frontendVariables.forEach((frontendVariable) => {
+                const { name, typeAnnotation, defaultValueFn, defaultCode, localCache } = frontendVariable;
+                localCache && localCacheVariableSet.add(name); // 本地存储的全局变量集合
+                let defaultValue = defaultCode?.code;
+                if (Object.prototype.toString.call(defaultValueFn) === '[object Function]') {
+                    defaultValue = defaultValueFn(Vue);
+                }
+                frontendVariables[name] = genInitFromSchema(genSortedTypeKey(typeAnnotation), defaultValue);
+            });
+        }
         Object.keys(porcessPorts).forEach((service) => {
             $global[service] = porcessPorts[service];
         });
@@ -311,8 +367,6 @@ export default {
         });
 
         Vue.prototype.$localCacheVariableSet = localCacheVariableSet;
-        Vue.prototype.$global = $global;
-        window.$global = $global;
 
         Vue.prototype.$isInstanceOf = isInstanceOf;
 
@@ -369,8 +423,7 @@ export default {
         Vue.prototype.$isLooseEqualFn = isLooseEqualFn;
         const enumsMap = options.enumsMap || {};
         Vue.prototype.$enums = (key, value) => {
-            if (!key || !value)
-                return '';
+            if (!key || !value) return '';
             if (enumsMap[key]) {
                 return enumsMap[key][value];
             } else {
@@ -418,8 +471,7 @@ export default {
 
         // 实体的 updateBy 和 deleteBy 需要提前处理请求参数
         function resolveRequestData(root) {
-            if (!root)
-                return;
+            if (!root) return;
             // console.log(root.concept)
             delete root.folded;
 
@@ -448,4 +500,3 @@ export default {
         Vue.prototype.$resolveRequestData = resolveRequestData;
     },
 };
-
