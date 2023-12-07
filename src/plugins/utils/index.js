@@ -28,14 +28,27 @@ import { findAsync, mapAsync, filterAsync, findIndexAsync, sortAsync } from './h
 import { getAppTimezone, isValidTimezoneIANAString } from './timezone';
 let enumsMap = {};
 
+const safeNewDate = (dateStr) => {
+    try {
+        const res = new Date(dateStr.replaceAll('-', '/'));
+        if (['Invalid Date', 'Invalid time value', 'invalid date'].includes(res.toString())) {
+            return new Date(dateStr);
+        } else {
+            return res;
+        }
+    } catch (err) {
+        return new Date(dateStr);
+    }
+};
+
 function naslDateToLocalDate(date) {
     const localTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const localDate = momentTZ.tz(date, 'YYYY-MM-DD', localTZ);
-    return new Date(localDate.format('YYYY-MM-DD HH:mm:ss'));
+    return safeNewDate(localDate.format('YYYY-MM-DD HH:mm:ss'));
 }
 
 function convertJSDateInTargetTimeZone(date, tz) {
-    return new Date(momentTZ.tz(date, getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss.SSS'));
+    return safeNewDate(momentTZ.tz(date, getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss.SSS'));
 }
 
 function toValue(date, typeKey) {
@@ -670,14 +683,14 @@ export const utils = {
         return new Date();
     },
     AddDays(date = new Date(), amount = 1, converter = 'json') {
-        return toValue(addDays(new Date(date), amount), converter);
+        return toValue(addDays(safeNewDate(date), amount), converter);
     },
-    AddMonths(date = new Date(), amount = 1, converter = 'json') {
+    AddMonths(date = safeNewDate(), amount = 1, converter = 'json') {
         /** 传入的值为标准的时间格式 */
-        return toValue(addMonths(new Date(date), amount), converter);
+        return toValue(addMonths(safeNewDate(date), amount), converter);
     },
     SubDays(date = new Date(), amount = 1, converter = 'json') {
-        return toValue(subDays(new Date(date), amount), converter);
+        return toValue(subDays(safeNewDate(date), amount), converter);
     },
     GetDateCount(datetr, metric, tz) {
         let date;
@@ -772,8 +785,8 @@ export const utils = {
             return filtereddate.map((date) => moment(date).format('YYYY-MM-DD'));
         }
     },
-    AlterDateTime(datetring, option, count, unit) {
-        const date = new Date(datetring);
+    AlterDateTime(dateStr, option, count, unit) {
+        const date = safeNewDate(dateStr);
         const amount = option === 'Increase' ? count : -count;
         let addDate;
         switch (unit) {
@@ -786,7 +799,7 @@ export const utils = {
             case 'quarter': addDate = addQuarters(date, amount); break;
             case 'year': addDate = addYears(date, amount); break;
         }
-        if (typeof datetring === 'object' || datetring.includes('T')) {
+        if (typeof dateStr === 'object' || dateStr.includes('T')) {
             return moment(addDate).format('YYYY-MM-DD HH:mm:ss');
         } else {
             return moment(addDate).format('YYYY-MM-DD');
@@ -867,21 +880,21 @@ export const utils = {
     Convert(value, typeAnnotation) {
         if (typeAnnotation && typeAnnotation.typeKind === 'primitive') {
             if (typeAnnotation.typeName === 'DateTime') {
-                return formatRFC3339(new Date(value));
+                return formatRFC3339(safeNewDate(value));
             } else if (typeAnnotation.typeName === 'Date')
-                return moment(new Date(value)).format('YYYY-MM-DD');
+                return moment(safeNewDate(value)).format('YYYY-MM-DD');
             else if (typeAnnotation.typeName === 'Time') {
                 if (/^\d{2}:\d{2}:\d{2}$/.test(value)) // 纯时间 12:30:00
-                    return moment(new Date('2022-01-01 ' + value)).format('HH:mm:ss');
+                    return moment(safeNewDate('2022-01-01 ' + value)).format('HH:mm:ss');
                 else
-                    return moment(new Date(value)).format('HH:mm:ss');
+                    return moment(safeNewDate(value)).format('HH:mm:ss');
             } else if (typeAnnotation.typeName === 'String')
                 return String(value);
             else if (typeAnnotation.typeName === 'Double' || typeAnnotation.typeName === 'Decimal') // 小数 或者精确小数
                 return parseFloat(+value);
             else if (typeAnnotation.typeName === 'Integer' || typeAnnotation.typeName === 'Long')
                 // 日期时间格式特殊处理; 整数： format 'int' ; 长整数: format: 'long'
-                return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? new Date(value).getTime() : Math.round(+value);
+                return /^\d{4}-\d{2}-\d{2}(.*)+/.test(value) ? safeNewDate(value).getTime() : Math.round(+value);
             else if (typeAnnotation.typeName === 'Boolean') // 布尔值
                 return !!value;
         }
@@ -944,7 +957,7 @@ export const utils = {
             dateTime1 = `1970-01-01 ${dateTime1}`;
             dateTime2 = `1970-01-01 ${dateTime2}`;
         }
-        if (!isValid(new Date(dateTime1)) || !isValid(new Date(dateTime2)))
+        if (!isValid(safeNewDate(dateTime1)) || !isValid(safeNewDate(dateTime2)))
             return;
         const map = {
             y: differenceInYears,
@@ -959,7 +972,7 @@ export const utils = {
         if (!map[calcType])
             return;
         const method = map[calcType];
-        const diffRes = method(new Date(dateTime2), new Date(dateTime1));
+        const diffRes = method(safeNewDate(dateTime2), safeNewDate(dateTime1));
         return isAbs ? Math.abs(diffRes) : diffRes;
     },
     // 时区转换
@@ -967,7 +980,7 @@ export const utils = {
         if (!dateTime) {
             toastAndThrow(`内置函数ConvertTimezone入参错误：指定日期为空`);
         }
-        if (!isValid(new Date(dateTime))) {
+        if (!isValid(safeNewDate(dateTime))) {
             toastAndThrow(`内置函数ConvertTimezone入参错误：指定日期不是合法日期类型`);
         }
         if (!isValidTimezoneIANAString(tz)) {
