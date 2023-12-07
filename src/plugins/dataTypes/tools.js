@@ -16,6 +16,18 @@ function tryJSONParse(str) {
 
 export const typeDefinitionMap = new Map();
 const typeMap = new Map();
+const safeNewDate = (dateStr) => {
+    try {
+        const res = new Date(dateStr.replaceAll('-', '/'));
+        if (['Invalid Date', 'Invalid time value', 'invalid date'].includes(res.toString())) {
+            return new Date(dateStr);
+        } else {
+            return res;
+        }
+    } catch (err) {
+        return new Date(dateStr);
+    }
+};
 
 // 生成typeKey
 export function genSortedTypeKey(typeAnnotation) {
@@ -545,12 +557,12 @@ export const toString = (typeKey, variable, tz, tabSize = 0, collection = new Se
                     }
                     varArr.push(varItem || '00');
                 });
-                str = momentTZ.tz(new Date('2022-01-01 ' + varArr.join(':')), getAppTimezone(tz)).format(formatArr.join(':'));
+                str = momentTZ.tz(safeNewDate('2022-01-01 ' + varArr.join(':')), getAppTimezone(tz)).format(formatArr.join(':'));
             } else {
-                str = momentTZ.tz(new Date(variable), getAppTimezone(tz)).format('HH:mm:ss');
+                str = momentTZ.tz(safeNewDate(variable), getAppTimezone(tz)).format('HH:mm:ss');
             }
         } else if (typeKey === 'nasl.core.DateTime') {
-            str = momentTZ.tz(new Date(variable), getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss');
+            str = momentTZ.tz(safeNewDate(variable), getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss');
         }
         if (tabSize > 0) {
             if (['nasl.core.String', 'nasl.core.Text'].includes(typeKey)) {
@@ -751,14 +763,14 @@ export const fromString = (variable, typeKey) => {
     const { typeName } = typeDefinition || {};
     // 日期
     if (typeName === 'DateTime' && isValidDate(variable, DateTimeReg)) {
-        const date = new Date(variable);
+        const date = safeNewDate(variable);
         const outputDate = formatISO(date, { format: 'extended', fractionDigits: 3 });
         return outputDate;
     } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
-        return (new Date(variable)).format('YYYY-MM-dd');
+        return moment(safeNewDate(variable)).format('YYYY-MM-DD');
     } else if (typeName === 'Time' && TimeReg.test(variable)) {
         // ???
-        return moment(new Date('2022-01-01 ' + variable)).format('HH:mm:ss');
+        return moment(safeNewDate('2022/01/01 ' + variable)).format('HH:mm:ss');
     }
     // 浮点数
     else if (['Decimal', 'Double'].includes(typeName) && FloatNumberReg.test(variable)) {
