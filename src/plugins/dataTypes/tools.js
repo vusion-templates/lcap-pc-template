@@ -755,7 +755,7 @@ export const fromString = (variable, typeKey) => {
         const outputDate = formatISO(date, { format: 'extended', fractionDigits: 3 });
         return outputDate;
     } else if (typeName === 'Date' && isValidDate(variable, DateReg)) {
-        return moment(new Date(variable)).format('YYYY-MM-dd');
+        return moment(new Date(variable)).format('YYYY-MM-DD');
     } else if (typeName === 'Time' && TimeReg.test(variable)) {
         // ???
         return moment(new Date('2022-01-01 ' + variable)).format('HH:mm:ss');
