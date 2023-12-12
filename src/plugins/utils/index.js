@@ -734,8 +734,8 @@ export const utils = {
     },
     isInputValidNaslDateTime(inp) {
         return inp instanceof Date
-            || /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})/.test(inp)
-            || /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})/.test(inp);
+            || (typeof inp === 'string' && /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})/.test(inp))
+            || (typeof inp === 'string' && /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})/.test(inp));
     },
     GetSpecificDaysOfWeek(startdatetr, enddatetr, arr, tz) {
         if (!startdatetr)
