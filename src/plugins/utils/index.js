@@ -48,7 +48,7 @@ function naslDateToLocalDate(date) {
 }
 
 function convertJSDateInTargetTimeZone(date, tz) {
-    return safeNewDate(momentTZ.tz(date, getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss.SSS'));
+    return safeNewDate(momentTZ.tz(date, getAppTimezone(tz)).format('YYYY-MM-DD HH:mm:ss'));
 }
 
 function toValue(date, typeKey) {
@@ -685,7 +685,7 @@ export const utils = {
     AddDays(date = new Date(), amount = 1, converter = 'json') {
         return toValue(addDays(safeNewDate(date), amount), converter);
     },
-    AddMonths(date = safeNewDate(), amount = 1, converter = 'json') {
+    AddMonths(date = new Date(), amount = 1, converter = 'json') {
         /** 传入的值为标准的时间格式 */
         return toValue(addMonths(safeNewDate(date), amount), converter);
     },
