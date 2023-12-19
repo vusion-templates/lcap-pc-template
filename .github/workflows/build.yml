@@ -37,7 +37,12 @@ jobs:
         run: mkdir temp && cp -r ./public ./temp
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'lcap-pc-template@${{ env.VERSION }}'
           path: temp
+
+  call-giselle:
+    needs: build
+    uses: vusion-templates/giselle/.github/workflows/release-lcap-pc-template.yml@master
+    secrets: inherit
