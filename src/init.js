@@ -64,10 +64,11 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         // 设置当前语言的翻译信息
         window.Vue.prototype.$CloudUILang = locale;
 
-        window.Vue.prototype.$CloudUIMessages = {
-            ...window.Vue.prototype.$CloudUIMessages,
-            ...(messages || {}),
-        };
+        const currentMessages = messages || {};
+        Object.keys(currentMessages).forEach((key) => {
+            window.Vue.prototype.$CloudUIMessages[key] = window.Vue.prototype.$CloudUIMessages[key] || {};
+            Object.assign(window.Vue.prototype.$CloudUIMessages[key], currentMessages[key]);
+        });
     }
 
     Vue.use(LogicsPlugin, metaData);
