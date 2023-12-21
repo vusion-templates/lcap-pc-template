@@ -94,8 +94,24 @@ export const porcessPorts = {
         });
         return res;
     },
+    async getTaskInstanceListV2(query) {
+        const res = await processInitService().getTaskInstanceListV2({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
     async getTaskInstance(query) {
         const res = await processInitService().getTaskInstance({
+            body: {
+                ...query,
+            },
+        });
+        return res;
+    },
+    async getTaskInstanceV2(query) {
+        const res = await processInitService().getTaskInstanceV2({
             body: {
                 ...query,
             },

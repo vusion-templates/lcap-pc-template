@@ -59,9 +59,21 @@
             "method": "post"
         }
     },
+    "getTaskInstanceListV2": {
+        "url": {
+            "path": "/api/system/process/getTaskInstanceListV2",
+            "method": "post"
+        }
+    },
     "getTaskInstance": {
         "url": {
             "path": "/api/system/process/getTaskInstance",
+            "method": "post"
+        }
+    },
+    "getTaskInstanceV2": {
+        "url": {
+            "path": "/api/system/process/getTaskInstanceV2",
             "method": "post"
         }
     },
