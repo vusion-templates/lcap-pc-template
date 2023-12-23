@@ -224,7 +224,8 @@ export function isInstanceOf(variable, typeKey) {
         if (Array.isArray(enumItems)) {
             if (varStr === '[object String]') {
                 // 当前值在枚举中存在
-                const enumItemIndex = enumItems.findIndex((enumItem) => variable === enumItem.value);
+                //  variable == enumItem.value 不改为全等，枚举支持整数类型
+                const enumItemIndex = enumItems.findIndex((enumItem) => variable == enumItem.value);
                 return enumItemIndex !== -1;
             } else if (varStr === '[object Array]') {
                 const enumItemIndex = variable.findIndex((varItem) => !isInstanceOf(varItem.value, genSortedTypeKey(typeDefinition)));

@@ -93,7 +93,7 @@ export const utils = {
         }
         return '';
     },
-    StringToEnumValue(value, enumTypeAnnotation) {
+    ToEnumValue(value, enumTypeAnnotation) {
         const { typeName, typeNamespace } = enumTypeAnnotation || {};
         if (typeName) {
             let enumName = typeName;
