@@ -196,7 +196,7 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
     serviceConfig = fixServiceConfig;
     const newApiSchemaMap = adjustPathWithSysPrefixPath(apiSchemaList);
     if (window.preRequest) {
-        service.preConfig.set('preRequest', (requestInfo, preData) => {
+        let resolve  = (requestInfo, preData) => {
             const HttpRequest = {
                 requestURI: requestInfo.url.path,
                 remoteIp: '',
@@ -205,10 +205,13 @@ export const createLogicService = function createLogicService(apiSchemaList, ser
                 headers: requestInfo.url.headers,
                 querys: JSON.stringify(requestInfo.url.query),
                 cookies: foramtCookie(document.cookie),
+                requestInfo
             };
 
-            window.preRequest && window.preRequest(HttpRequest, preData);
-        });
+            return  window.preRequest && window.preRequest(HttpRequest, preData);
+        }
+
+        service.preConfig.set('preRequest',   {resolve});
         serviceConfig.config.preRequest = true;
     }
     if (window.postRequest) {
