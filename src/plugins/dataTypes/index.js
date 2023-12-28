@@ -202,7 +202,7 @@ export default {
                 const decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
                 return decryptedStr.toString();
             },
-            hasAuth({ string: authPath }) {
+            hasAuth({ authPath }) {
                 return authService.has(authPath);
             },
             getLocation() {
