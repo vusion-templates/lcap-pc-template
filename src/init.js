@@ -79,10 +79,10 @@ const init = (appConfig, platformConfig, routes, metaData) => {
             console.error(err);
         }
     };
+    if (!window?.$toast) {
+        window.$toast = instance;
+    }
     if (window?.rendered) {
-        if (!window?.$toast) {
-            window.$toast = instance;
-        }
         window.rendered();
     }
     const baseResourcePaths = platformConfig.baseResourcePaths || [];
