@@ -1092,7 +1092,7 @@ export const utils = {
             TowardsInfinity: Decimal.ROUND_UP,
             HalfUp: Decimal.ROUND_HALF_UP,
         };
-        return new Decimal(value).toFixed(0, modeMap[mode]);
+        return value && new Decimal(value).toFixed(0, modeMap[mode]);
     },
     /**
      * 空值判断（与）
