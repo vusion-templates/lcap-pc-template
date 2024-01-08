@@ -1,6 +1,6 @@
 {
   "name": "lcap-pc-template",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "base on vue cloud-ui.vusion",
   "scripts": {
     "gen:bundle": "node --experimental-modules demo/gen/index.mjs",
@@ -22,7 +22,7 @@
     "watch:designer-local": "node ./bin/local-designer-build.js",
     "build:designer-local": "cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js",
     "build:designer": "npm run check && cross-env BUILD_LIB_ENV=designer vue-cli-service build --target lib --name cloudAdminDesigner src/init.js && rimraf public/*.common.js && rimraf public/*.umd.js && rimraf public/index.html && rimraf public/demo.html",
-    "deploy:dev": "lcap deploy ./public --platform http://defaulttenant.lcap.dev.env.com",
+    "deploy:dev": "lcap deploy ./public --platform http://defaulttenant.lcap.codewave-dev.163yun.com/",
     "deploy:test": "lcap deploy ./public --platform https://defaulttenant.lcap.hatest.163yun.com/",
     "deploy:test2": "lcap deploy ./public --platform https://defaulttenant.lcap.test33x-lowcode.163yun.com/",
     "deploy:pre": "lcap deploy ./public --platform http://defaulttenant.lcap.hadri.163yun.com",

@@ -792,15 +792,43 @@ export const utils = {
             return moment(addDate).format('YYYY-MM-DD');
         }
     },
-    FormatDate(value, formatter) {
+    FormatDate(value, formatTypeName, formatter, customFormatter) {
         if (!value) {
             return '-';
         }
+        if (formatter === 'custom') {
+            return dateFormatter.format(naslDateToLocalDate(value), customFormatter);
+        }
         return dateFormatter.format(naslDateToLocalDate(value), formatter);
     },
-    FormatDateTime(value, formatter, tz) {
+    FormatTime(value, formatTypeName, tz, formatter, customFormatter) {
         if (!value) {
             return '-';
+        }
+        if (formatter === 'custom') {
+            if (!tz) {
+                return this.FormatTime(value, customFormatter, 'global');
+            }
+            const date = convertJSDateInTargetTimeZone(value, tz);
+            return dateFormatter.format(date, customFormatter);
+        } else {
+            if (!tz) {
+                return this.FormatTime(value, formatter, 'global');
+            }
+            const date = convertJSDateInTargetTimeZone(value, tz);
+            return dateFormatter.format(date, formatter);
+        }
+    },
+    FormatDateTime(value, formatTypeName, tz, formatter, customFormatter) {
+        if (!value) {
+            return '-';
+        }
+        if (formatter === 'custom') {
+            if (!tz) {
+                return this.FormatDateTime(value, customFormatter, 'global');
+            }
+            const date = convertJSDateInTargetTimeZone(value, tz);
+            return dateFormatter.format(date, customFormatter);
         }
         if (!tz) {
             return this.FormatDateTime(value, formatter, 'global');
@@ -902,10 +930,14 @@ export const utils = {
     },
     /**
      * 数字格式化
+     * @param {formatTypeName} 格式化类型
      * @param {digits} 小数点保留个数
+     * @param {omit} 是否隐藏末尾零
      * @param {showGroup} 是否显示千位分割（默认逗号分隔）
+     * @param {fix} 前缀还是后缀
+     * @param {unit} 单位
     */
-    FormatNumber(value, digits, showGroup) {
+    FormatNumber(value, formatTypeName, digits, omit, showGroup, fix, unit) {
         if (!value)
             return value;
         if (parseFloat(value) === 0)
@@ -914,6 +946,9 @@ export const utils = {
             return;
         if (digits !== undefined) {
             value = Number(value).toFixed(parseInt(digits));
+            if (omit) {
+                value = parseFloat(value) + ''; // 转字符串
+            }
         }
         if (showGroup) {
             const temp = ('' + value).split('.');
@@ -925,7 +960,52 @@ export const utils = {
                 left = left + '.' + right;
             value = left;
         }
+        if (fix && unit) {
+            switch (fix) {
+                case 'prefix':
+                    value = unit + value;
+                    break;
+                case 'suffix':
+                    value = value + unit;
+                    break;
+                default: value = value + unit;
+                    break;
+            }
+        }
         return '' + value;
+    },
+    /**
+     * 数字格式化
+     * @param {formatTypeName} 格式化类型
+     * @param {digits} 小数点保留个数
+     * @param {omit} 是否隐藏末尾零
+     * @param {showGroup} 是否显示千位分割（默认逗号分隔）
+    */
+    FormatPercent(value, formatTypeName, digits, omit, showGroup) {
+        if (!value)
+            return value;
+        if (parseFloat(value) === 0)
+            return '0';
+        if (isNaN(parseFloat(value)) || isNaN(parseInt(digits)))
+            return;
+        value = value * 100;
+        if (digits !== undefined) {
+            value = Number(value).toFixed(parseInt(digits));
+            if (omit) {
+                value = parseFloat(value) + ''; // 转字符串
+            }
+        }
+        if (showGroup) {
+            const temp = ('' + value).split('.');
+            const right = temp[1];
+            let left = temp[0].split('').reverse().join('').match(/(\d{1,3})/g).join(',').split('').reverse().join('');
+            if (temp[0][0] === '-')
+                left = '-' + left;
+            if (right)
+                left = left + '.' + right;
+            value = left;
+        }
+        return value + '%';
     },
     /**
      * 时间差
