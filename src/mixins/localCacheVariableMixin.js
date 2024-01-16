@@ -26,10 +26,6 @@ export const localCacheVariableMixin = {
             }
         }
     },
-    beforeDestroy() {
-        this.actionLocalCacheVariable(ACTION_LOCAL_CACHE_VARIABLE_TYPE.UPDATE);
-        document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-    },
     methods: {
         handleVisibilityChange() {
             if (document.hidden && typeof this.actionLocalCacheVariable === 'function') {
