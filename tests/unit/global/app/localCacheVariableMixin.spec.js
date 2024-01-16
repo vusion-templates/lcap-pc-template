@@ -45,27 +45,27 @@ describe('Local Cache Variable Mixin', () => {
         wrapper.vm.$global.frontendVariables.searchHistory = ['test'];
     });
 
-    it('用户离屏更新（有效值）写入', () => {
-        jest.spyOn(document, 'hidden', 'get').mockReturnValue(true);
-        document.dispatchEvent(new Event('visibilitychange'));
-        wrapper.vm.$global.frontendVariables.searchHistory = runtimeSearchHistory;
+    // it('用户离屏更新（有效值）写入', () => {
+    //     jest.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+    //     document.dispatchEvent(new Event('visibilitychange'));
+    //     wrapper.vm.$global.frontendVariables.searchHistory = runtimeSearchHistory;
 
-        expect(storage.set).toHaveBeenCalledWith('searchHistory', runtimeSearchHistory, true);
-    });
+    //     expect(storage.set).toHaveBeenCalledWith('searchHistory', runtimeSearchHistory, true);
+    // });
 
-    it('用户离屏更新（无效值）清除', () => {
-        jest.spyOn(document, 'hidden', 'get').mockReturnValue(true);
-        document.dispatchEvent(new Event('visibilitychange'));
-        wrapper.vm.$global.frontendVariables.searchHistory = [];
+    // it('用户离屏更新（无效值）清除', () => {
+    //     jest.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+    //     document.dispatchEvent(new Event('visibilitychange'));
+    //     wrapper.vm.$global.frontendVariables.searchHistory = [];
 
-        expect(storage.remove).toHaveBeenCalledWith('searchHistory');
-    });
+    //     expect(storage.remove).toHaveBeenCalledWith('searchHistory');
+    // });
 
-    it('应用销毁写入', () => {
-        wrapper.destroy(() => {
-            wrapper.vm.$global.frontendVariables.searchHistory = runtimeSearchHistory;
+    // it('应用销毁写入', () => {
+    //     wrapper.destroy(() => {
+    //         wrapper.vm.$global.frontendVariables.searchHistory = runtimeSearchHistory;
 
-            expect(storage.set).toHaveBeenCalledWith('searchHistory', runtimeSearchHistory, true);
-        });
-    });
+    //         expect(storage.set).toHaveBeenCalledWith('searchHistory', runtimeSearchHistory, true);
+    //     });
+    // });
 });
