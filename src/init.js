@@ -80,7 +80,7 @@ const init = (appConfig, platformConfig, routes, metaData) => {
         }
     };
     if (!window?.$toast) {
-        window.$toast = instance;
+        window.$toast = window.Vue.prototype.$toast;
     }
     if (window?.rendered) {
         window.rendered();
