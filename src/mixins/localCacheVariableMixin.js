@@ -13,11 +13,18 @@ export const localCacheVariableMixin = {
         this.actionLocalCacheVariable(ACTION_LOCAL_CACHE_VARIABLE_TYPE.GET);
     },
     mounted() {
-        document.addEventListener('visibilitychange', this.handleVisibilityChange);
-    },
-    beforeDestroy() {
-        this.actionLocalCacheVariable(ACTION_LOCAL_CACHE_VARIABLE_TYPE.UPDATE);
-        document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+        const localCacheVariableSet = this.$localCacheVariableSet;
+        if (localCacheVariableSet) {
+            for (const localCacheVariableKey of localCacheVariableSet) {
+                try {
+                    this.$watch(`$global.frontendVariables.${localCacheVariableKey}`, function(newValue) {
+                        storage.set(localCacheVariableKey, newValue, true);
+                    });
+                } catch (error) {
+                    console.warn('error: ', error);
+                }
+            }
+        }
     },
     methods: {
         handleVisibilityChange() {
