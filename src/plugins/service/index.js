@@ -17,6 +17,7 @@ export default {
         });
         if (keys.length) {
             Vue.prototype.$services = Object.assign({}, Vue.prototype.$services, services);
+            window.$services = Vue.prototype.$services
         }
     },
 };
