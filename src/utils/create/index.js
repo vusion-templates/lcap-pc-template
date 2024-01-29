@@ -20,13 +20,20 @@ const formatContentType = function (contentType, data) {
 };
 
 const parseCookie = (str) =>
-    str
-        .split(';')
-        .map((v) => v.split('='))
-        .reduce((acc, v) => {
-            acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
-            return acc;
-        }, {});
+  str
+    .split(";")
+    .map((v) => v.split("="))
+    .reduce((acc, v) => {
+      const getValue = s =>{
+        try {
+          return decodeURIComponent(s.trim())
+        } catch (error) {
+          return s.trim()
+        }
+      }
+      acc[getValue(v[0])] = getValue(v[1]);
+      return acc;
+    }, {});
 const foramtCookie = (cookieStr) => {
     const result = {};
     if (document.cookie.length <= 0) {
