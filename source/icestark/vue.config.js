@@ -1,17 +1,15 @@
 const path = require('path');
 
 module.exports = {
-    configureWebpack: {
-        output: {
-            // 设置模块导出规范为 umd
-            libraryTarget: 'umd',
-            library: __microAppName__,
-        },
-        resolve: {
-            alias: {
-                'cloud-ui.vusion$': path.resolve(__dirname, 'node_modules/cloud-ui.vusion/dist-theme/index.js'),
-                'cloud-ui.vusion.css$': path.resolve(__dirname, 'node_modules/cloud-ui.vusion/dist-theme/index.css'),
-            },
+    configureWebpack(config) {
+        config.output.library = __microAppName__;
+        config.output.libraryTarget = 'umd';
+
+        config.resolve.alias['cloud-ui.vusion$'] = path.resolve(__dirname, 'node_modules/cloud-ui.vusion/dist-theme/index.js');
+        config.resolve.alias['cloud-ui.vusion.css$'] = path.resolve(__dirname, 'node_modules/cloud-ui.vusion/dist-theme/index.css');
+
+        if (process.env.NODE_ENV === 'production') {
+            config.devtool = false;
         }
     },
     lintOnSave: false,

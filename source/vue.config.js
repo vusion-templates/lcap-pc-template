@@ -2,13 +2,13 @@
 const path = require('path');
 
 module.exports = {
-    configureWebpack: {
-        resolve: {
-            alias: {
-                'cloud-ui.vusion$': path.resolve(__dirname, 'node_modules/cloud-ui.vusion/dist-theme/index.js'),
-                'cloud-ui.vusion.css$': path.resolve(__dirname, 'node_modules/cloud-ui.vusion/dist-theme/index.css'),
-            },
-        },
+    configureWebpack(config) {
+        config.resolve.alias['cloud-ui.vusion$'] = path.resolve(__dirname, 'node_modules/cloud-ui.vusion/dist-theme/index.js');
+        config.resolve.alias['cloud-ui.vusion.css$'] = path.resolve(__dirname, 'node_modules/cloud-ui.vusion/dist-theme/index.css');
+
+        if (process.env.NODE_ENV === 'production') {
+            config.devtool = false;
+        }
     },
     lintOnSave: false,
     devServer: {
