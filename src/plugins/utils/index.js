@@ -916,7 +916,7 @@ export const utils = {
         if (isNaN(parseFloat(value)) || isNaN(parseInt(digits)))
             return;
         if (digits !== undefined) {
-            value = Number(value).toFixed(parseInt(digits));
+            value = new Decimal(value).toFixed(parseInt(digits));
         }
         if (showGroup) {
             const temp = ('' + value).split('.');
